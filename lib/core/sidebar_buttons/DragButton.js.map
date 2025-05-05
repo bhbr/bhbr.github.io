@@ -1,0 +1,1 @@
+{"version":3,"file":"DragButton.js","sourceRoot":"","sources":["../../../src/core/sidebar_buttons/DragButton.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,YAAY,EAAE,MAAM,gBAAgB,CAAA;AAE7C,MAAM,OAAO,UAAW,SAAQ,YAAY;IAE3C,QAAQ;QACP,OAAO;YACN,UAAU,EAAE,MAAM;SAClB,CAAA;IACF,CAAC;CAGD"}

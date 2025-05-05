@@ -1,0 +1,1 @@
+{"version":3,"file":"SidebarView.js","sourceRoot":"","sources":["../../src/core/SidebarView.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,IAAI,EAAE,MAAM,oBAAoB,CAAA;AAEzC,MAAM,OAAO,WAAY,SAAQ,IAAI;IAEpC,QAAQ;QACP,OAAO;YACN,GAAG,EAAE,QAAQ,CAAC,aAAa,CAAC,aAAa,CAAmB;SAC5D,CAAA;IACF,CAAC;CAED"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"PlotButton.js","sourceRoot":"","sources":["../../../src/extensions/sidebar_buttons/PlotButton.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,cAAc,EAAE,MAAM,qCAAqC,CAAA;AAEpE,MAAM,OAAO,UAAW,SAAQ,cAAc;IAE7C,QAAQ;QACP,OAAO;YACN,SAAS,EAAE,CAAC,MAAM,EAAE,MAAM,CAAC;SAC3B,CAAA;IACF,CAAC;IAED,YAAY;QACX,OAAO;YACN,SAAS,EAAE,OAAO;SAClB,CAAA;IACF,CAAC;CACD"}

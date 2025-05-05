@@ -1,0 +1,1 @@
+{"version":3,"file":"BoardButton.js","sourceRoot":"","sources":["../../../src/core/sidebar_buttons/BoardButton.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,cAAc,EAAE,MAAM,kBAAkB,CAAA;AAEjD,MAAM,OAAO,WAAY,SAAQ,cAAc;IAE9C,QAAQ;QACP,OAAO;YACN,SAAS,EAAE,CAAC,OAAO,CAAC;SACpB,CAAA;IACF,CAAC;IAED,YAAY;QACX,OAAO;YACN,SAAS,EAAE,OAAO;SAClB,CAAA;IACF,CAAC;CAID"}

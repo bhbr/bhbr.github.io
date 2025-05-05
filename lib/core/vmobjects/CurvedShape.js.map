@@ -1,0 +1,1 @@
+{"version":3,"file":"CurvedShape.js","sourceRoot":"","sources":["../../../src/core/vmobjects/CurvedShape.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,UAAU,EAAE,MAAM,cAAc,CAAA;AAEzC,MAAM,OAAO,WAAY,SAAQ,UAAU;IAC1C;;MAEE;IAEF,YAAY;QACX,OAAO;YACN,MAAM,EAAE,OAAO;SACf,CAAA;IACF,CAAC;CACD"}

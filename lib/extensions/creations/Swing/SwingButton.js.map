@@ -1,0 +1,1 @@
+{"version":3,"file":"SwingButton.js","sourceRoot":"","sources":["../../../../src/extensions/creations/Swing/SwingButton.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,cAAc,EAAE,MAAM,qCAAqC,CAAA;AAEpE,MAAM,OAAO,WAAY,SAAQ,cAAc;IAE9C,QAAQ;QACP,OAAO;YACN,SAAS,EAAE,CAAC,OAAO,CAAC;SACpB,CAAA;IACF,CAAC;IAED,YAAY;QACX,OAAO;YACN,SAAS,EAAE,OAAO;SAClB,CAAA;IACF,CAAC;CACD"}
