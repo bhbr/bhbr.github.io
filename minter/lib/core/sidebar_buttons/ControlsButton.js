@@ -1,13 +1,15 @@
 import { ToggleButton } from './ToggleButton.js';
+import { ImageView } from '../../core/mobjects/ImageView.js';
 export class ControlsButton extends ToggleButton {
     defaults() {
         return {
-            messageKey: 'ctrl'
+            messageKey: 'ctrl',
+            icon: new ImageView({
+                imageLocation: '../../assets/ctrl.png',
+                frameWidth: 30,
+                frameHeight: 30
+            })
         };
-    }
-    setup() {
-        super.setup();
-        this.label.view['fill'] = 'black';
     }
     mutabilities() { return {}; }
 }

@@ -38,6 +38,9 @@ export class ToggleButton extends SidebarButton {
         let f = this.active ? BUTTON_SCALE_FACTOR : 1;
         this.label.view.div.setAttribute('font-size', (f * this.baseFontSize).toString());
     }
+    imageNameForIndex(index) {
+        return this.messageKey;
+    }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=ToggleButton.js.map

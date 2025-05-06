@@ -65,6 +65,7 @@ export class IOList extends RoundedRectangle {
     createOutlet(prop) {
         let outlet = new LinkOutlet({
             name: prop.name,
+            displayName: prop.displayName ?? prop.name,
             editable: this.editable,
             ioList: this,
             type: prop.type

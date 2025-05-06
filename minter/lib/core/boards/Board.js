@@ -16,7 +16,6 @@ import { getPaper } from '../../core/functions/getters.js';
 import { ExpandedBoardInputList } from './ExpandedBoardInputList.js';
 import { ExpandedBoardOutputList } from './ExpandedBoardOutputList.js';
 import { EXPANDED_IO_LIST_HEIGHT, EXPANDED_IO_LIST_INSET } from './constants.js';
-import { PAPER_WIDTH, PAPER_HEIGHT } from '../../core/constants.js';
 import { IO_LIST_OFFSET, SNAPPING_DISTANCE } from '../../core/linkables/constants.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
 export class BoardContent extends MGroup {
@@ -164,10 +163,10 @@ export class Board extends Linkable {
         return [this.expandedPadding, this.expandedPadding];
     }
     expandedWidth() {
-        return PAPER_WIDTH - 2 * this.expandedPadding;
+        return window.innerWidth - 2 * this.expandedPadding;
     }
     expandedHeight() {
-        return PAPER_HEIGHT - 2 * this.expandedPadding;
+        return window.innerHeight - 2 * this.expandedPadding;
     }
     getCompactWidth() {
         return this.compactWidth;

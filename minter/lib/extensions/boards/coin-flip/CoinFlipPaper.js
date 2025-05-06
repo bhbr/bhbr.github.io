@@ -9,8 +9,6 @@ import { BoxStepperCreator } from '../../../extensions/creations/math/BoxStepper
 import { AddBoxCreator, SubtractBoxCreator, MultiplyBoxCreator, DivideBoxCreator } from '../../../core/boxes/BinaryOperatorBoxCreator.js';
 import { SumBoxCreator } from '../../../core/boxes/SumBox.js';
 import { AverageBoxCreator } from '../../../core/boxes/AverageBox.js';
-import { CumSumBoxCreator } from '../../../core/boxes/CumSumBox.js';
-import { CumAverageBoxCreator } from '../../../core/boxes/CumAverageBox.js';
 import { SequencePlotCreator } from '../../../extensions/creations/DesmosCalculator/SequencePlotCreator.js';
 import { HistogramCreator } from '../../../extensions/creations/DesmosCalculator/HistogramCreator.js';
 import { RGBAColorSampleCreator } from '../../../extensions/creations/ColorSample/RGBAColorSampleCreator.js';
@@ -19,21 +17,19 @@ export class CoinFlipPaper extends Paper {
     defaults() {
         return {
             creationConstructors: {
-                'num': NumberBoxCreator,
-                'numlist': NumberListBoxCreator,
+                'number': NumberBoxCreator,
+                'list': NumberListBoxCreator,
                 'input': InputNumberBoxCreator,
                 'slider': BoxSliderCreator,
                 'stepper': BoxStepperCreator,
                 'coin': PlayableCoinCreator,
-                'coin row': CoinRowCreator,
+                'coinrow': CoinRowCreator,
                 '+': AddBoxCreator,
                 '–': SubtractBoxCreator,
                 '&times;': MultiplyBoxCreator,
                 '/': DivideBoxCreator,
                 'sum': SumBoxCreator,
-                'avg': AverageBoxCreator,
-                'cumsum': CumSumBoxCreator,
-                'cumavg': CumAverageBoxCreator,
+                'mean': AverageBoxCreator,
                 'plot': SequencePlotCreator,
                 'hist': HistogramCreator,
                 'rgb': RGBAColorSampleCreator,

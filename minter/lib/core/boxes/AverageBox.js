@@ -4,10 +4,10 @@ import { DraggingCreator } from '../../core/creators/DraggingCreator.js';
 export class AverageBox extends NumberValuedFunctionBox {
     defaults() {
         return {
-            name: 'avg',
+            name: 'mean',
             argument: [],
             inputProperties: [
-                { name: 'argument', type: 'Array<number>' }
+                { name: 'argument', displayName: 'list', type: 'Array<number>' }
             ]
         };
     }

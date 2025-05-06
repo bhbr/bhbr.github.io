@@ -1,7 +1,5 @@
 import { Color } from '../core/classes/Color.js';
 export const SIDEBAR_WIDTH = 150;
-export const PAPER_WIDTH = 1000; //1216
-export const PAPER_HEIGHT = 800; //1024
 export const DRAW_BORDERS = false;
 export const MAX_TAP_DELAY = 250;
 export const MERE_TAP_DELAY = 250;

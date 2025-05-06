@@ -62,10 +62,10 @@ export class LinkableNumberBox extends NumberBox {
     defaults() {
         return {
             inputProperties: [
-                { name: 'value', type: 'number' }
+                { name: 'value', displayName: null, type: 'number' }
             ],
             outputProperties: [
-                { name: 'value', type: 'number' }
+                { name: 'value', displayName: null, type: 'number' }
             ]
         };
     }

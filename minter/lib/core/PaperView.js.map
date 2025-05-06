@@ -1,1 +1,1 @@
-{"version":3,"file":"PaperView.js","sourceRoot":"","sources":["../../src/core/PaperView.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,IAAI,EAAE,MAAM,oBAAoB,CAAA;AAEzC,MAAM,OAAO,SAAU,SAAQ,IAAI;IAElC,QAAQ;QACP,OAAO;YACN,GAAG,EAAE,QAAQ,CAAC,aAAa,CAAC,WAAW,CAAmB;SAC1D,CAAA;IACF,CAAC;CAED"}
+{"version":3,"file":"PaperView.js","sourceRoot":"","sources":["../../src/core/PaperView.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,IAAI,EAAE,MAAM,oBAAoB,CAAA;AAEzC,MAAM,OAAO,SAAU,SAAQ,IAAI;IAElC,QAAQ;QACP,OAAO;YACN,GAAG,EAAE,QAAQ,CAAC,aAAa,CAAC,WAAW,CAAmB;SAC1D,CAAA;IACF,CAAC;CAGD"}

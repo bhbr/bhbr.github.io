@@ -1,9 +1,10 @@
+import { log } from '../core/functions/logging.js';
 import { remove, convertStringToArray } from '../core/functions/arrays.js';
 import { ScreenEventDevice, separateSidebar, ScreenEventHandler } from '../core/mobjects/screen_events.js';
 import { vertexOrigin } from '../core/functions/vertex.js';
 import { Board } from '../core/boards/Board.js';
 import { Color } from '../core/classes/Color.js';
-import { PAPER_WIDTH, PAPER_HEIGHT, SIDEBAR_WIDTH, COLOR_PALETTE } from '../core/constants.js';
+import { SIDEBAR_WIDTH, COLOR_PALETTE } from '../core/constants.js';
 import { PaperView } from './PaperView.js';
 export class Paper extends Board {
     defaults() {
@@ -15,8 +16,6 @@ export class Paper extends Board {
             expandedMobject: this,
             pressedKeys: [],
             activeKeyboard: true,
-            frameWidth: PAPER_WIDTH,
-            frameHeight: PAPER_HEIGHT,
             currentColor: Color.white(),
             drawShadow: false,
             loadedAPIs: []
@@ -54,6 +53,20 @@ export class Paper extends Board {
         this.background.update({
             width: width,
             height: height
+        });
+        //window.addEventListener('resize', this.resize.bind(this))
+        this.resize();
+    }
+    resize() {
+        let size = Math.max(window.screen.width, window.screen.height);
+        let buffer = 500;
+        log(size);
+        this.update({
+            frameWidth: size + buffer,
+            frameHeight: size + buffer
+        });
+        this.sidebar?.update({
+            frameHeight: size + buffer
         });
     }
     changeColorByName(newColorName) {

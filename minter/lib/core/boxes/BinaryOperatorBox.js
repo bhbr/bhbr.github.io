@@ -20,11 +20,11 @@ export class BinaryOperatorBox extends Linkable {
             valueType: 'number',
             valueBox: new NumberBox(),
             inputProperties: [
-                { name: 'operand1', type: 'number|Array<number>' },
-                { name: 'operand2', type: 'number|Array<number>' }
+                { name: 'operand1', displayName: null, type: 'number|Array<number>' },
+                { name: 'operand2', displayName: null, type: 'number|Array<number>' }
             ],
             outputProperties: [
-                { name: 'result', type: 'number|Array<number>' }
+                { name: 'result', displayName: null, type: 'number|Array<number>' }
             ]
         };
     }
