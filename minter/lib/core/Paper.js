@@ -1,4 +1,3 @@
-import { log } from '../core/functions/logging.js';
 import { remove, convertStringToArray } from '../core/functions/arrays.js';
 import { ScreenEventDevice, separateSidebar, ScreenEventHandler } from '../core/mobjects/screen_events.js';
 import { vertexOrigin } from '../core/functions/vertex.js';
@@ -60,7 +59,6 @@ export class Paper extends Board {
     resize() {
         let size = Math.max(window.screen.width, window.screen.height);
         let buffer = 500;
-        log(size);
         this.update({
             frameWidth: size + buffer,
             frameHeight: size + buffer

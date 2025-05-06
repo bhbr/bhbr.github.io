@@ -2,7 +2,8 @@ import { CreativeButton } from '../../core/sidebar_buttons/CreativeButton.js';
 export class ArithmeticButton extends CreativeButton {
     defaults() {
         return {
-            creations: ['+', '–', '&times;', '/']
+            creations: ['+', '–', '&times;', '/'],
+            baseFontSize: 30
         };
     }
     mutabilities() {
