@@ -12,12 +12,6 @@ export class TextLabelView extends View {
             fontFamily: 'Helvetica'
         };
     }
-    get fontSize() {
-        return Number(this.div.style.fontSize.substring(0, this.div.style.fontSize.length - 2));
-    }
-    set fontSize(newValue) {
-        this.div.style.fontSize = `${newValue}px`;
-    }
     setup() {
         super.setup();
         this.div.setAttribute('class', this.mobject.constructor.name + ' unselectable mobject-div');

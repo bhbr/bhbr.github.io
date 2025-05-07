@@ -39,8 +39,7 @@ export class CoinRow extends Linkable {
             ],
             outputProperties: [
                 { name: 'nbHeads', displayName: '# heads', type: 'number' },
-                { name: 'nbTails', displayName: '# tails', type: 'number' },
-                { name: 'nbFlips', displayName: '# flips', type: 'number' }
+                { name: 'nbTails', displayName: '# tails', type: 'number' }
             ],
             frameWidth: 300,
             frameHeight: 100

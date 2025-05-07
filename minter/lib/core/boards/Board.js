@@ -139,7 +139,7 @@ export class Board extends Linkable {
             this.expandedOutputList.view.show();
         }
         this.hideLinksOfContent();
-        this.setButtonVisibility(false);
+        this.setControlsVisibility(false);
     }
     update(args = {}, redraw = true) {
         super.update(args, false);
@@ -331,7 +331,7 @@ export class Board extends Linkable {
                 this.setLinking(value);
                 break;
             case 'ctrl':
-                this.setButtonVisibility(value);
+                this.setControlsVisibility(value);
                 break;
             case 'create':
                 this.creationMode = value;
@@ -344,10 +344,10 @@ export class Board extends Linkable {
                 break;
         }
     }
-    setButtonVisibility(visible) {
+    setControlsVisibility(visible) {
         for (let mob of this.contentChildren) {
             if (mob instanceof Linkable) {
-                mob.setButtonVisibility(visible);
+                mob.setControlsVisibility(visible);
             }
         }
     }
@@ -523,25 +523,23 @@ export class Board extends Linkable {
     setLinking(flag) {
         if (flag && !this.isShowingLinks) {
             this.showLinksOfContent();
-            //if (isTouchDevice) {
             this.sensor.setTouchMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
             this.sensor.setPenMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
             this.sensor.setMouseMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
-            // } else {
-            // 	this.sensor.setPointerMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this))
-            // }
         }
         else if (!flag && this.isShowingLinks) { // if (!this.editingLinkName) {
             this.hideLinksOfContent();
-            //if (isTouchDevice) {
             this.sensor.restoreTouchMethods();
             this.sensor.restorePenMethods();
             this.sensor.restoreMouseMethods();
-            // } else {
-            // 	this.sensor.restorePointerMethods()
-            // }
         }
         this.isShowingLinks = flag;
+        if (flag) {
+            this.disableContent();
+        }
+        else {
+            this.enableContent();
+        }
     }
     startLinking(e) {
         var p = this.sensor.localEventVertex(e);

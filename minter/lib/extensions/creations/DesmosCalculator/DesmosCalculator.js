@@ -42,7 +42,7 @@ export class DesmosCalculator extends Linkable {
             this.focus();
         };
         this.add(this.outerFrame);
-        window.setTimeout(this.createCalculator.bind(this), 10000);
+        window.setTimeout(this.createCalculator.bind(this), 1000);
     }
     loadDesmosAPI() {
         let paper = getPaper();

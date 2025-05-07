@@ -2,7 +2,9 @@ import { Mobject } from '../../core/mobjects/Mobject.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
 import { InputList } from './InputList.js';
 import { OutputList } from './OutputList.js';
+import { log } from '../../core/functions/logging.js';
 import { SimpleButton } from '../../core/mobjects/SimpleButton.js';
+import { Checkbox } from '../../core/mobjects/Checkbox.js';
 export class Linkable extends Mobject {
     defaults() {
         return {
@@ -95,9 +97,10 @@ export class Linkable extends Mobject {
         super.dragging(e);
         this.board.updateLinks();
     }
-    setButtonVisibility(visible) {
+    setControlsVisibility(visible) {
         for (let mob of this.submobs) {
-            if (mob instanceof SimpleButton) {
+            log(mob);
+            if (mob instanceof SimpleButton || mob instanceof Checkbox) {
                 mob.update({
                     visible: visible
                 });

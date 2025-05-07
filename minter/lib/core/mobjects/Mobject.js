@@ -52,6 +52,7 @@ export class Mobject extends ExtendedObject {
             view: new View(),
             motor: new Motor(),
             sensor: new Sensor(),
+            preventDefault: true,
             draggingEnabled: false,
             // dependencies
             dependencies: []

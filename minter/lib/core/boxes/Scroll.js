@@ -4,7 +4,8 @@ export class Scroll extends Mobject {
         return {
             list: [],
             fontSize: 16,
-            fontFamily: 'Helvetica'
+            fontFamily: 'Helvetica',
+            preventDefault: false
         };
     }
     setup() {

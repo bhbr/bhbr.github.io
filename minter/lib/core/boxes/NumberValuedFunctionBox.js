@@ -15,7 +15,7 @@ export class NumberValuedFunctionBox extends NumberBox {
             }),
             functionLabel: new TextLabel(),
             inputProperties: [
-                { name: 'argument', displayName: null, type: 'any' }
+                { name: 'argument', displayName: 'list', type: 'Array<number>' }
             ],
             outputProperties: [
                 { name: 'value', displayName: null, type: 'number' }

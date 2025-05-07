@@ -9,6 +9,7 @@ export class ImageView extends View {
     setup() {
         super.setup();
         this.div.appendChild(this.imageElement);
+        this.div.style['pointer-events'] = 'none';
         this.imageElement.src = this.imageLocation;
     }
     redraw() {
