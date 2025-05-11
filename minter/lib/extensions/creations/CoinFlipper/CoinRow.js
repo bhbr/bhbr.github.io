@@ -1,7 +1,6 @@
 import { Coin } from './Coin.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
 import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.js';
-import { SimpleButton } from '../../../core/mobjects/SimpleButton.js';
 import { Color } from '../../../core/classes/Color.js';
 import { TextLabel } from '../../../core/mobjects/TextLabel.js';
 import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
@@ -17,9 +16,8 @@ export class CoinRow extends Linkable {
             tailsProbability: 0.5,
             playState: 'stop',
             playIntervalID: null,
-            playButton: new PlayButton(),
-            resetButton: new SimpleButton({
-                text: 'reset'
+            playButton: new PlayButton({
+                anchor: [0, 50]
             }),
             nbHeadsLabel: new TextLabel({
                 frameWidth: 50,
@@ -29,8 +27,6 @@ export class CoinRow extends Linkable {
                 frameWidth: 50,
                 frameHeight: 25
             }),
-            nbHeadsHistory: [],
-            nbTailsHistory: [],
             inputProperties: [
                 { name: 'tailsProbability', displayName: 'p(tails)', type: 'number' },
                 { name: 'nbCoins', displayName: '# coins', type: 'number' },
@@ -49,7 +45,7 @@ export class CoinRow extends Linkable {
         super.setup();
         this.createCoins();
         this.setupLabels();
-        this.setupButtons();
+        this.setupButton();
     }
     createCoins() {
         for (var i = 0; i < this.nbCoins; i++) {
@@ -72,14 +68,12 @@ export class CoinRow extends Linkable {
         this.add(this.nbTailsLabel);
         this.positionTailsLabel();
     }
-    setupButtons() {
+    setupButton() {
         this.add(this.playButton);
-        this.add(this.resetButton);
-        this.positionButtons();
+        this.positionButton();
         this.playButton.update({
             mobject: this
         });
-        this.resetButton.action = this.reset.bind(this);
     }
     addCoin() {
         let coin = new Coin({
@@ -100,14 +94,14 @@ export class CoinRow extends Linkable {
         this.add(coin);
         this.adjustFrameWidth();
         this.positionTailsLabel();
-        this.positionButtons();
+        this.positionButton();
     }
     removeCoin() {
         let coin = this.coins.pop();
         this.remove(coin);
         this.adjustFrameWidth();
         this.positionTailsLabel();
-        this.positionButtons();
+        this.positionButton();
     }
     adjustFrameWidth() {
         this.update({
@@ -122,17 +116,11 @@ export class CoinRow extends Linkable {
             ]
         });
     }
-    positionButtons() {
+    positionButton() {
         this.playButton.update({
             anchor: [
-                this.frameWidth / 2 - this.playButton.frameWidth - 5,
-                2 * this.coinRadius + 5
-            ]
-        });
-        this.resetButton.update({
-            anchor: [
-                this.frameWidth / 2 + 5,
-                2 * this.coinRadius + 5
+                this.frameWidth / 2 - this.playButton.frameWidth / 2,
+                2 * this.coinRadius + 15
             ]
         });
     }
@@ -140,8 +128,6 @@ export class CoinRow extends Linkable {
         for (let coin of this.coins) {
             coin.flip();
         }
-        this.nbHeadsHistory.push(this.nbHeads());
-        this.nbTailsHistory.push(this.nbTails());
         this.update(); // to trigger the histogram to update
     }
     play() {
@@ -163,11 +149,8 @@ export class CoinRow extends Linkable {
     reset() {
         this.pause();
         this.playButton.toggleLabel();
-        this.nbHeadsHistory = [];
-        this.nbTailsHistory = [];
         this.update();
     }
-    nbFlips() { return this.nbTailsHistory.length; }
     nbTails() {
         var t = 0;
         for (let coin of this.coins) {

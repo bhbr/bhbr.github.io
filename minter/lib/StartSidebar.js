@@ -4,3 +4,4 @@ export class StartSidebar extends CoinFlipSidebar {
     mutabilities() { return {}; }
 }
 export const sidebar = new StartSidebar();
+//# sourceMappingURL=StartSidebar.js.map

@@ -36,7 +36,9 @@ export class Motor extends ExtendedObject {
             return;
         }
         for (let key of Object.keys(args)) {
-            this.animationStartArgs[key] = copy(this.mobject[key]);
+            let a = this.mobject[key];
+            let b = copy(a);
+            this.animationStartArgs[key] = b;
         }
         this.animationStopArgs = args;
         // all times in ms bc that is what setInterval and setTimeout expect
@@ -93,6 +95,7 @@ export class Motor extends ExtendedObject {
     cleanupAfterAnimation() {
         // This method gets called at the end of the animation
         window.clearInterval(this.animationInterval);
+        this.mobject.update(this.animationStopArgs);
         if (!this.showShadow) {
             this.mobject.showShadow();
         }

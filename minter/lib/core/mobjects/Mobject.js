@@ -396,6 +396,7 @@ export class Mobject extends ExtendedObject {
         this.update({
             anchor: vertexAdd(eventVertex(e), this.dragAnchorStart)
         });
+        this.redraw(); // fixes dragging bug
     }
     endDragging(e) {
         this.dragAnchorStart = null;

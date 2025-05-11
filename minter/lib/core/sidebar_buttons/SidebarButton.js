@@ -1,10 +1,11 @@
 import { Circle } from '../../core/shapes/Circle.js';
 import { Color } from '../../core/classes/Color.js';
-import { vertexTranslatedBy, vertexSubtract, vertexMultiply } from '../../core/functions/vertex.js';
+import { vertexTranslatedBy } from '../../core/functions/vertex.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
-import { buttonCenter, BUTTON_RADIUS, BUTTON_SCALE_FACTOR } from './button_geometry.js';
+import { buttonCenter, BUTTON_RADIUS, BUTTON_SCALE_FACTOR, OPTION_SPACING } from './button_geometry.js';
 import { TextLabel } from '../../core/mobjects/TextLabel.js';
 import { eventVertex, separateSidebar } from '../../core/mobjects/screen_events.js';
+import { SidebarButtonView } from './SidebarButtonView.js';
 export const buttonDict = {};
 export class SidebarButton extends Circle {
     defaults() {
@@ -13,7 +14,7 @@ export class SidebarButton extends Circle {
             baseRadius: BUTTON_RADIUS,
             baseFontSize: 12,
             activeScalingFactor: 1.2,
-            optionSpacing: 25,
+            optionSpacing: OPTION_SPACING,
             label: new TextLabel(),
             icon: null,
             messages: [],
@@ -30,7 +31,10 @@ export class SidebarButton extends Circle {
             frameHeight: 2 * BUTTON_RADIUS,
             fillOpacity: 0.5,
             activeKeyboard: true,
-            paper: null
+            paper: null,
+            view: new SidebarButtonView({
+                radius: BUTTON_RADIUS
+            })
         };
     }
     mutabilities() {
@@ -102,14 +106,13 @@ export class SidebarButton extends Circle {
         if (this.active) {
             return;
         }
-        this.messagePaper(this.messages[0]);
         this.update({
             active: true,
             //radius: this.baseRadius * this.activeScalingFactor,
             previousIndex: this.currentModeIndex,
         });
         this.frame.transform.update({
-            anchor: vertexSubtract(this.midpoint, vertexMultiply([BUTTON_RADIUS, BUTTON_RADIUS], this.activeScalingFactor)),
+            //anchor: vertexSubtract(this.midpoint, vertexMultiply([BUTTON_RADIUS, BUTTON_RADIUS], this.activeScalingFactor)),
             scale: this.activeScalingFactor
         });
         this.redraw();
@@ -120,6 +123,10 @@ export class SidebarButton extends Circle {
         });
         this.updateLabel();
         this.updateIcon();
+        if (this.messages.length == 0) {
+            return;
+        }
+        this.messagePaper(this.messages[0]);
     }
     onPointerDown(e) {
         this.commonButtonDown();
@@ -164,12 +171,12 @@ export class SidebarButton extends Circle {
         this.update({
             active: false,
             fillColor: this.colorForIndex(this.currentModeIndex),
-            // midpoint: newMidpoint,
+            midpoint: newMidpoint,
             // radius: this.baseRadius,
             // fontSize: this.baseFontSize
         });
         this.frame.transform.update({
-            anchor: vertexSubtract(newMidpoint, [BUTTON_RADIUS, BUTTON_RADIUS]),
+            //anchor: vertexSubtract(newMidpoint, [BUTTON_RADIUS, BUTTON_RADIUS]),
             scale: 1
         });
         this.redraw();
@@ -213,7 +220,7 @@ export class SidebarButton extends Circle {
         }
         let f = this.active ? BUTTON_SCALE_FACTOR : 1;
         let fs = f * (this.baseFontSize); // ?? 12)
-        this.label.view?.div.style.setProperty('font-size', '30px'); //fs.toString().concat('px'))
+        this.label.view?.div.style.setProperty('font-size', this.baseFontSize.toString().concat('px'));
     }
     updateIcon() {
         if (this.icon === undefined || this.icon === null) {

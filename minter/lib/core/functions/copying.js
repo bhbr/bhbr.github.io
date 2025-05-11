@@ -16,6 +16,9 @@ export function copy(obj) {
         }
         return newObj;
     }
+    if (obj.constructor.name == 'Transform') {
+        return obj.copy();
+    }
     // Objects have a convenience method:
     // assign all of the original object's
     // properties to an empty object

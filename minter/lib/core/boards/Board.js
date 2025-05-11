@@ -342,6 +342,16 @@ export class Board extends Linkable {
                 this.creator = this.createCreator(this.creationMode);
                 this.add(this.creator);
                 break;
+            case 'restart':
+                this.restart();
+                break;
+        }
+    }
+    restart() {
+        var child = this.contentChildren.pop();
+        while (child !== undefined) {
+            this.content.remove(child);
+            child = this.contentChildren.pop();
         }
     }
     setControlsVisibility(visible) {
@@ -450,6 +460,10 @@ export class Board extends Linkable {
         }
     }
     panning(e) {
+        if (this.panPointStart == null) {
+            this.startPanning(e);
+            return;
+        }
         let panPoint = this.sensor.localEventVertex(e);
         let dr = vertexSubtract(panPoint, this.panPointStart);
         for (let mob of this.contentChildren) {

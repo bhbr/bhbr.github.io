@@ -1,7 +1,6 @@
 import { Coin } from './Coin.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
 import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.js';
-import { SimpleButton } from '../../../core/mobjects/SimpleButton.js';
 export class PlayableCoin extends Linkable {
     defaults() {
         return {
@@ -9,11 +8,7 @@ export class PlayableCoin extends Linkable {
             playState: 'stop',
             playIntervalID: null,
             playButton: new PlayButton({
-                anchor: [-35, 50]
-            }),
-            resetButton: new SimpleButton({
-                anchor: [15, 50],
-                text: 'reset'
+                anchor: [-12.5, 50]
             }),
             valueHistory: [],
             outputProperties: [
@@ -35,16 +30,13 @@ export class PlayableCoin extends Linkable {
         }, false);
         this.add(this.coin);
         this.add(this.playButton);
-        this.add(this.resetButton);
         this.playButton.mobject = this;
-        this.resetButton.action = this.reset.bind(this);
     }
     onTap(e) {
         this.flip();
     }
     flip() {
         this.coin.flip();
-        this.valueHistory.push(this.value);
         this.update();
     }
     play() {
@@ -53,7 +45,7 @@ export class PlayableCoin extends Linkable {
     }
     pause() {
         window.clearInterval(this.playIntervalID);
-        this.playState = 'pause';
+        this.playState = 'stop';
     }
     togglePlayState() {
         if (this.playState == 'play') {
@@ -63,23 +55,8 @@ export class PlayableCoin extends Linkable {
             this.play();
         }
     }
-    reset() {
-        this.pause();
-        this.playButton.toggleLabel();
-        this.valueHistory = [];
-        this.update();
-    }
     get value() { return this.coin.value; }
     set value(newValue) { this.coin.value = newValue; }
-    nbFlips() { return this.valueHistory.length; }
-    nbHeads() {
-        var sum = 0;
-        for (let value of this.valueHistory) {
-            sum += value;
-        }
-        return sum;
-    }
-    nbTails() { return this.nbFlips() - this.nbHeads(); }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=PlayableCoin.js.map

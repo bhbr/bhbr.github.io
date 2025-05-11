@@ -3,7 +3,7 @@ export class ArithmeticButton extends CreativeButton {
     defaults() {
         return {
             creations: ['+', '–', '&times;', '/'],
-            baseFontSize: 30
+            baseFontSize: 36
         };
     }
     mutabilities() {
