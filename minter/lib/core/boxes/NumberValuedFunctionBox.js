@@ -2,6 +2,7 @@ import { NumberBox } from './NumberBox.js';
 import { Rectangle } from '../../core/shapes/Rectangle.js';
 import { TextLabel } from '../../core/mobjects/TextLabel.js';
 import { Color } from '../../core/classes/Color.js';
+import { log } from '../../core/functions/logging.js';
 export class NumberValuedFunctionBox extends NumberBox {
     defaults() {
         return {
@@ -40,6 +41,7 @@ export class NumberValuedFunctionBox extends NumberBox {
         return NaN;
     }
     update(args = {}, redraw = true) {
+        log('updating NumberValuedFunctionBox');
         args['value'] = this.result();
         super.update(args, redraw);
     }

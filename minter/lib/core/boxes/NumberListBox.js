@@ -59,6 +59,7 @@ export class NumberListBox extends Linkable {
         this.update({
             value: []
         });
+        this.updateDependents();
     }
     mutabilities() { return {}; }
 }
@@ -86,7 +87,6 @@ export class LinkableNumberListBox extends NumberListBox {
     }
     set newestEntry(newValue) {
         this.list.push(newValue);
-        this.update();
     }
     setup() {
         super.setup();

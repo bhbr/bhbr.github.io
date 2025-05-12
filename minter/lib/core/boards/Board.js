@@ -629,6 +629,7 @@ export class Board extends Linkable {
         this.openBullet.update({
             midpoint: p
         });
+        this.openBullet.updateDependents();
     }
     endLinking(e) {
         let h = this.freeCompatibleHookAtLocation(this.sensor.localEventVertex(e));
@@ -673,7 +674,9 @@ export class Board extends Linkable {
         if (startHook.outlet.kind == 'output' && endHook.outlet.kind == 'input') {
             let flag1 = (startHook.outlet.type == endHook.outlet.type)
                 || ((startHook.outlet.type == 'number' || startHook.outlet.type == 'Array<number>')
-                    && endHook.outlet.type == 'number|Array<number>');
+                    && endHook.outlet.type == 'number|Array<number>')
+                || (startHook.outlet.type == 'number|Array<number>'
+                    && (endHook.outlet.type == 'number' || endHook.outlet.type == 'Array<number>'));
             let flag2 = (startHook.outlet.ioList.mobject !== endHook.outlet.ioList.mobject);
             let flag3 = (!startHook.outlet.ioList.mobject.dependsOn(endHook.outlet.ioList.mobject));
             return flag1 && flag2 && flag3;

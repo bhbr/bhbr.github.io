@@ -4,3 +4,4 @@ export class StartPaper extends CoinFlipPaper {
     mutabilities() { return {}; }
 }
 export const paper = new StartPaper();
+//# sourceMappingURL=startPaper.js.map

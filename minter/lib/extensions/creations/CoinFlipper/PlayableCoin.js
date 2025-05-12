@@ -38,6 +38,7 @@ export class PlayableCoin extends Linkable {
     flip() {
         this.coin.flip();
         this.update();
+        this.updateDependents();
     }
     play() {
         this.playIntervalID = window.setInterval(this.flip.bind(this), 250);

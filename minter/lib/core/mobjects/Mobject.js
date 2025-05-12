@@ -9,6 +9,7 @@ import { View } from './View.js';
 import { Motor } from './Motor.js';
 import { Sensor } from './Sensor.js';
 import { getPaper } from '../../core/functions/getters.js';
+import { UpdateCall, UpdateCalls } from './UpdateCall.js';
 export class Mobject extends ExtendedObject {
     /*
     A mobject (math object) has a view with an underlying state and logic
@@ -287,46 +288,29 @@ export class Mobject extends ExtendedObject {
                 this.view.div.style['pointer-events'] = 'auto';
             }
         }
-        let targetsAndUpdateDicts = [];
-        // TODO: refactor
-        for (let dep of this.dependencies || []) {
-            let output = this[dep.outputName]; // value or function, may be undefined
-            var outputValue = null;
-            if (typeof output === 'function') {
-                outputValue = output.bind(this)();
-            }
-            else if (output !== undefined && output !== null) {
-                outputValue = output;
-            }
-            var repeatMobject = false;
-            for (let pair of targetsAndUpdateDicts) {
-                let target = pair[0];
-                if (target == dep.target) {
-                    let updateDict = pair[1];
-                    updateDict[dep.inputName] = outputValue;
-                    repeatMobject = true;
-                    break;
-                }
-            }
-            if (!repeatMobject) {
-                let newUpdateDict = {};
-                newUpdateDict[dep.inputName] = outputValue;
-                targetsAndUpdateDicts.push([dep.target, newUpdateDict]);
-            }
-        }
-        for (let pair of targetsAndUpdateDicts) {
-            let target = pair[0];
-            let updateDict = pair[1];
-            if (Object.keys(updateDict).includes('null')) {
-                target.update();
-            }
-            else {
-                target.update(updateDict);
-            }
-        }
         if (redraw) {
             this.view.redraw();
         }
+    }
+    getUpdateCalls() {
+        let ret = new UpdateCalls();
+        for (let dep of this.dependencies) {
+            let dict = {};
+            if (typeof this[dep.outputName] == 'function') {
+                dict[dep.inputName] = this[dep.outputName].bind(this);
+            }
+            else {
+                dict[dep.inputName] = this[dep.outputName];
+            }
+            let updateCall = new UpdateCall(dep.target, dict);
+            ret.includeCall(updateCall);
+            ret.includeCalls(dep.target.getUpdateCalls());
+        }
+        return ret;
+    }
+    updateDependents() {
+        let calls = this.getUpdateCalls();
+        calls.call();
     }
     disable() { this.sensor.disable(); }
     enable() { this.sensor.enable(); }
