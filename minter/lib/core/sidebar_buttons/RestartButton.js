@@ -1,22 +1,26 @@
 import { SidebarButton } from './SidebarButton.js';
 import { Color } from '../../core/classes/Color.js';
+import { ImageView } from '../../core/mobjects/ImageView.js';
 export class RestartButton extends SidebarButton {
     defaults() {
         return {
-            baseColor: Color.green(),
-            baseFontSize: 36,
-            messageKey: 'restart',
-            messages: [],
-            outgoingMessage: { restart: true }
+            baseColor: Color.red().brighten(0.5),
+            messageKey: 'clear strokes',
+            touchDownMessages: [
+                { 'clear strokes': false },
+                { 'restart': false }
+            ],
+            touchUpMessages: [
+                { 'clear strokes': true },
+                { 'restart': true }
+            ],
+            icon: new ImageView({
+                imageLocation: '../../assets/clear_strokes.png',
+                frameWidth: 30,
+                frameHeight: 30
+            })
         };
     }
-    setup() {
-        super.setup();
-        this.label.update({
-            text: '&circlearrowleft;'
-        });
-    }
-    onPointerMove(e) { }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=RestartButton.js.map

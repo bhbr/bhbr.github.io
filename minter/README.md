@@ -1,2 +1,0 @@
-# minter
- INTERactive Math objects

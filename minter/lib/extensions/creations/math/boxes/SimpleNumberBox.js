@@ -1,0 +1,113 @@
+import { Rectangle } from '../../../../core/shapes/Rectangle.js';
+import { Color } from '../../../../core/classes/Color.js';
+import { Mobject } from '../../../../core/mobjects/Mobject.js';
+import { getPaper, getSidebar } from '../../../../core/functions/getters.js';
+import { ScreenEventHandler, isTouchDevice } from '../../../../core/mobjects/screen_events.js';
+export class SimpleNumberBox extends Mobject {
+    defaults() {
+        return {
+            background: new Rectangle({
+                fillColor: Color.black(),
+                strokeWidth: 0
+            }),
+            inputElement: document.createElement('input'),
+            frameWidth: 50,
+            frameHeight: 30,
+            strokeWidth: 0.0,
+            screenEventHandler: ScreenEventHandler.Self
+        };
+    }
+    mutabilities() {
+        return {
+            background: 'never',
+            inputElement: 'never'
+        };
+    }
+    onPointerUp(e) {
+        this.focus();
+    }
+    get value() {
+        return Number(this.inputElement.value);
+    }
+    set value(newValue) {
+        let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(newValue);
+        this.inputElement.value = isFalsy ? '' : newValue.toString();
+    }
+    focus() {
+        super.focus();
+        this.inputElement.focus();
+        document.addEventListener('keydown', this.boundKeyPressed);
+    }
+    blur() {
+        super.blur();
+        this.inputElement.blur();
+        document.removeEventListener('keydown', this.boundKeyPressed);
+    }
+    setup() {
+        super.setup();
+        this.add(this.background);
+        this.inputElement.setAttribute('type', 'text');
+        this.inputElement.style.width = '50px';
+        this.inputElement.style.position = 'absolute';
+        this.inputElement.style.height = '70%';
+        this.inputElement.style.padding = '0px 0px';
+        this.inputElement.style.color = 'white';
+        this.inputElement.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        this.inputElement.style.textAlign = 'center';
+        this.inputElement.style.verticalAlign = 'center';
+        this.inputElement.style.fontSize = '14px';
+        this.inputElement.style.border = 'none';
+        this.inputElement.style.outline = 'none';
+        this.inputElement.value = this.value.toString();
+        this.view.div.appendChild(this.inputElement);
+        this.boundKeyPressed = this.keyPressed.bind(this);
+        document.addEventListener('keyup', this.boundActivateKeyboard);
+    }
+    boundKeyPressed(e) { }
+    keyPressed(e) {
+        if (e.which != 13) {
+            return;
+        }
+        this.inputElement.blur();
+        getPaper().activeKeyboard = true;
+        if (!isTouchDevice) {
+            for (let button of getSidebar().buttons) {
+                button.activeKeyboard = true;
+            }
+        }
+        this.update({ value: this.valueFromString(this.inputElement.value) });
+        this.updateDependents();
+        this.onReturn();
+    }
+    valueFromString(valueString) {
+        return valueString;
+    }
+    activateKeyboard() {
+        document.removeEventListener('keyup', this.boundActivateKeyboard);
+        document.addEventListener('keydown', this.boundKeyPressed);
+        getPaper().activeKeyboard = false;
+        for (let button of getSidebar().buttons) {
+            button.activeKeyboard = false;
+        }
+    }
+    boundActivateKeyboard() { }
+    deactivateKeyboard() {
+        document.removeEventListener('keydown', this.boundKeyPressed);
+        getPaper().activeKeyboard = true;
+        for (let button of getSidebar().buttons) {
+            button.activeKeyboard = true;
+        }
+    }
+    onReturn() { }
+    update(args = {}, redraw = true) {
+        super.update(args, redraw);
+        if (args['value'] !== undefined) {
+            this.inputElement.textContent = `${args['value']}`;
+        }
+        this.background.update({
+            width: this.view.frame.width,
+            height: this.view.frame.height
+        }, redraw);
+    }
+}
+//# sourceMappingURL=SimpleNumberBox.js.map

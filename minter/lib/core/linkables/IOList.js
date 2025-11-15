@@ -3,7 +3,7 @@ import { Color } from '../../core/classes/Color.js';
 import { RoundedRectangle } from '../../core/shapes/RoundedRectangle.js';
 import { LinkOutlet } from './LinkOutlet.js';
 import { IO_LIST_WIDTH, HOOK_INSET_X, HOOK_INSET_Y, HOOK_VERTICAL_SPACING } from './constants.js';
-import { clear } from '../../core/functions/arrays.js';
+import { remove } from '../../core/functions/arrays.js';
 export class IOList extends RoundedRectangle {
     defaults() {
         return {
@@ -12,9 +12,11 @@ export class IOList extends RoundedRectangle {
             outletProperties: [],
             cornerRadius: 20,
             width: IO_LIST_WIDTH,
+            frameWidth: IO_LIST_WIDTH,
             fillColor: Color.gray(0.2),
             fillOpacity: 1.0,
-            strokeWidth: 0,
+            strokeColor: Color.gray(0.4),
+            strokeWidth: 0.75,
             editable: false
         };
     }
@@ -36,7 +38,7 @@ export class IOList extends RoundedRectangle {
     }
     setup() {
         super.setup();
-        this.createOutlets();
+        this.updateOutlets();
         this.update({ height: this.getHeight() });
     }
     getHeight() {
@@ -51,15 +53,28 @@ export class IOList extends RoundedRectangle {
             return 2 * HOOK_INSET_Y + HOOK_VERTICAL_SPACING * this.outletProperties.length;
         }
     }
-    createOutlets() {
+    updateOutlets() {
         // create the hooks (empty circles) and their labels
-        for (let outlet of this.linkOutlets) {
-            this.remove(outlet);
-        }
-        clear(this.linkOutlets);
         for (var i = 0; i < this.outletProperties.length; i++) {
             let prop = this.outletProperties[i];
-            this.createOutlet(prop);
+            if (!this.outletNamed(prop.name)) {
+                this.createOutlet(prop);
+            }
+        }
+        for (let outlet of this.linkOutlets) {
+            var found = false;
+            for (let prop of this.outletProperties) {
+                if (outlet.name == prop['name']) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                this.removeOutlet(outlet);
+            }
+            for (let hook of outlet.linkHooks) {
+                hook.updateDependents();
+            }
         }
     }
     createOutlet(prop) {
@@ -74,21 +89,51 @@ export class IOList extends RoundedRectangle {
         this.linkOutlets.push(outlet);
         this.positionOutlet(outlet, this.linkOutlets.length - 1);
     }
+    removeOutlet(outlet) {
+        for (let hook of outlet.linkHooks) {
+            if (hook.linked) {
+                this.mobject.board.removeDependencyAtHook(hook);
+            }
+        }
+        this.remove(outlet);
+        remove(this.linkOutlets, outlet);
+    }
     positionOutlet(outlet, index) {
         outlet.update({
             anchor: [HOOK_INSET_X, HOOK_INSET_Y + HOOK_VERTICAL_SPACING * index]
         });
+        for (let hook of outlet.linkHooks) {
+            hook.updateDependents();
+        }
     }
     hookNamed(name, index = 0) {
+        let outlet = this.outletNamed(name);
+        if (outlet === null) {
+            return null;
+        }
+        let hooks = outlet.linkHooks;
+        if (hooks.length <= index) {
+            return null;
+        }
+        return hooks[index];
+    }
+    outletNamed(name) {
         for (let outlet of this.linkOutlets) {
             if (outlet.name == name) {
-                return outlet.linkHooks[index];
+                return outlet;
             }
         }
         return null;
     }
     update(args = {}, redraw = true) {
         super.update(args, false);
+        this.height = this.getHeight();
+        if (this.height == 0) {
+            this.view.hide();
+        }
+        else {
+            this.view.show();
+        }
         if (this.mobject == null) {
             return;
         }
@@ -98,10 +143,12 @@ export class IOList extends RoundedRectangle {
         if (args['outletProperties'] === undefined) {
             return;
         }
-        this.createOutlets();
-        this.height = this.getHeight();
+        this.updateOutlets();
         if (this.mobject == null) {
             return;
+        }
+        if (this.mobject.board) {
+            this.mobject.board.updateLinks();
         }
         this.positionSelf();
         if (redraw) {

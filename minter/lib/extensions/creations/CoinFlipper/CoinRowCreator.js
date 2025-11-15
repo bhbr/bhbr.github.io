@@ -1,9 +1,13 @@
 import { Creator } from '../../../core/creators/Creator.js';
 import { CoinRow } from './CoinRow.js';
+import { vertexSubtract } from '../../../core/functions/vertex.js';
 export class CoinRowCreator extends Creator {
     setup() {
         super.setup();
         this.creation = this.createMobject();
+        this.creation.update({
+            anchor: vertexSubtract(this.getEndPoint(), this.getStartPoint())
+        });
         this.add(this.creation);
     }
     createMobject() {
@@ -20,6 +24,15 @@ export class CoinRowCreator extends Creator {
         });
     }
     dissolve() {
+        if (this.creation === null) {
+            return;
+        }
+        this.creation.update({
+            anchor: this.getStartPoint(),
+            frameWidth: this.creation.computeWidth()
+        });
+        this.creation.inputList.positionSelf();
+        this.creation.outputList.positionSelf();
         this.parent.addToContent(this.creation);
         this.parent.creator = null;
         this.parent.remove(this);

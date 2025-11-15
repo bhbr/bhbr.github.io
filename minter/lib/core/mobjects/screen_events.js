@@ -131,11 +131,11 @@ export function removePointerUp(element, method) {
 export function addPointerOut(element, method) {
     //	element.addEventListener('touchcancel', method, { capture: true })
     //	element.addEventListener('mouseout', method, { capture: true })
-    element.addEventListener('pointercancel', method, { capture: true });
+    //	element.addEventListener('pointercancel', method, { capture: true })
 }
 export function removePointerOut(element, method) {
     //	element.removeEventListener('touchcancel', method, { capture: true })
     //	element.removeEventListener('mouseout', method, { capture: true })
-    element.removeEventListener('pointercancel', method, { capture: true });
+    //	element.removeEventListener('pointercancel', method, { capture: true })
 }
 //# sourceMappingURL=screen_events.js.map

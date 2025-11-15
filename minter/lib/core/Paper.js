@@ -1,9 +1,9 @@
 import { remove, convertStringToArray } from '../core/functions/arrays.js';
-import { ScreenEventDevice, separateSidebar, ScreenEventHandler } from '../core/mobjects/screen_events.js';
+import { ScreenEventDevice, separateSidebar, ScreenEventHandler, isTouchDevice } from '../core/mobjects/screen_events.js';
 import { vertexOrigin } from '../core/functions/vertex.js';
 import { Board } from '../core/boards/Board.js';
 import { Color } from '../core/classes/Color.js';
-import { SIDEBAR_WIDTH, COLOR_PALETTE } from '../core/constants.js';
+import { SIDEBAR_WIDTH, COLOR_PALETTE, SHOW_HTML_CONSOLE } from '../core/constants.js';
 import { PaperView } from './PaperView.js';
 export class Paper extends Board {
     defaults() {
@@ -53,6 +53,8 @@ export class Paper extends Board {
             width: width,
             height: height
         });
+        let el = document.querySelector('#htmlConsole');
+        el.hidden = (isTouchDevice && !SHOW_HTML_CONSOLE) || !isTouchDevice;
         //window.addEventListener('resize', this.resize.bind(this))
         this.resize();
     }

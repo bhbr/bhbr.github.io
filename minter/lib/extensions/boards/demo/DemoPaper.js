@@ -3,9 +3,8 @@ import { WavyCreator } from '../../../extensions/creations/Wavy/WavyCreator.js';
 import { DesmosCalculatorCreator } from '../../../extensions/creations/DesmosCalculator/DesmosCalculatorCreator.js';
 import { BoxSliderCreator } from '../../../extensions/creations/math/BoxSlider/BoxSliderCreator.js';
 import { BoxStepperCreator } from '../../../extensions/creations/math/BoxStepper/BoxStepperCreator.js';
-import { NumberBoxCreator } from '../../../core/boxes/NumberBox.js';
-import { InputNumberBoxCreator } from '../../../extensions/creations/math/InputNumberBox/InputNumberBoxCreator.js';
-import { AddBoxCreator, SubtractBoxCreator, MultiplyBoxCreator, DivideBoxCreator } from '../../../core/boxes/BinaryOperatorBoxCreator.js';
+import { NumberBoxCreator } from '../../../extensions/creations/math/boxes/NumberBox.js';
+import { AddBoxCreator, SubtractBoxCreator, MultiplyBoxCreator, DivideBoxCreator } from '../../../extensions/creations/math/box_functions/BinaryOperatorBoxCreator.js';
 import { BoardCreator } from '../../../core/boards/BoardCreator.js';
 import { ConstructionCreator } from '../../../extensions/boards/construction/ConstructionCreator.js';
 import { SwingCreator } from '../../../extensions/creations/Swing/SwingCreator.js';
@@ -22,16 +21,15 @@ export class DemoPaper extends Paper {
                 'desmos': DesmosCalculatorCreator,
                 'slider': BoxSliderCreator,
                 'stepper': BoxStepperCreator,
-                'num': NumberBoxCreator,
-                'input': InputNumberBoxCreator,
-                '+': AddBoxCreator,
-                '–': SubtractBoxCreator,
-                '&times;': MultiplyBoxCreator,
-                '/': DivideBoxCreator,
+                'number': NumberBoxCreator,
+                'add': AddBoxCreator,
+                'subtract': SubtractBoxCreator,
+                'multiply': MultiplyBoxCreator,
+                'divide': DivideBoxCreator,
                 'board': BoardCreator,
                 'swing': SwingCreator,
                 'color': RGBAColorSampleCreator,
-                'geo': ConstructionCreator,
+                'construction': ConstructionCreator,
                 'line': ConLineConstructor,
                 'ray': ConRayConstructor,
                 'segment': ConSegmentConstructor,

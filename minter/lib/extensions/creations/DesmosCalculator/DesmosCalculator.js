@@ -4,6 +4,8 @@ import { View } from '../../../core/mobjects/View.js';
 import { Mobject } from '../../../core/mobjects/Mobject.js';
 import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
 import { Rectangle } from '../../../core/shapes/Rectangle.js';
+import { log } from '../../../core/functions/logging.js';
+import { Color } from '../../../core/classes/Color.js';
 export class DesmosCalculator extends Linkable {
     defaults() {
         return {
@@ -14,58 +16,128 @@ export class DesmosCalculator extends Linkable {
             }),
             screenEventHandler: ScreenEventHandler.Self,
             calculator: null,
+            options: {},
+            clippingCanvas: new Mobject(),
             innerCanvas: new Mobject(),
-            outerFrame: new Rectangle()
+            outerFrame: new Rectangle({ strokeWidth: 0 }),
+            expressions: {},
+            secretInputExpressions: {},
+            outputHelperExpressions: {},
+            updating: false,
+            minWidth: 100,
+            minHeight: 100
         };
     }
     setup() {
+        //log('DesmosCalculator.setup')
         super.setup();
+        this.setupCanvases();
+        this.setupOuterFrame();
+        this.boundFocus = this.focus.bind(this);
+        this.ensureMinimumFrameSize();
+        this.layoutFrames();
         if (!getPaper().loadedAPIs.includes('desmos-calc')) {
             this.loadDesmosAPI();
         }
-        this.innerCanvas.view.frame.update({
-            width: this.view.frame.width,
-            height: this.view.frame.height
-        });
+        else {
+            this.createCalculator(this.options);
+        }
+    }
+    setupCanvases() {
+        //log('DesmosCalculator.setupCanvases')
+        this.clippingCanvas.view.div.id = 'clippingCanvas';
         this.innerCanvas.update({
             screenEventHandler: ScreenEventHandler.Auto
         });
-        this.add(this.innerCanvas);
+        this.clippingCanvas.add(this.innerCanvas);
+        this.add(this.clippingCanvas);
+        this.clippingCanvas.view.div.style.overflow = 'hidden';
         this.innerCanvas.view.div.style['pointer-events'] = 'auto';
         this.innerCanvas.view.div.id = 'desmos-calc';
-        this.outerFrame.update({
-            width: this.view.frame.width,
-            height: this.view.frame.height,
-            screenEventHandler: ScreenEventHandler.Self
-        });
-        this.outerFrame.onPointerDown = (e) => {
-            this.focus();
-        };
+        window.setTimeout(function () {
+            this.innerCanvas.view.div.addEventListener('click', this.boundFocus);
+        }.bind(this), 100);
+    }
+    setupOuterFrame() {
+        //log('DesmosCalculator.setupOuterFrame')
         this.add(this.outerFrame);
-        window.setTimeout(this.createCalculator.bind(this), 1000);
-    }
-    loadDesmosAPI() {
-        let paper = getPaper();
-        let scriptTag = document.createElement('script');
-        scriptTag.type = 'text/javascript';
-        scriptTag.src = 'https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6';
-        document.head.append(scriptTag);
-        paper.loadedAPIs.push('desmos-calc');
-    }
-    createCalculator(options = {}) {
-        this.calculator = Desmos.GraphingCalculator(this.innerCanvas.view.div, options);
-    }
-    focus() {
-        super.focus();
         this.outerFrame.update({
             screenEventHandler: ScreenEventHandler.Below
         });
+        this.outerFrame.view.div.id = 'outerFrame';
     }
-    blur() {
-        super.blur();
-        this.outerFrame.update({
-            screenEventHandler: ScreenEventHandler.Self
+    ensureMinimumFrameSize() {
+        //log('DesmosCalculator.ensureMinimumFrameSize')
+        var changedFrame = false;
+        if (this.frameWidth < this.minWidth) {
+            //log('padding to min width')
+            this.update({ frameWidth: this.minWidth });
+            changedFrame = true;
+        }
+        if (this.frameHeight < this.minHeight) {
+            //log('padding to min height')
+            this.update({ frameHeight: this.minHeight });
+            changedFrame = true;
+        }
+        if (changedFrame) {
+            this.layoutFrames();
+        }
+    }
+    layoutFrames() {
+        //log('DesmosCalculator.layoutFrames')
+        //log(`${this.frameWidth} ${this.frameHeight}`)
+        this.clippingCanvas.update({
+            frameWidth: this.frameWidth,
+            frameHeight: this.frameHeight
         });
+        this.innerCanvas.update({
+            frameWidth: this.frameWidth,
+            frameHeight: this.frameHeight
+        });
+        this.outerFrame.update({
+            width: this.frameWidth,
+            height: this.frameHeight,
+            strokeColor: Color.gray(0.5),
+            strokeWidth: 1
+        });
+    }
+    layoutContent() { }
+    loadDesmosAPI() {
+        let scriptTag = document.createElement('script');
+        scriptTag.type = 'text/javascript';
+        scriptTag.src = 'https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6';
+        scriptTag.onload = this.createCalculator.bind(this, this.options);
+        document.head.append(scriptTag);
+    }
+    createCalculator(options = {}) {
+        //log('createCalculator')
+        let apis = getPaper().loadedAPIs;
+        if (!apis.includes('desmos-calc')) {
+            apis.push('desmos-calc');
+        }
+        this.calculator = Desmos.GraphingCalculator(this.innerCanvas.view.div, options);
+        this.calculator.observeEvent('change', this.onChange.bind(this));
+        window.setTimeout(this.layoutContent.bind(this), 50);
+    }
+    focus() {
+        //log('DesmosCalculator.focus')
+        super.focus();
+        this.calculator.openKeypad();
+        this.innerCanvas.view.div.removeEventListener('click', this.boundFocus);
+        this.board.onTap = ((e) => {
+            this.blur();
+        }).bind(this);
+        this.board.onMouseClick = ((e) => {
+            this.blur();
+        }).bind(this);
+    }
+    boundFocus() { }
+    blur() {
+        //log('DesmosCalculator.blur')
+        super.blur();
+        let area = this.view.div.querySelector('.dcg-mq-textarea').querySelector('textarea');
+        area.blur();
+        this.innerCanvas.view.div.querySelector('.dcg-dom-change-wrapper').addEventListener('click', this.boundFocus);
     }
     setDragging(flag) {
         super.setDragging(flag);
@@ -79,6 +151,23 @@ export class DesmosCalculator extends Linkable {
                 screenEventHandler: ScreenEventHandler.Self
             });
         }
+    }
+    onChange(eventName, event) { }
+    showKeypad() {
+        log('showKeypad');
+        this.calculator.openKeypad();
+        window.setTimeout(function () {
+            // let keypad = this.innerCanvas.view.div.querySelector('.dcg-keypad') as HTMLElement
+            // var ancestor = keypad
+            // while (ancestor !== this.innerCanvas.view.div) {
+            // 	ancestor.style.visibility = 'visible'
+            // 	ancestor = ancestor.parentNode as HTMLDivElement
+            // }
+            // this.clippingCanvas.view.div.style.overflow = 'visible'
+        }.bind(this), 500);
+    }
+    hideKeypad() {
+        //log('hideKeypad')
     }
     mutabilities() { return {}; }
 }

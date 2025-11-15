@@ -3,7 +3,7 @@ export class CreativeButton extends SidebarButton {
     defaults() {
         return {
             creations: [],
-            outgoingMessage: { create: 'freehand' }
+            touchUpMessages: [{ create: 'draw' }]
         };
     }
     mutabilities() {
@@ -13,15 +13,22 @@ export class CreativeButton extends SidebarButton {
     }
     setup() {
         for (let c of this.creations) {
-            this.messages.push({ create: c });
+            this.touchDownMessages.push({ create: c });
         }
         super.setup();
     }
     labelFromMessage(msg) {
-        return Object.values(msg)[0];
+        var key = Object.values(msg)[0];
+        if (this.currentModeIndex > 0) {
+            key = '&#9666; ' + key;
+        }
+        if (this.currentModeIndex < this.creations.length - 1) {
+            key = key + ' &#9656;';
+        }
+        return key;
     }
     imageNameForIndex(index) {
-        return (Object.values(this.messages[index] ?? {}) ?? ['key'])[0];
+        return (Object.values(this.touchDownMessages[index] ?? {}) ?? ['key'])[0];
     }
 }
 //# sourceMappingURL=CreativeButton.js.map

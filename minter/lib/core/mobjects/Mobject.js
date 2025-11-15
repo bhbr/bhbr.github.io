@@ -1,4 +1,4 @@
-import { remove } from '../../core/functions/arrays.js';
+import { remove, clear } from '../../core/functions/arrays.js';
 import { copy } from '../../core/functions/copying.js';
 import { ScreenEventHandler, eventVertex, addPointerDown, addPointerMove, addPointerUp, addPointerOut } from './screen_events.js';
 import { vertexAdd, vertexSubtract } from '../../core/functions/vertex.js';
@@ -103,10 +103,16 @@ export class Mobject extends ExtendedObject {
     set opacity(newValue) { this.view.opacity = newValue; }
     get backgroundColor() { return this.view.backgroundColor; }
     set backgroundColor(newValue) { this.view.backgroundColor = newValue; }
+    get borderColor() { return this.view.borderColor; }
+    set borderColor(newValue) { this.view.borderColor = newValue; }
+    get borderWidth() { return this.view.borderWidth; }
+    set borderWidth(newValue) { this.view.borderWidth = newValue; }
     get drawBorder() { return this.view.drawBorder; }
     set drawBorder(newValue) { this.view.drawBorder = newValue; }
     get drawShadow() { return this.view.drawShadow; }
     set drawShadow(newValue) { this.view.drawShadow = newValue; }
+    get borderRadius() { return this.view.borderRadius; }
+    set borderRadius(newValue) { this.view.borderRadius = newValue; }
     redraw() { this.view.redraw(); }
     //////////// Showing and hiding ////////////
     hideShadow() { this.view.hideShadow(); }
@@ -154,6 +160,12 @@ export class Mobject extends ExtendedObject {
             p = p.parent;
         }
         return ret;
+    }
+    descendsFrom(mob) {
+        return this.ancestors().includes(mob);
+    }
+    isDescendentFrom(mob) {
+        return mob.descendsFrom(this);
     }
     //////////// Aliases ////////////
     get superMobject() { return this.parent; }
@@ -242,6 +254,9 @@ export class Mobject extends ExtendedObject {
     }
     removeDependency(dep) {
         remove(this.dependencies, dep);
+    }
+    removeAllDependents() {
+        clear(this.dependencies);
     }
     getDependency(outputName, target, inputName) {
         for (let dep of this.dependencies) {

@@ -1,9 +1,11 @@
 import { Linkable } from '../../../../core/linkables/Linkable.js';
 import { vertexSubtract } from '../../../../core/functions/vertex.js';
+import { getPaper } from '../../../../core/functions/getters.js';
 import { Color } from '../../../../core/classes/Color.js';
 import { TextLabel } from '../../../../core/mobjects/TextLabel.js';
 import { eventVertex, ScreenEventHandler } from '../../../../core/mobjects/screen_events.js';
 import { Rectangle } from '../../../../core/shapes/Rectangle.js';
+import { SimpleNumberBox } from '../../../../extensions/creations/math/boxes/SimpleNumberBox.js';
 export class BoxSlider extends Linkable {
     defaults() {
         return {
@@ -34,7 +36,15 @@ export class BoxSlider extends Linkable {
             fillColor: Color.black(),
             barFillColor: Color.gray(0.5),
             screenEventHandler: ScreenEventHandler.Self,
-            precision: 3
+            precision: 3,
+            minValueInputBox: new SimpleNumberBox({
+                anchor: [10, 10],
+                value: 0
+            }),
+            maxValueInputBox: new SimpleNumberBox({
+                anchor: [10, -30],
+                value: 1
+            })
         };
     }
     mutabilities() {
@@ -57,7 +67,51 @@ export class BoxSlider extends Linkable {
             frameWidth: this.width,
             frameHeight: this.height
         });
+        this.add(this.minValueInputBox);
+        this.add(this.maxValueInputBox);
+        this.minValueInputBox.inputElement.value = this.min.toString();
+        this.maxValueInputBox.inputElement.value = this.max.toString();
+        this.minValueInputBox.blur = this.endMinValueEditing.bind(this);
+        this.minValueInputBox.onReturn = this.endMinValueEditing.bind(this);
+        this.maxValueInputBox.blur = this.endMaxValueEditing.bind(this);
+        this.maxValueInputBox.onReturn = this.endMaxValueEditing.bind(this);
+        this.updateDependents();
         this.outputList.update();
+        this.moveToTop(this.outputList);
+    }
+    endMinValueEditing() {
+        getPaper().blurFocusedChild();
+        this.minValueInputBox.inputElement.blur();
+        document.removeEventListener('keydown', this.minValueInputBox.boundKeyPressed);
+        this.updateMinValue();
+    }
+    endMaxValueEditing() {
+        getPaper().blurFocusedChild();
+        this.maxValueInputBox.inputElement.blur();
+        document.removeEventListener('keydown', this.maxValueInputBox.boundKeyPressed);
+        this.updateMaxValue();
+    }
+    updateMinValue() {
+        let minValue = Number(this.minValueInputBox.value);
+        if (minValue >= this.max) {
+            this.minValueInputBox.value = this.min;
+        }
+        else {
+            this.update({
+                min: minValue
+            }, true);
+        }
+    }
+    updateMaxValue() {
+        let maxValue = Number(this.maxValueInputBox.value);
+        if (maxValue <= this.min) {
+            this.maxValueInputBox.value = this.max;
+        }
+        else {
+            this.update({
+                max: maxValue
+            }, true);
+        }
     }
     normalizedValue() {
         // is always between 0 and 1
@@ -70,6 +124,9 @@ export class BoxSlider extends Linkable {
         }
         if (args['height'] !== undefined) {
             this.view.frame.height = this.height;
+            this.minValueInputBox.update({
+                anchor: [10, this.height + 10]
+            });
         }
         //// updating submobs
         let a = this.normalizedValue();
@@ -82,6 +139,7 @@ export class BoxSlider extends Linkable {
             anchor: [0, this.height - a * this.height]
         }, redraw);
         this.updateLabel(redraw);
+        this.updateDependents();
         if (redraw) {
             this.view.redraw();
         }

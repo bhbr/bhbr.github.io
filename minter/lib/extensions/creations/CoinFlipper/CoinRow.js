@@ -1,9 +1,9 @@
 import { Coin } from './Coin.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
 import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.js';
-import { Color } from '../../../core/classes/Color.js';
 import { TextLabel } from '../../../core/mobjects/TextLabel.js';
 import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
+import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
 export class CoinRow extends Linkable {
     defaults() {
         return {
@@ -11,8 +11,8 @@ export class CoinRow extends Linkable {
             coinRadius: 25,
             nbCoins: 12,
             coinSpacing: 16,
-            headsColor: new Color(0, 0.3, 1),
-            tailsColor: Color.red(),
+            headsColor: HEADS_COLOR,
+            tailsColor: TAILS_COLOR,
             tailsProbability: 0.5,
             playState: 'stop',
             playIntervalID: null,
@@ -35,10 +35,11 @@ export class CoinRow extends Linkable {
             ],
             outputProperties: [
                 { name: 'nbHeads', displayName: '# heads', type: 'number' },
-                { name: 'nbTails', displayName: '# tails', type: 'number' }
+                { name: 'nbTails', displayName: '# tails', type: 'number' },
+                { name: 'mean', displayName: 'mean', type: 'number' }
             ],
             frameWidth: 300,
-            frameHeight: 100
+            frameHeight: 50
         };
     }
     setup() {
@@ -128,7 +129,11 @@ export class CoinRow extends Linkable {
         for (let coin of this.coins) {
             coin.flip();
         }
-        this.update(); // to trigger the histogram to update
+        this.update();
+        this.updateDependents();
+    }
+    onTap(e) {
+        this.flipCoins();
     }
     play() {
         this.playIntervalID = window.setInterval(this.flipCoins.bind(this), 100);
@@ -146,11 +151,6 @@ export class CoinRow extends Linkable {
             this.play();
         }
     }
-    reset() {
-        this.pause();
-        this.playButton.toggleLabel();
-        this.update();
-    }
     nbTails() {
         var t = 0;
         for (let coin of this.coins) {
@@ -161,6 +161,9 @@ export class CoinRow extends Linkable {
     nbTailsAsString() { return this.nbTails().toString(); }
     nbHeads() { return this.nbCoins - this.nbTails(); }
     nbHeadsAsString() { return this.nbHeads().toString(); }
+    mean() {
+        return this.nbTails() / this.nbCoins;
+    }
     update(args = {}, redraw = false) {
         let newNbCoins = args['nbCoins'];
         if (newNbCoins !== undefined && newNbCoins != this.nbCoins) {
@@ -179,6 +182,9 @@ export class CoinRow extends Linkable {
                 this.addCoin();
             }
         }
+    }
+    computeWidth() {
+        return (this.nbCoins - 1) * this.coinSpacing + 2 * this.coinRadius + this.nbHeadsLabel.frameWidth + this.nbTailsLabel.frameWidth;
     }
     mutabilities() { return {}; }
 }

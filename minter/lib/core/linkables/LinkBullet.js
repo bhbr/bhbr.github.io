@@ -10,7 +10,8 @@ export class LinkBullet extends Circle {
         return {
             radius: BULLET_RADIUS,
             fillOpacity: 1,
-            strokeColor: Color.white()
+            strokeColor: Color.black(),
+            strokeWidth: 2
         };
     }
     mutabilities() {

@@ -6,8 +6,6 @@ export class TextLabelView extends View {
             horizontalAlign: 'center',
             verticalAlign: 'center',
             color: Color.white(),
-            borderColor: Color.white(),
-            borderWidth: 1,
             fontSize: 16,
             fontFamily: 'Helvetica'
         };

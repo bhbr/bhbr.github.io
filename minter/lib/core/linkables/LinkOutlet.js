@@ -4,6 +4,7 @@ import { LinkHook } from './LinkHook.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
 import { HOOK_HORIZONTAL_SPACING, IO_LIST_WIDTH } from './constants.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
+import { remove } from '../../core/functions/arrays.js';
 export class LinkOutlet extends MGroup {
     defaults() {
         return {
@@ -107,6 +108,24 @@ export class LinkOutlet extends MGroup {
                 }, redraw);
             }
         }
+    }
+    removeUnlinkedHook() {
+        var i = 0;
+        for (let hook of this.linkHooks) {
+            if (!hook.linked) {
+                break;
+            }
+            i += 1;
+        }
+        let unlinkedHook = this.linkHooks[i];
+        this.remove(unlinkedHook);
+        while (i < this.linkHooks.length) {
+            this.linkHooks[i].update({
+                midpoint: [this.linkHooks[i].midpoint[0] - HOOK_HORIZONTAL_SPACING, this.linkHooks[i].midpoint[1]]
+            });
+            i += 1;
+        }
+        remove(this.linkHooks, unlinkedHook);
     }
 }
 //# sourceMappingURL=LinkOutlet.js.map

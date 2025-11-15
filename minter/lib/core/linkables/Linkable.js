@@ -9,8 +9,8 @@ export class Linkable extends Mobject {
         return {
             inputList: new InputList(),
             outputList: new OutputList(),
-            inputs: [],
-            outputs: [],
+            inputProperties: [],
+            outputProperties: [],
             linksEditable: false,
             screenEventHandler: ScreenEventHandler.Self
         };
@@ -53,8 +53,12 @@ export class Linkable extends Mobject {
         this.outputList.view.hide();
     }
     showLinks() {
-        this.inputList.view.show();
-        this.outputList.view.show();
+        if (this.inputList.height != 0) {
+            this.inputList.view.show();
+        }
+        if (this.outputList.height != 0) {
+            this.outputList.view.show();
+        }
         this.disable();
     }
     hideLinks() {
@@ -120,6 +124,29 @@ export class Linkable extends Mobject {
                 outletProperties: args['outputProperties']
             }, true);
         }
+    }
+    addedInputLink(link) {
+        link.startHook.outlet.ioList.mobject.updateDependents();
+    }
+    addedOutputLink(link) {
+        this.update();
+        this.updateDependents();
+    }
+    removedInputLink(link) {
+        this.update();
+    }
+    removedOutputLink(link) {
+        this.update();
+        if (!link.startHook || !link.endHook) {
+            return;
+        }
+        link.startHook.outlet.removeUnlinkedHook();
+    }
+    inputNames() {
+        return this.inputProperties.map((prop) => prop.name);
+    }
+    outputNames() {
+        return this.outputProperties.map((prop) => prop.name);
     }
 }
 //# sourceMappingURL=Linkable.js.map

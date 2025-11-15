@@ -1,14 +1,25 @@
-export function remove(arr, value, all = false) {
-    // remove an object or value from an Array
-    // either the first encountered matching entry (if all = false)
-    // or every matching entry (if all = true)
+export function removeOne(arr, value) {
+    // remove the first encountered matching entry of an object or value from an Array
     for (let i = 0; i < arr.length; i++) {
         if (arr[i] == value) {
             arr.splice(i, 1);
-            if (!all) {
-                break;
-            }
+            return true;
         }
+    }
+    return false;
+}
+export function removeAll(arr, value) {
+    var found = true;
+    while (found) {
+        found = removeOne(arr, value);
+    }
+}
+export function remove(arr, value, all = false) {
+    if (all) {
+        removeAll(arr, value);
+    }
+    else {
+        removeOne(arr, value);
     }
 }
 export function clear(arr) {
@@ -57,5 +68,26 @@ export function convertArrayToString(array) {
     }
     arrayString += ")";
     return arrayString;
+}
+export function removeDuplicates(arr) {
+    let ret = [];
+    for (let x of arr) {
+        if (ret.includes(x)) {
+            continue;
+        }
+        ret.push(x);
+    }
+    return ret;
+}
+export function equalArrays(arr1, arr2) {
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
+    for (var i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 //# sourceMappingURL=arrays.js.map

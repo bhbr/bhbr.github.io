@@ -1,7 +1,7 @@
 import { ExtendedObject } from '../../core/classes/ExtendedObject.js';
 import { ScreenEventHandler, ScreenEventDevice, ScreenEventType, screenEventDevice, screenEventType, eventVertex, isTouchDevice } from './screen_events.js';
 import { MAX_TAP_DELAY, MERE_TAP_DELAY, LONG_PRESS_DURATION } from '../../core/constants.js';
-import { getPaper } from '../../core/functions/getters.js';
+import { getPaper, getSidebar } from '../../core/functions/getters.js';
 export class Sensor extends ExtendedObject {
     defaults() {
         return {
@@ -132,6 +132,7 @@ export class Sensor extends ExtendedObject {
     Captured event methods
     */
     capturedOnPointerDown(e) {
+        //log('capturedOnPointerDown')
         if (this.eventStartTime == 0) {
             this.eventStartTime = e.timeStamp;
         }
@@ -152,6 +153,7 @@ export class Sensor extends ExtendedObject {
         this.decideEventAction(e);
     }
     capturedOnPointerMove(e) {
+        //log('capturedOnPointerMove')
         let target = this.eventTarget;
         if (target == null || this.screenEventDevice == null) {
             return;
@@ -180,6 +182,10 @@ export class Sensor extends ExtendedObject {
     capturedOnPointerUp(e) {
         let target = this.eventTarget;
         if (target == null || this.screenEventDevice == null) {
+            let p = getPaper();
+            if (this.mobject == p || this.mobject.descendsFrom(p)) {
+                getSidebar().activeButton?.onPointerUp(e);
+            }
             return;
         }
         if (target.sensor.screenEventHandler == ScreenEventHandler.Auto) {
@@ -326,6 +332,7 @@ export class Sensor extends ExtendedObject {
         this.screenEventHistory.push(e);
     }
     rawOnTouchDown(e) {
+        //log('rawOnTouchDown')
         this.longPressTimeoutID = window.setTimeout(this.onLongTouchDown, LONG_PRESS_DURATION);
         this.onTouchDown(e);
     }
@@ -351,6 +358,7 @@ export class Sensor extends ExtendedObject {
         this.onTouchUp(e);
     }
     rawOnPenDown(e) {
+        //log('rawOnPenDown')
         this.longPressTimeoutID = window.setTimeout(this.onLongPenDown, LONG_PRESS_DURATION);
         this.onPenDown(e);
     }
@@ -375,6 +383,7 @@ export class Sensor extends ExtendedObject {
         this.onPenUp(e);
     }
     rawOnMouseDown(e) {
+        //log('rawOnMouseDown')
         this.longPressTimeoutID = window.setTimeout(this.mobject.onLongMouseDown.bind(this.mobject), LONG_PRESS_DURATION);
         this.onMouseDown(e);
     }

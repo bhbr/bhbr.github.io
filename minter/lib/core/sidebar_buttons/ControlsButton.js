@@ -3,9 +3,9 @@ import { ImageView } from '../../core/mobjects/ImageView.js';
 export class ControlsButton extends ToggleButton {
     defaults() {
         return {
-            messageKey: 'ctrl',
+            messageKey: 'show controls',
             icon: new ImageView({
-                imageLocation: '../../assets/ctrl.png',
+                imageLocation: '../../assets/show_controls.png',
                 frameWidth: 30,
                 frameHeight: 30
             })

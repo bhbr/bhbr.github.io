@@ -317,16 +317,16 @@ window.clearAll = function() {
 
 function init() {
     // Event listeners for drawing f'(x) on the right canvas
-    fpCanvas.addEventListener('mousedown', startDrawing);
-    fpCanvas.addEventListener('mousemove', drawFPrime);
-    fpCanvas.addEventListener('mouseup', stopDrawing);
-    fpCanvas.addEventListener('mouseout', stopDrawing);
+    fpCanvas.addEventListener('pointerdown', startDrawing);
+    fpCanvas.addEventListener('pointermove', drawFPrime);
+    fpCanvas.addEventListener('pointerup', stopDrawing);
+    fpCanvas.addEventListener('pointerout', stopDrawing);
 
     // Event listeners for dragging the starting point on the left canvas
-    fCanvas.addEventListener('mousedown', startDragging);
-    fCanvas.addEventListener('mousemove', dragStartPoint);
-    fCanvas.addEventListener('mouseup', stopDragging);
-    fCanvas.addEventListener('mouseout', stopDragging);
+    fCanvas.addEventListener('pointerdown', startDragging);
+    fCanvas.addEventListener('pointermove', dragStartPoint);
+    fCanvas.addEventListener('pointerup', stopDragging);
+    fCanvas.addEventListener('pointerout', stopDragging);
     fCanvas.style.cursor = 'grab'; 
 
     // Draw initial axes and the start point

@@ -12,6 +12,7 @@ export class Sidebar extends Mobject {
     defaults() {
         return {
             view: new SidebarView(),
+            activeButton: null,
             background: new Rectangle({
                 fillColor: Color.gray(0.1),
                 fillOpacity: 1.0,
@@ -28,7 +29,8 @@ export class Sidebar extends Mobject {
             ],
             frameWidth: SIDEBAR_WIDTH,
             frameHeight: Math.max(window.screen.width, window.screen.height) + 500,
-            screenEventHandler: ScreenEventHandler.Self
+            screenEventHandler: ScreenEventHandler.Self,
+            defaultKeys: '1 2 3 4 5 6 7 8 9 0 q w e r t z u i o p'.split(' ')
         };
     }
     mutabilities() {
@@ -75,7 +77,9 @@ export class Sidebar extends Mobject {
     createButton(buttonName) {
         for (let buttonClass of this.availableButtonClasses) {
             if (buttonClass.name == buttonName) {
-                return new buttonClass();
+                let b = new buttonClass();
+                b.sidebar = this;
+                return b;
             }
         }
         throw `Button class ${buttonName} not available!`;
@@ -87,7 +91,7 @@ export class Sidebar extends Mobject {
             let button = this.createButton(names[i]);
             button.update({
                 locationIndex: i,
-                key: (i + 1).toString()
+                key: this.defaultKeys[i]
             });
             this.addButton(button);
         }

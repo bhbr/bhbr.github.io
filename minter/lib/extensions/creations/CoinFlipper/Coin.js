@@ -1,13 +1,14 @@
 import { Circle } from '../../../core/shapes/Circle.js';
 import { Color } from '../../../core/classes/Color.js';
 import { TextLabel } from '../../../core/mobjects/TextLabel.js';
+import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
 export class Coin extends Circle {
     defaults() {
         return {
             state: 'heads',
             radius: 25,
-            headsColor: new Color(0, 0.3, 1),
-            tailsColor: Color.red(),
+            headsColor: HEADS_COLOR,
+            tailsColor: TAILS_COLOR,
             tailsProbability: 0.5,
             label: new TextLabel({
                 fontSize: 24,
@@ -42,10 +43,21 @@ export class Coin extends Circle {
         args['labelText'] = (newState === 'heads') ? 'H' : 'T';
         return args;
     }
-    flip() {
+    flip(animate = false) {
         let x = Math.random();
         let newState = (x < this.tailsProbability) ? 'tails' : 'heads';
-        this.update({ state: newState });
+        if (animate) {
+            this.update({
+                fillColor: Color.black(),
+                labelText: ''
+            });
+            window.setTimeout(function () {
+                this.update({ state: newState });
+            }.bind(this), 50);
+        }
+        else {
+            this.update({ state: newState });
+        }
     }
     get labelText() {
         return this.label.text;

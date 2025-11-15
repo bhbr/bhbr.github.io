@@ -4,6 +4,7 @@ const CANVAS_HEIGHT = 300;
 const PADDING = 20; // Padding for axes labels
 const X_MIN = -5;
 const X_MAX = 5;
+const DX = .05;
 const Y_MIN = -5;
 const Y_MAX = 5;
 const F_COLOR = 'blue';
@@ -13,7 +14,7 @@ const LINE_THICKNESS = 2;
  * The slope at point i will be calculated between point (i - SMOOTHING_WINDOW) 
  * and point (i + SMOOTHING_WINDOW). Higher values mean more smoothing.
  */
-const SMOOTHING_WINDOW = 5; 
+const SMOOTHING_WINDOW = 5;
 
 // --- DOM Elements and Contexts ---
 const fCanvas = document.getElementById('functionCanvas');
@@ -21,8 +22,12 @@ const fCtx = fCanvas.getContext('2d');
 const fpCanvas = document.getElementById('derivativeCanvas');
 const fpCtx = fpCanvas.getContext('2d');
 
+let pointerIsDown = false;
 let isDrawing = false;
 let points = []; // Array to store {x, y} coordinates in canvas pixels
+let drawnOverIntervals = [];
+var drawnOverIntervalStart = 0;
+var drawnOverIntervalEnd = 0;
 
 // --- Coordinate System Utilities (Unchanged) ---
 
@@ -197,7 +202,7 @@ function calculateDerivative() {
         
         // Denominator: the span of x-values (2h)
         const dx = point_plus_h.x - point_minus_h.x;
-        
+
         // Numerator: the change in y-values
         const dy = point_plus_h.y - point_minus_h.y;
         
@@ -247,19 +252,58 @@ function getMousePos(canvas, event) {
     };
 }
 
-function startDrawing(event) {
-    isDrawing = true;
+function xValueAlreadyDrawn(x) {
+    for (var i = 0; i < drawnOverIntervals.length; i++) {
+        let interval = drawnOverIntervals[i];
+        let a = Math.min(interval[0], interval[1]);
+        let b = Math.max(interval[0], interval[1]);
+        if (a < x && x < b) {
+            return true;
+          }
+    }
+    return false;
+}
+
+function pointerDown(event) {
+    pointerIsDown = true;
     const pos = getMousePos(fCanvas, event);
+    if (xValueAlreadyDrawn(pos.x)) return;
     // Start a new path
+    isDrawing = true;
     fCtx.beginPath();
     fCtx.moveTo(pos.x, pos.y);
     points.push(pos);
+    drawnOverIntervals.push([
+        pos.x, pos.x
+    ])
 }
 
-function draw(event) {
-    if (!isDrawing) return;
+function pointerMove(event) {
+    if (!pointerIsDown) return;
     const pos = getMousePos(fCanvas, event);
+    if (xValueAlreadyDrawn(pos.x)) {
+        if (isDrawing) {
+            isDrawing = false;
+            fCtx.closePath();
+        }
+        return;
+    }
+    if (!isDrawing) {
+        isDrawing = true;
+        // Start a new path
+        fCtx.beginPath();
+        fCtx.moveTo(pos.x, pos.y);
+        points.push(pos);
+        drawnOverIntervals.push([
+            pos.x, pos.x
+        ])
+        return;
+    }
     
+    if (drawnOverIntervals.length > 0) {
+        drawnOverIntervals[drawnOverIntervals.length - 1][1] = pos.x;
+    }
+
     // Draw on the function canvas
     fCtx.lineTo(pos.x, pos.y);
     fCtx.stroke();
@@ -270,14 +314,19 @@ function draw(event) {
     drawDerivative(derivPoints);
 }
 
-function stopDrawing() {
+function pointerUp() {
+    if (isDrawing) {
+        fCtx.closePath();
+    }
     isDrawing = false;
-    fCtx.closePath();
+    pointerIsDown = false;
 }
 
 // --- Public Function for the Button (Unchanged) ---
 window.clearAll = function() {
     points = [];
+    xValues = [];
+    drawnOverIntervals = [];
     drawAxes(fCtx, false);
     drawAxes(fpCtx, true);
 };
@@ -285,10 +334,10 @@ window.clearAll = function() {
 // --- Initialization (Unchanged) ---
 function init() {
     // Set up event listeners for drawing on the function canvas
-    fCanvas.addEventListener('mousedown', startDrawing);
-    fCanvas.addEventListener('mousemove', draw);
-    fCanvas.addEventListener('mouseup', stopDrawing);
-    fCanvas.addEventListener('mouseout', stopDrawing);
+    fCanvas.addEventListener('pointerdown', pointerDown);
+    fCanvas.addEventListener('pointermove', pointerMove);
+    fCanvas.addEventListener('pointerup', pointerUp);
+    fCanvas.addEventListener('pointerout', pointerUp);
 
     // Draw initial axes
     drawAxes(fCtx, false);

@@ -2,7 +2,7 @@ import { CreativeButton } from '../../../core/sidebar_buttons/CreativeButton.js'
 export class ConButton extends CreativeButton {
     defaults() {
         return {
-            creations: ['geo']
+            creations: ['construction']
         };
     }
     mutabilities() {

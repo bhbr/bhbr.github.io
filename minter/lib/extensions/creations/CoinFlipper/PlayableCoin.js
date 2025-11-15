@@ -8,9 +8,14 @@ export class PlayableCoin extends Linkable {
             playState: 'stop',
             playIntervalID: null,
             playButton: new PlayButton({
-                anchor: [-12.5, 50]
+                anchor: [0, 70]
             }),
             valueHistory: [],
+            inputProperties: [
+                { name: 'tailsProbability', displayName: 'p(tails)', type: 'number' },
+                { name: 'headsColor', displayName: 'heads color', type: 'Color' },
+                { name: 'tailsColor', displayName: 'tails color', type: 'Color' }
+            ],
             outputProperties: [
                 { name: 'value', type: 'number' }
             ],
@@ -26,22 +31,25 @@ export class PlayableCoin extends Linkable {
             frameHeight: 2 * this.coin.radius
         });
         this.coin.update({
+            midpoint: [this.coin.radius, this.coin.radius],
             tailsProbability: this.tailsProbability
-        }, false);
+        });
         this.add(this.coin);
         this.add(this.playButton);
         this.playButton.mobject = this;
     }
     onTap(e) {
-        this.flip();
+        this.flip(true);
     }
-    flip() {
-        this.coin.flip();
+    flip(animate = false) {
+        this.coin.flip(animate);
         this.update();
         this.updateDependents();
     }
     play() {
-        this.playIntervalID = window.setInterval(this.flip.bind(this), 250);
+        this.playIntervalID = window.setInterval(function () {
+            this.flip(true);
+        }.bind(this), 250);
         this.playState = 'play';
     }
     pause() {

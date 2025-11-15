@@ -2,6 +2,7 @@ import { equalObjects } from '../../core/functions/copying.js';
 import { ClassDeclaration } from './ClassDeclaration.js';
 import { isVertex, vertexEquals, isVertexArray, vertexArrayEquals } from '../../core/functions/vertex.js';
 import { AssignmentError } from './Errors.js';
+import { remove } from '../../core/functions/arrays.js';
 export class ExtendedObject {
     // These properties need to be treated separately so we can modify them without declaring a public writable property. They are hidden inside this private dictionary, and modified by calling the update method, which internally accesses this dictionary.
     mutabilities() { return {}; }
@@ -155,7 +156,7 @@ export class ExtendedObject {
         }
     }
     createProperty(prop, value) {
-        // that can only the changed via the update() method
+        // i. e. a property that can only the changed via the update() method
         let isSettable = (this.mutability(prop) == 'always');
         if (isSettable) {
             Object.defineProperty(this, prop, {
@@ -177,6 +178,10 @@ export class ExtendedObject {
             });
         }
         this.properties.push(prop);
+    }
+    removeProperty(prop) {
+        this[prop] = undefined;
+        remove(this.properties, prop);
     }
     isAccessor(prop) {
         if (Object.keys(this.indirectlyWritableProperties).includes(prop)) {

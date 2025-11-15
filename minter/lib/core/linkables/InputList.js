@@ -1,5 +1,5 @@
 import { IOList } from './IOList.js';
-import { IO_LIST_OFFSET } from './constants.js';
+import { IO_LIST_OFFSET, IO_LIST_WIDTH } from './constants.js';
 export class InputList extends IOList {
     defaults() {
         return {
@@ -7,7 +7,7 @@ export class InputList extends IOList {
         };
     }
     getAnchor() {
-        return [0.5 * (this.mobject.getCompactWidth() - this.view.frame.width), -IO_LIST_OFFSET - this.getHeight()];
+        return [0.5 * (this.mobject.getCompactWidth() - IO_LIST_WIDTH), -IO_LIST_OFFSET - this.getHeight()];
     }
     mutabilities() { return {}; }
 }

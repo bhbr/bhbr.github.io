@@ -47,7 +47,7 @@ export class Frame extends ExtendedObject {
     }
     transformLocalPoint(point, frame) {
         /*
-        Given a point (Vertex) in local coordinates,
+        Given a point (vertex) in local coordinates,
         compute its coordinates in the given ancestor
         Frame's frame.
         */

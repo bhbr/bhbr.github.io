@@ -2,7 +2,7 @@ import { Circle } from '../../core/shapes/Circle.js';
 import { Color } from '../../core/classes/Color.js';
 import { vertexTranslatedBy } from '../../core/functions/vertex.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
-import { buttonCenter, BUTTON_RADIUS, BUTTON_SCALE_FACTOR, OPTION_SPACING } from './button_geometry.js';
+import { buttonCenter, BUTTON_RADIUS, OPTION_SPACING } from './button_geometry.js';
 import { TextLabel } from '../../core/mobjects/TextLabel.js';
 import { eventVertex, separateSidebar } from '../../core/mobjects/screen_events.js';
 import { SidebarButtonView } from './SidebarButtonView.js';
@@ -10,15 +10,18 @@ export const buttonDict = {};
 export class SidebarButton extends Circle {
     defaults() {
         return {
-            baseColor: Color.gray(0.4),
+            baseColor: Color.gray(0.2),
             baseRadius: BUTTON_RADIUS,
-            baseFontSize: 12,
+            smallLabelFontSize: 12,
+            bigLabelFontSize: 12,
             activeScalingFactor: 1.2,
             optionSpacing: OPTION_SPACING,
             label: new TextLabel(),
+            labelWidth: 110,
+            labelHeight: 25,
             icon: null,
-            messages: [],
-            outgoingMessage: {},
+            touchDownMessages: [],
+            touchUpMessages: [],
             strokeWidth: 0,
             screenEventHandler: ScreenEventHandler.Self,
             currentModeIndex: 0,
@@ -29,9 +32,10 @@ export class SidebarButton extends Circle {
             radius: BUTTON_RADIUS,
             frameWidth: 2 * BUTTON_RADIUS,
             frameHeight: 2 * BUTTON_RADIUS,
-            fillOpacity: 0.5,
+            fillOpacity: 1.0,
             activeKeyboard: true,
             paper: null,
+            sidebar: null,
             view: new SidebarButtonView({
                 radius: BUTTON_RADIUS
             })
@@ -40,8 +44,11 @@ export class SidebarButton extends Circle {
     mutabilities() {
         return {
             baseColor: 'in_subclass',
+            bigLabelFontSize: 'never',
+            smallLabelFontSize: 'never',
             optionSpacing: 'never',
             label: 'never',
+            sideLabel: 'never',
             icon: 'on_init',
             activeScalingFactor: 'never',
             messages: 'on_update',
@@ -52,9 +59,8 @@ export class SidebarButton extends Circle {
     setup() {
         super.setup();
         buttonDict[this.constructor.name] = this.constructor;
-        if (this.label && !this.icon) {
-            this.add(this.label);
-        }
+        this.sidebar?.add(this.label);
+        this.label.view.hide();
         if (this.icon) {
             this.updateIcon();
             this.view.add(this.icon);
@@ -64,15 +70,22 @@ export class SidebarButton extends Circle {
         this.view.update({
             fillColor: this.baseColor
         });
-        this.label?.update({
-            frameWidth: 2 * this.baseRadius,
-            frameHeight: 2 * this.baseRadius,
-            text: this.messageKey
-        }, false);
-        if (this.label) {
-            this.label.view.div.style['font-size'] = `${this.baseFontSize}px`;
-            this.label.view.div.style['color'] = Color.white().toHex();
-        }
+        this.label.update({
+            anchor: [10, this.anchor[1] - 38],
+            frameWidth: this.labelWidth,
+            frameHeight: this.labelHeight,
+            backgroundColor: this.fillColor.brighten(1.2),
+            borderColor: this.fillColor.brighten(1.4),
+            borderWidth: 2,
+            borderRadius: 7,
+            drawShadow: false,
+            text: this.messageKey,
+            horizontalAlign: 'center',
+            verticalAlign: 'center',
+            fontSize: this.bigLabelFontSize
+        });
+        this.label.view.div.style.paddingLeft = `5px`;
+        this.label.view.div.style.paddingRight = `5px`;
         this.updateLabel();
         if (!separateSidebar) {
             const paperDiv = document.querySelector('#paper_id');
@@ -84,7 +97,7 @@ export class SidebarButton extends Circle {
             }
         }
     }
-    numberOfIndices() { return this.messages.length; }
+    numberOfIndices() { return this.touchDownMessages.length; }
     colorForIndex(i) {
         return this.baseColor;
     }
@@ -108,31 +121,35 @@ export class SidebarButton extends Circle {
         }
         this.update({
             active: true,
-            //radius: this.baseRadius * this.activeScalingFactor,
             previousIndex: this.currentModeIndex,
         });
         this.frame.transform.update({
-            //anchor: vertexSubtract(this.midpoint, vertexMultiply([BUTTON_RADIUS, BUTTON_RADIUS], this.activeScalingFactor)),
             scale: this.activeScalingFactor
         });
-        this.redraw();
-        //this.label?.view.div.style.setProperty('font-size', `${this.baseFontSize * this.activeScalingFactor}px`)
-        this.label?.update({
-            frameWidth: 2 * this.radius,
-            frameHeight: 2 * this.radius
+        this.label.update({
+            anchor: [10, this.anchor[1] - 38]
         });
-        this.updateLabel();
+        this.redraw();
         this.updateIcon();
-        if (this.messages.length == 0) {
+        this.updateLabel();
+        this.label.view.show();
+        if (this.touchDownMessages.length == 0) {
             return;
         }
-        this.messagePaper(this.messages[0]);
+        this.messagePaper(this.touchDownMessages[0]);
+        if (this.sidebar) {
+            this.sidebar.activeButton = this;
+            this.sidebar.add(this.label);
+        }
     }
     onPointerDown(e) {
         this.commonButtonDown();
         this.touchStart = eventVertex(e);
     }
     onPointerMove(e) {
+        if (!this.sidebar.activeButton) {
+            return;
+        }
         let t = null;
         if (e instanceof MouseEvent) {
             t = e;
@@ -143,17 +160,17 @@ export class SidebarButton extends Circle {
         let p = eventVertex(e);
         var dx = p[0] - this.touchStart[0];
         var newIndex = Math.floor(this.previousIndex + dx / this.optionSpacing);
-        newIndex = Math.min(Math.max(newIndex, 0), this.messages.length - 1);
+        newIndex = Math.min(Math.max(newIndex, 0), this.touchDownMessages.length - 1);
         dx += this.previousIndex * this.optionSpacing;
-        dx = Math.min(Math.max(dx, 0), this.optionSpacing * (this.messages.length - 1));
-        let newMidpoint = [buttonCenter(this.locationIndex)[0] + dx, buttonCenter(this.locationIndex)[1]];
+        dx = Math.min(Math.max(dx, 0), this.optionSpacing * (this.touchDownMessages.length - 1));
+        let newMidpoint = [
+            buttonCenter(this.locationIndex)[0] + dx,
+            buttonCenter(this.locationIndex)[1]
+        ];
         this.updateModeIndex(newIndex, true);
         this.update({ midpoint: newMidpoint });
     }
     onPointerUp(e) {
-        this.commonButtonUp();
-    }
-    onPointerOut(e) {
         this.commonButtonUp();
     }
     buttonUpByKey(key) {
@@ -165,29 +182,33 @@ export class SidebarButton extends Circle {
         }
     }
     commonButtonUp() {
+        if (this.touchUpMessages.length == 1) {
+            this.messagePaper(this.touchUpMessages[0]);
+        }
+        else if (this.touchUpMessages.length > 1) {
+            this.messagePaper(this.touchUpMessages[this.currentModeIndex]);
+        }
         this.currentModeIndex = 0;
         let dx = this.currentModeIndex * this.optionSpacing;
-        let newMidpoint = [buttonCenter(this.locationIndex)[0] + dx, buttonCenter(this.locationIndex)[1]];
+        let newMidpoint = [
+            buttonCenter(this.locationIndex)[0] + dx,
+            buttonCenter(this.locationIndex)[1]
+        ];
         this.update({
             active: false,
             fillColor: this.colorForIndex(this.currentModeIndex),
-            midpoint: newMidpoint,
-            // radius: this.baseRadius,
-            // fontSize: this.baseFontSize
+            midpoint: newMidpoint
         });
         this.frame.transform.update({
-            //anchor: vertexSubtract(newMidpoint, [BUTTON_RADIUS, BUTTON_RADIUS]),
             scale: 1
         });
-        this.redraw();
-        //this.label?.view.div.style.setProperty('font-size', `${this.baseFontSize}px`)
-        this.label?.update({
-            frameWidth: 2 * this.radius,
-            frameHeight: 2 * this.radius
+        this.sidebar.update({
+            activeButton: null
         });
+        this.redraw();
         this.updateLabel();
         this.updateIcon();
-        this.messagePaper(this.outgoingMessage);
+        this.label.view.hide();
     }
     messagePaper(message) {
         try {
@@ -199,34 +220,18 @@ export class SidebarButton extends Circle {
         }
     }
     updateLabel() {
-        if (this.label === undefined || this.label === null) {
-            return;
-        }
+        let msg = this.touchDownMessages[this.currentModeIndex];
+        let text = this.labelFromMessage(msg);
         this.label.update({
-            frameWidth: 2 * this.radius,
-            frameHeight: 2 * this.radius
+            text: text,
+            fontSize: (text.length < 15) ? this.bigLabelFontSize : this.smallLabelFontSize
         });
-        if (this.label) {
-            try {
-                let msg = this.messages[this.currentModeIndex];
-                this.label.update({
-                    text: this.labelFromMessage(msg)
-                });
-            }
-            catch { }
-        }
-        else {
-            this.label.text = '';
-        }
-        let f = this.active ? BUTTON_SCALE_FACTOR : 1;
-        let fs = f * (this.baseFontSize); // ?? 12)
-        this.label.view?.div.style.setProperty('font-size', this.baseFontSize.toString().concat('px'));
     }
     updateIcon() {
         if (this.icon === undefined || this.icon === null) {
             return;
         }
-        let name = this.imageNameForIndex(this.currentModeIndex);
+        let name = this.imageNameForIndex(this.currentModeIndex).replaceAll(' ', '_');
         this.icon.update({
             imageLocation: `../../assets/${name}.png`,
             anchor: [
@@ -236,13 +241,9 @@ export class SidebarButton extends Circle {
         });
     }
     imageNameForIndex(index) {
-        return 'key';
-    }
-    labelFromMessage(msg) {
-        return Object.keys(msg)[0];
+        return (Object.keys(this.touchDownMessages[index] ?? {}) ?? ['key'])[0];
     }
     update(args = {}, redraw = true) {
-        //args['midpoint'] = buttonCenter(this.locationIndex)
         super.update(args, false);
         this.updateLabel();
         if (redraw) {
@@ -254,7 +255,7 @@ export class SidebarButton extends Circle {
             return;
         }
         this.currentModeIndex = newIndex;
-        let message = this.messages[this.currentModeIndex];
+        let message = this.touchDownMessages[this.currentModeIndex];
         this.update({
             fillColor: this.colorForIndex(this.currentModeIndex)
         });
@@ -265,7 +266,7 @@ export class SidebarButton extends Circle {
         this.updateIcon();
     }
     selectNextOption() {
-        if (this.currentModeIndex == this.messages.length - 1) {
+        if (this.currentModeIndex == this.touchDownMessages.length - 1) {
             return;
         }
         this.update({
@@ -281,6 +282,16 @@ export class SidebarButton extends Circle {
             midpoint: vertexTranslatedBy(this.midpoint, [-this.optionSpacing, 0])
         });
         this.updateModeIndex(this.currentModeIndex - 1, true);
+    }
+    labelFromMessage(msg) {
+        var key = Object.keys(msg)[0];
+        if (this.currentModeIndex > 0) {
+            key = '&#9666; ' + key;
+        }
+        if (this.currentModeIndex < this.touchDownMessages.length - 1) {
+            key = key + ' &#9656;';
+        }
+        return key;
     }
 }
 //# sourceMappingURL=SidebarButton.js.map

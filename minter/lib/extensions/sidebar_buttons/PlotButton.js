@@ -3,7 +3,7 @@ import { ImageView } from '../../core/mobjects/ImageView.js';
 export class PlotButton extends CreativeButton {
     defaults() {
         return {
-            creations: ['plot', 'hist'],
+            creations: ['plot', 'histogram'],
             icon: new ImageView({
                 imageLocation: '../../assets/plot.png',
                 frameWidth: 32,
