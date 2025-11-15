@@ -7,7 +7,7 @@ import { AllTests } from './_tests/allTests'
 
 export class StartPaper extends CoinFlipPaper { }
 
-export const TESTING = true
+export const TESTING = false
 
 if (TESTING) { AllTests.run() }
 

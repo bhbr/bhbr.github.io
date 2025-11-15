@@ -4,7 +4,7 @@ export class StartPaper extends CoinFlipPaper {
     defaults() { return {}; }
     mutabilities() { return {}; }
 }
-export const TESTING = true;
+export const TESTING = false;
 if (TESTING) {
     AllTests.run();
 }
