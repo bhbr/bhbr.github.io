@@ -8,5 +8,6 @@ export const TESTING = true;
 if (TESTING) {
     AllTests.run();
 }
+//test
 export const paper = new StartPaper();
 //# sourceMappingURL=startPaper.js.map
