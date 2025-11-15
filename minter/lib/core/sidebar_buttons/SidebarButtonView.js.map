@@ -1,0 +1,1 @@
+{"version":3,"file":"SidebarButtonView.js","sourceRoot":"","sources":["../../../src/core/sidebar_buttons/SidebarButtonView.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,KAAK,EAAE,MAAM,sBAAsB,CAAA;AAE5C,MAAM,OAAO,iBAAkB,SAAQ,KAAK;IAI3C,KAAK;QACJ,KAAK,CAAC,KAAK,EAAE,CAAA;QACb,IAAI,CAAC,GAAG,CAAC,KAAK,CAAC,eAAe,GAAG,GAAG,IAAI,CAAC,MAAM,MAAM,IAAI,CAAC,MAAM,IAAI,CAAA;IACrE,CAAC;CACD"}
