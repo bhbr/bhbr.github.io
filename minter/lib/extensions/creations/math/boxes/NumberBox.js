@@ -126,6 +126,11 @@ export class NumberBox extends Linkable {
     }
 }
 export class NumberBoxCreator extends DraggingCreator {
+    defaults() {
+        return {
+            helpText: 'A number. Its value be edited or linked as an input variable.'
+        };
+    }
     createMobject() {
         return new NumberBox({
             anchor: this.getStartPoint(),
@@ -136,7 +141,6 @@ export class NumberBoxCreator extends DraggingCreator {
         super.updateFromTip(q, redraw);
         this.creation.hideLinks();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=NumberBox.js.map

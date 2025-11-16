@@ -2,6 +2,11 @@ import { Creator } from '../../../core/creators/Creator.js';
 import { CoinRow } from './CoinRow.js';
 import { vertexSubtract } from '../../../core/functions/vertex.js';
 export class CoinRowCreator extends Creator {
+    defaults() {
+        return {
+            helpText: 'A row of coins. Drag horizontally to the desired number of coins. Tap the coins or the play button to flip them.'
+        };
+    }
     setup() {
         super.setup();
         this.creation = this.createMobject();
@@ -37,7 +42,6 @@ export class CoinRowCreator extends Creator {
         this.parent.creator = null;
         this.parent.remove(this);
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=CoinRowCreator.js.map

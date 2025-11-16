@@ -17,10 +17,14 @@ export class CumSumBox extends NumberListValuedFunctionBox {
     mutabilities() { return {}; }
 }
 export class CumSumBoxCreator extends DraggingCreator {
+    defaults() {
+        return {
+            helpText: 'Cumulative sums of a list of numbers.'
+        };
+    }
     createMobject() {
         return new CumSumBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=CumSumBox.js.map

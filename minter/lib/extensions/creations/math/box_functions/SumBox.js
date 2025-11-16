@@ -17,10 +17,14 @@ export class SumBox extends NumberValuedFunctionBox {
     mutabilities() { return {}; }
 }
 export class SumBoxCreator extends DraggingCreator {
+    defaults() {
+        return {
+            helpText: 'Sum of a list of numbers.'
+        };
+    }
     createMobject() {
         return new SumBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=SumBox.js.map

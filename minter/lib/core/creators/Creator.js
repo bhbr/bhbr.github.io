@@ -5,7 +5,8 @@ export class Creator extends Mobject {
         return {
             creationStroke: [],
             creation: null,
-            screenEventHandler: ScreenEventHandler.Self
+            screenEventHandler: ScreenEventHandler.Self,
+            helpText: ''
         };
     }
     get parent() {

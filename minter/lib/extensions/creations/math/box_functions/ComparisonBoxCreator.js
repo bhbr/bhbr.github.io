@@ -14,45 +14,69 @@ export class ComparisonBoxCreator extends DraggingCreator {
     mutabilities() { return {}; }
 }
 export class LessThanBoxCreator extends ComparisonBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Compares two input numbers a and b: output is 1 if a < b, otherwise 0. '
+        };
+    }
     createMobject() {
         return new LessThanBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class LessThanOrEqualBoxCreator extends ComparisonBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Compares two input numbers a and b: output is 1 if a &le; b, otherwise 0. '
+        };
+    }
     createMobject() {
         return new LessThanOrEqualBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class GreaterThanBoxCreator extends ComparisonBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Compares two input numbers a and b: output is 1 if a > b, otherwise 0. '
+        };
+    }
     createMobject() {
         return new GreaterThanBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class GreaterThanOrEqualBoxCreator extends ComparisonBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Compares two input numbers a and b: output is 1 if a &ge; b, otherwise 0. '
+        };
+    }
     createMobject() {
         return new GreaterThanOrEqualBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class EqualsBoxCreator extends ComparisonBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Compares two input numbers a and b: output is 1 if a = b, otherwise 0. '
+        };
+    }
     createMobject() {
         return new EqualsBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class NotEqualsBoxCreator extends ComparisonBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Compares two input numbers a and b: output is 1 if a &ne; b, otherwise 0. '
+        };
+    }
     createMobject() {
         return new NotEqualsBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=ComparisonBoxCreator.js.map

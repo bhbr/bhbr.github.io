@@ -17,10 +17,14 @@ export class AverageBox extends NumberValuedFunctionBox {
     mutabilities() { return {}; }
 }
 export class AverageBoxCreator extends DraggingCreator {
+    defaults() {
+        return {
+            helpText: 'Average of a list of numbers.'
+        };
+    }
     createMobject() {
         return new AverageBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=AverageBox.js.map

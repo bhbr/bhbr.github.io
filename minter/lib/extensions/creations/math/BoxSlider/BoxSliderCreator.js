@@ -3,6 +3,11 @@ import { Creator } from '../../../../core/creators/Creator.js';
 import { BoxSlider } from './BoxSlider.js';
 import { Color } from '../../../../core/classes/Color.js';
 export class BoxSliderCreator extends Creator {
+    defaults() {
+        return {
+            helpText: 'A vertical number slider. Drag to the desired size. The min and max values can be edited.'
+        };
+    }
     setup() {
         super.setup();
         this.update({
@@ -57,7 +62,6 @@ export class BoxSliderCreator extends Creator {
         });
         this.creation.outputList.positionSelf();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=BoxSliderCreator.js.map

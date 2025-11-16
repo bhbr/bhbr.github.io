@@ -1,6 +1,11 @@
 import { Histogram } from './Histogram.js';
 import { SpanningCreator } from '../../../core/creators/SpanningCreator.js';
 export class HistogramCreator extends SpanningCreator {
+    defaults() {
+        return {
+            helpText: 'Shows the distribution of the entries of a number list as a histogram. The binning parameters and colors can be changed as input variables.'
+        };
+    }
     createMobject() {
         let p = this.getStartPoint();
         return new Histogram({
@@ -9,7 +14,6 @@ export class HistogramCreator extends SpanningCreator {
             frameHeight: this.view.frame.height
         });
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=HistogramCreator.js.map

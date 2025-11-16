@@ -19,6 +19,7 @@ import { ExpandedBoardOutputList } from './ExpandedBoardOutputList.js';
 import { EXPANDED_IO_LIST_HEIGHT, EXPANDED_IO_LIST_INSET } from './constants.js';
 import { IO_LIST_OFFSET, SNAPPING_DISTANCE } from '../../core/linkables/constants.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
+import { TextLabel } from '../../core/mobjects/TextLabel.js';
 export class BoardContent extends MGroup {
     defaults() { return {}; }
     mutabilities() { return {}; }
@@ -81,7 +82,19 @@ export class Board extends Linkable {
             isShowingLinks: false,
             isShowingControls: false,
             allowingDrag: false,
-            lastHoveredChild: null
+            lastHoveredChild: null,
+            helpTextLabel: new TextLabel({
+                frameHeight: 50,
+                text: '',
+                horizontalAlign: 'center'
+            }),
+            helpTexts: {
+                'drag': 'Drag objects or pan the board. Slide this button to the right to lock.',
+                'link': 'Show and edit links between objects. Slide this button to the right to lock.',
+                'show controls': 'Show control elements on objects. Slide this button to the right to lock.',
+                'clear strokes': 'Clear all drawing strokes.',
+                'restart': 'Clear the board.',
+            }
         };
     }
     mutabilities() {
@@ -143,6 +156,11 @@ export class Board extends Linkable {
         }
         this.hideLinksOfContent();
         this.setControlsVisibility(false);
+        this.helpTextLabel.update({
+            frameWidth: this.expandedWidth
+        });
+        this.add(this.helpTextLabel);
+        this.helpTextLabel.view.hide();
     }
     update(args = {}, redraw = true) {
         super.update(args, false);
@@ -330,6 +348,15 @@ export class Board extends Linkable {
         switch (key) {
             case 'drag':
                 this.setInternalDragging(value);
+                this.helpTextLabel.update({
+                    text: this.helpTexts['drag']
+                });
+                if (value) {
+                    this.helpTextLabel.view.show();
+                }
+                else {
+                    this.helpTextLabel.view.hide();
+                }
                 break;
             case 'link':
                 this.setLinking(value);
@@ -339,28 +366,84 @@ export class Board extends Linkable {
                 else {
                     this.setControlsVisibility(this.isShowingControls);
                 }
+                this.helpTextLabel.update({
+                    text: this.helpTexts['link']
+                });
+                if (value) {
+                    this.helpTextLabel.view.show();
+                }
+                else {
+                    this.helpTextLabel.view.hide();
+                }
                 break;
             case 'show controls':
+                this.helpTextLabel.update({
+                    text: this.helpTexts['show controls']
+                });
+                if (value) {
+                    this.helpTextLabel.view.show();
+                }
+                else {
+                    this.helpTextLabel.view.hide();
+                }
                 this.setControlsVisibility(value);
                 this.isShowingControls = value;
                 break;
             case 'create':
                 this.creationMode = value;
                 if (this.creator == null) {
+                    // little hack, I know
+                    let dummyCreator = this.createCreator(this.creationMode);
+                    this.helpTextLabel.update({
+                        text: dummyCreator.helpText
+                    });
+                    if (value) {
+                        this.helpTextLabel.view.show();
+                    }
+                    else {
+                        this.helpTextLabel.view.hide();
+                    }
                     return;
                 }
                 this.remove(this.creator);
                 this.creator = this.createCreator(this.creationMode);
                 this.add(this.creator);
+                this.helpTextLabel.update({
+                    text: this.creator.helpText
+                });
+                if (value) {
+                    this.helpTextLabel.view.show();
+                }
+                else {
+                    this.helpTextLabel.view.hide();
+                }
                 break;
             case 'clear strokes':
                 if (value) {
                     this.clearStrokes();
                 }
+                this.helpTextLabel.update({
+                    text: this.helpTexts['clear strokes']
+                });
+                if (!value) { // merely touch down
+                    this.helpTextLabel.view.show();
+                }
+                else {
+                    this.helpTextLabel.view.hide();
+                }
                 break;
             case 'restart':
                 if (value) {
                     this.restart();
+                }
+                this.helpTextLabel.update({
+                    text: this.helpTexts['restart']
+                });
+                if (!value) { // merely touch down
+                    this.helpTextLabel.view.show();
+                }
+                else {
+                    this.helpTextLabel.view.hide();
                 }
                 break;
         }
@@ -488,6 +571,7 @@ export class Board extends Linkable {
             return;
         }
         this.creator.dissolve();
+        this.helpTextLabel.view.hide();
     }
     startPanning(e) {
         this.panPointStart = this.sensor.localEventVertex(e);

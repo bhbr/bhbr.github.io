@@ -106,6 +106,11 @@ export class NumberListBox extends Linkable {
     mutabilities() { return {}; }
 }
 export class NumberListBoxCreator extends DraggingCreator {
+    defaults() {
+        return {
+            helpText: 'A list of numbers. Its values can be linked from elsewhere, or a single entry added whenever another object changes. The list can be reset by tapping the clear button.'
+        };
+    }
     createMobject() {
         return new NumberListBox({
             anchor: this.getStartPoint()
@@ -115,7 +120,6 @@ export class NumberListBoxCreator extends DraggingCreator {
         super.updateFromTip(q, redraw);
         this.creation.hideLinks();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=NumberListBox.js.map

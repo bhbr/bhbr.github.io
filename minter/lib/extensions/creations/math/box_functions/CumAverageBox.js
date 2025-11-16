@@ -17,10 +17,14 @@ export class CumAverageBox extends NumberListValuedFunctionBox {
     mutabilities() { return {}; }
 }
 export class CumAverageBoxCreator extends DraggingCreator {
+    defaults() {
+        return {
+            helpText: 'Cumulative averages of a list of numbers.'
+        };
+    }
     createMobject() {
         return new CumAverageBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=CumAverageBox.js.map

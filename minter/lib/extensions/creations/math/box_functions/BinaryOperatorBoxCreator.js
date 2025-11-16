@@ -14,31 +14,47 @@ export class BinaryOperatorBoxCreator extends DraggingCreator {
     mutabilities() { return {}; }
 }
 export class AddBoxCreator extends BinaryOperatorBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Adds two input numbers.'
+        };
+    }
     createMobject() {
         return new AddBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class SubtractBoxCreator extends BinaryOperatorBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Subtracts two input numbers.'
+        };
+    }
     createMobject() {
         return new SubtractBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class MultiplyBoxCreator extends BinaryOperatorBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Multiplies two input numbers.'
+        };
+    }
     createMobject() {
         return new MultiplyBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class DivideBoxCreator extends BinaryOperatorBoxCreator {
+    defaults() {
+        return {
+            helpText: 'Divides two input numbers.'
+        };
+    }
     createMobject() {
         return new DivideBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=BinaryOperatorBoxCreator.js.map
