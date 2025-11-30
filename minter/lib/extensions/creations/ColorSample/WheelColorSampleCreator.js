@@ -1,20 +1,21 @@
 import { WheelColorSample } from './WheelColorSample.js';
 import { DraggingCreator } from '../../../core/creators/DraggingCreator.js';
-import { vertexTranslatedBy } from '../../../core/functions/vertex.js';
+import { vertexAdd } from '../../../core/functions/vertex.js';
 export class WheelColorSampleCreator extends DraggingCreator {
     defaults() {
         return {
-            helpText: 'A wheel-shaped color picker. The angle sets its hue, the saturation and value are fixed to 100 %.'
+            helpText: 'A wheel-shaped color picker (HSV model). The angle sets its hue, the saturation and value are fixed to 100 %.',
+            pointOffset: [-30, -60]
         };
     }
     createMobject() {
         return new WheelColorSample({
-            midpoint: this.getStartPoint()
+            midpoint: vertexAdd(this.getStartPoint(), this.pointOffset)
         });
     }
     updateFromTip(q, redraw = true) {
         let r = this.creation.circle.radius;
-        super.updateFromTip(vertexTranslatedBy(q, [-r, -r]), redraw);
+        super.updateFromTip(q, redraw);
         this.creation.hideLinks();
     }
     mutabilities() { return {}; }

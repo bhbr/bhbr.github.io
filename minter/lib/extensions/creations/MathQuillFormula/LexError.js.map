@@ -1,0 +1,1 @@
+{"version":3,"file":"LexError.js","sourceRoot":"","sources":["../../../../src/extensions/creations/MathQuillFormula/LexError.ts"],"names":[],"mappings":"AACA,MAAM,OAAO,QAAS,SAAQ,KAAK;IAClC,YAAY,OAAe,EAAE,GAAW,EAAE,GAAG,IAAS;QACrD,KAAK,CAAC,GAAG,IAAI,CAAC,CAAA;QACd,IAAI,CAAC,IAAI,GAAG,UAAU,CAAA;QACtB,IAAI,CAAC,OAAO,GAAG,MAAM,GAAG,KAAK,OAAO,EAAE,CAAA;IACvC,CAAC;CACD"}

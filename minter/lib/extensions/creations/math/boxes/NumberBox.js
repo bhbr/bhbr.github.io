@@ -128,7 +128,8 @@ export class NumberBox extends Linkable {
 export class NumberBoxCreator extends DraggingCreator {
     defaults() {
         return {
-            helpText: 'A number. Its value be edited or linked as an input variable.'
+            helpText: 'A number. Its value be edited or linked as an input variable.',
+            pointOffset: [-40, -40]
         };
     }
     createMobject() {

@@ -19,7 +19,8 @@ export class SumBox extends NumberValuedFunctionBox {
 export class SumBoxCreator extends DraggingCreator {
     defaults() {
         return {
-            helpText: 'Sum of a list of numbers.'
+            helpText: 'Sum of a list of numbers.',
+            pointOffset: [-40, -40]
         };
     }
     createMobject() {

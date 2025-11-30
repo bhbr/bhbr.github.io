@@ -106,6 +106,12 @@ export class IOList extends RoundedRectangle {
             hook.updateDependents();
         }
     }
+    positionOutlets() {
+        for (let i = 0; i < this.linkOutlets.length; i++) {
+            let outlet = this.linkOutlets[i];
+            this.positionOutlet(outlet, i);
+        }
+    }
     hookNamed(name, index = 0) {
         let outlet = this.outletNamed(name);
         if (outlet === null) {

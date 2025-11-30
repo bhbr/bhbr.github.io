@@ -148,5 +148,11 @@ export class Linkable extends Mobject {
     outputNames() {
         return this.outputProperties.map((prop) => prop.name);
     }
+    positionIOLists() {
+        this.inputList.positionOutlets();
+        this.outputList.positionOutlets();
+        this.inputList.positionSelf();
+        this.outputList.positionSelf();
+    }
 }
 //# sourceMappingURL=Linkable.js.map

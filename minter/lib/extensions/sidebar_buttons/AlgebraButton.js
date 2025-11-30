@@ -3,7 +3,7 @@ import { ImageView } from '../../core/mobjects/ImageView.js';
 export class AlgebraButton extends CreativeButton {
     defaults() {
         return {
-            creations: ['expression', 'expression list'],
+            creations: ['expression'],
             icon: new ImageView({
                 imageLocation: '../../assets/expression.png',
                 frameWidth: 35,

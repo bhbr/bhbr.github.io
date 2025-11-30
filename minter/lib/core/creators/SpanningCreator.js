@@ -1,5 +1,6 @@
 import { Creator } from './Creator.js';
 import { Rectangle } from '../../core/shapes/Rectangle.js';
+import { vertexAdd } from '../../core/functions/vertex.js';
 export class SpanningCreator extends Creator {
     defaults() {
         return {
@@ -19,10 +20,10 @@ export class SpanningCreator extends Creator {
         this.addDependency('getHeight', this.rectangle, 'height');
     }
     topLeftVertex() {
-        return [
+        return vertexAdd([
             Math.min(this.getStartPoint()[0], this.getEndPoint()[0]),
             Math.min(this.getStartPoint()[1], this.getEndPoint()[1])
-        ];
+        ], this.pointOffset);
     }
     getWidth() {
         return Math.abs(this.getStartPoint()[0] - this.getEndPoint()[0]);

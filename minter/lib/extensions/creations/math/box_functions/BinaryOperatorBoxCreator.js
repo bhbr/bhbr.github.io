@@ -1,6 +1,11 @@
 import { DraggingCreator } from '../../../../core/creators/DraggingCreator.js';
 import { BinaryOperatorBox, AddBox, SubtractBox, MultiplyBox, DivideBox } from './BinaryOperatorBox.js';
 export class BinaryOperatorBoxCreator extends DraggingCreator {
+    defaults() {
+        return {
+            pointOffset: [-40, -40]
+        };
+    }
     setup() {
         super.setup();
         this.creation.operatorLabel.update({
@@ -10,7 +15,6 @@ export class BinaryOperatorBoxCreator extends DraggingCreator {
     createMobject() {
         return new BinaryOperatorBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class AddBoxCreator extends BinaryOperatorBoxCreator {

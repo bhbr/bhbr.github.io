@@ -1,6 +1,6 @@
 import { Creator } from './Creator.js';
 import { Color } from '../../core/classes/Color.js';
-import { vertexSubtract } from '../../core/functions/vertex.js';
+import { vertexAdd, vertexSubtract } from '../../core/functions/vertex.js';
 import { Rectangle } from '../../core/shapes/Rectangle.js';
 import { VView } from '../../core/vmobjects/VView.js';
 export class DraggingCreator extends Creator {
@@ -25,7 +25,7 @@ export class DraggingCreator extends Creator {
     updateFromTip(q, redraw = true) {
         super.updateFromTip(q, false);
         this.creation.update({
-            anchor: vertexSubtract(q, this.getStartPoint())
+            anchor: vertexAdd(vertexSubtract(q, this.getStartPoint()), this.pointOffset)
         }, redraw);
         if (redraw) {
             this.view.redraw();

@@ -6,6 +6,12 @@ import { LessThanBox } from './ComparisonBox'
 export class BinaryOperatorBoxCreator extends DraggingCreator {
 	declare creation: BinaryOperatorBox
 
+	defaults(): object {
+		return {
+			pointOffset: [-40, -40]
+		}
+	}
+
 	setup() {
 		super.setup()
 		this.creation.operatorLabel.update({

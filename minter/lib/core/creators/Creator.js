@@ -1,12 +1,14 @@
 import { Mobject } from '../../core/mobjects/Mobject.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
+import { vertexAdd } from '../../core/functions/vertex.js';
 export class Creator extends Mobject {
     defaults() {
         return {
             creationStroke: [],
             creation: null,
             screenEventHandler: ScreenEventHandler.Self,
-            helpText: ''
+            helpText: '',
+            pointOffset: [0, 0]
         };
     }
     get parent() {
@@ -22,10 +24,10 @@ export class Creator extends Mobject {
         });
     }
     getStartPoint() {
-        return this.creationStroke[0] ?? this.view.frame.anchor;
+        return vertexAdd(this.creationStroke[0] ?? this.view.frame.anchor, this.pointOffset);
     }
     getEndPoint() {
-        return this.creationStroke[this.creationStroke.length - 1] ?? this.view.frame.anchor;
+        return vertexAdd(this.creationStroke[this.creationStroke.length - 1] ?? this.view.frame.anchor, this.pointOffset);
     }
     dissolve() {
         this.remove(this.creation);
@@ -38,7 +40,9 @@ export class Creator extends Mobject {
         this.parent.remove(this);
     }
     createMobject() {
-        return new Mobject();
+        return new Mobject({
+            anchor: this.pointOffset
+        });
     }
     updateFromTip(q, redraw = true) {
         this.creationStroke.push(q);

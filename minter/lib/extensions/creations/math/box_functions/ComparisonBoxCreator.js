@@ -1,6 +1,11 @@
 import { DraggingCreator } from '../../../../core/creators/DraggingCreator.js';
 import { ComparisonBox, LessThanBox, LessThanOrEqualBox, GreaterThanBox, GreaterThanOrEqualBox, EqualsBox, NotEqualsBox } from './ComparisonBox.js';
 export class ComparisonBoxCreator extends DraggingCreator {
+    defaults() {
+        return {
+            pointOffset: [-40, -40]
+        };
+    }
     setup() {
         super.setup();
         this.creation.operatorLabel.update({
@@ -10,7 +15,6 @@ export class ComparisonBoxCreator extends DraggingCreator {
     createMobject() {
         return new ComparisonBox();
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 export class LessThanBoxCreator extends ComparisonBoxCreator {

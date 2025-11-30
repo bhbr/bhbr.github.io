@@ -19,7 +19,8 @@ export class AverageBox extends NumberValuedFunctionBox {
 export class AverageBoxCreator extends DraggingCreator {
     defaults() {
         return {
-            helpText: 'Average of a list of numbers.'
+            helpText: 'Average of a list of numbers.',
+            pointOffset: [-40, -40]
         };
     }
     createMobject() {

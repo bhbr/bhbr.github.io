@@ -4,7 +4,8 @@ import { vertexSubtract } from '../../../core/functions/vertex.js';
 export class CoinRowCreator extends Creator {
     defaults() {
         return {
-            helpText: 'A row of coins. Drag horizontally to the desired number of coins. Tap the coins or the play button to flip them.'
+            helpText: 'A row of coins. Drag horizontally to the desired number of coins. Tap the coins or the play button to flip them.',
+            pointOffset: [-50, -50]
         };
     }
     setup() {

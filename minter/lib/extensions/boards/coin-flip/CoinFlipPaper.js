@@ -14,8 +14,7 @@ import { SequencePlotCreator } from '../../../extensions/creations/DesmosCalcula
 import { HistogramCreator } from '../../../extensions/creations/DesmosCalculator/HistogramCreator.js';
 import { RGBAColorSampleCreator } from '../../../extensions/creations/ColorSample/RGBAColorSampleCreator.js';
 import { WheelColorSampleCreator } from '../../../extensions/creations/ColorSample/WheelColorSampleCreator.js';
-import { DesmosExpressionCreator } from '../../../extensions/creations/DesmosCalculator/DesmosExpressionCreator.js';
-import { DesmosExpressionSheetCreator } from '../../../extensions/creations/DesmosCalculator/DesmosExpressionSheetCreator.js';
+import { MathQuillFormulaCreator } from '../../../extensions/creations/MathQuillFormula/MathQuillFormulaCreator.js';
 export class CoinFlipPaper extends Paper {
     defaults() {
         return {
@@ -37,8 +36,7 @@ export class CoinFlipPaper extends Paper {
                 'greater or equal': GreaterThanOrEqualBoxCreator,
                 'equal': EqualsBoxCreator,
                 'not equal': NotEqualsBoxCreator,
-                'expression': DesmosExpressionCreator,
-                'expressions': DesmosExpressionSheetCreator,
+                'expression': MathQuillFormulaCreator,
                 'sum': SumBoxCreator,
                 'mean': AverageBoxCreator,
                 'plot': SequencePlotCreator,

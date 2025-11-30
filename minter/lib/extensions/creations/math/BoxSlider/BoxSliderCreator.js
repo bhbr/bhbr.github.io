@@ -5,7 +5,8 @@ import { Color } from '../../../../core/classes/Color.js';
 export class BoxSliderCreator extends Creator {
     defaults() {
         return {
-            helpText: 'A vertical number slider. Drag to the desired size. The min and max values can be edited.'
+            helpText: 'A vertical number slider. Drag to the desired size. The min and max values can be edited.',
+            pointOffset: [-35, 0]
         };
     }
     setup() {

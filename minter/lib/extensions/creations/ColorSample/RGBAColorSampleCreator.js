@@ -1,20 +1,21 @@
 import { RGBAColorSample } from './RGBAColorSample.js';
 import { DraggingCreator } from '../../../core/creators/DraggingCreator.js';
-import { vertexTranslatedBy } from '../../../core/functions/vertex.js';
+import { vertexAdd } from '../../../core/functions/vertex.js';
 export class RGBAColorSampleCreator extends DraggingCreator {
     defaults() {
         return {
-            helpText: 'A color defined by its red, green and blue components as input variables.'
+            helpText: 'A color defined by its red, green, blue and alpha (RGBA) components as input variables.',
+            pointOffset: [-30, -60]
         };
     }
     createMobject() {
         return new RGBAColorSample({
-            midpoint: this.getStartPoint()
+            midpoint: vertexAdd(this.getStartPoint(), this.pointOffset)
         });
     }
     updateFromTip(q, redraw = true) {
         let r = this.creation.circle.radius;
-        super.updateFromTip(vertexTranslatedBy(q, [-r, -r]), redraw);
+        super.updateFromTip(q, redraw);
         this.creation.hideLinks();
     }
     mutabilities() { return {}; }
