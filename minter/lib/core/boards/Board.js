@@ -3,7 +3,6 @@ import { DependencyLink } from '../../core/linkables/DependencyLink.js';
 import { LinkBullet } from '../../core/linkables/LinkBullet.js';
 import { RoundedRectangle } from '../../core/shapes/RoundedRectangle.js';
 import { vertexOrigin, vertexCopy, vertexAdd, vertexSubtract, vertexCloseTo } from '../../core/functions/vertex.js';
-import { log } from '../../core/functions/logging.js';
 import { remove } from '../../core/functions/arrays.js';
 import { BoardCreator } from './BoardCreator.js';
 import { Freehand } from '../../core/creators/Freehand.js';
@@ -467,7 +466,6 @@ export class Board extends Linkable {
             }
         }
         for (let link of this.links) {
-            log(link);
             this.content.remove(link);
         }
     }

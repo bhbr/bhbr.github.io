@@ -4,7 +4,6 @@ import { View } from '../../../core/mobjects/View.js';
 import { Mobject } from '../../../core/mobjects/Mobject.js';
 import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
 import { Rectangle } from '../../../core/shapes/Rectangle.js';
-import { log } from '../../../core/functions/logging.js';
 import { Color } from '../../../core/classes/Color.js';
 export class DesmosCalculator extends Linkable {
     defaults() {
@@ -154,7 +153,6 @@ export class DesmosCalculator extends Linkable {
     }
     onChange(eventName, event) { }
     showKeypad() {
-        log('showKeypad');
         this.calculator.openKeypad();
         window.setTimeout(function () {
             // let keypad = this.innerCanvas.view.div.querySelector('.dcg-keypad') as HTMLElement

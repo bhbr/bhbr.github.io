@@ -3,7 +3,6 @@ import { Scroll } from '../../../../core/mobjects/Scroll.js';
 import { Rectangle } from '../../../../core/shapes/Rectangle.js';
 import { Color } from '../../../../core/classes/Color.js';
 import { DraggingCreator } from '../../../../core/creators/DraggingCreator.js';
-import { log } from '../../../../core/functions/logging.js';
 import { SimpleButton } from '../../../../core/mobjects/SimpleButton.js';
 export class NumberListBox extends Linkable {
     defaults() {
@@ -97,9 +96,7 @@ export class NumberListBox extends Linkable {
         this.list.push(newValue);
     }
     addedInputLink(link) {
-        log(link);
         if (link.endHook.outlet.name == 'newestEntry') {
-            log('clearing');
             this.clear();
         }
     }

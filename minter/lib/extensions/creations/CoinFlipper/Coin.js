@@ -51,8 +51,9 @@ export class Coin extends Circle {
                 fillColor: Color.black(),
                 labelText: ''
             });
+            this.update({ state: newState }, false);
             window.setTimeout(function () {
-                this.update({ state: newState });
+                this.update();
             }.bind(this), 50);
         }
         else {

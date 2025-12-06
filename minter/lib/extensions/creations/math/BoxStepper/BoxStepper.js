@@ -1,7 +1,6 @@
 import { BoxSlider } from '../../../../extensions/creations/math/BoxSlider/BoxSlider.js';
 import { MGroup } from '../../../../core/mobjects/MGroup.js';
 import { Line } from '../../../../core/shapes/Line.js';
-import { log } from '../../../../core/functions/logging.js';
 export class BoxStepper extends BoxSlider {
     defaults() {
         return {
@@ -36,7 +35,6 @@ export class BoxStepper extends BoxSlider {
         }
     }
     update(args = {}, redraw = true) {
-        log(args);
         super.update(args, redraw);
         if (args['min'] !== undefined || args['max'] !== undefined) {
             this.ticks.removeAllChildren();

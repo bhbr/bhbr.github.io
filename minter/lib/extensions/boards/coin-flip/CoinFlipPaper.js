@@ -10,7 +10,7 @@ import { AddBoxCreator, SubtractBoxCreator, MultiplyBoxCreator, DivideBoxCreator
 import { LessThanBoxCreator, LessThanOrEqualBoxCreator, GreaterThanBoxCreator, GreaterThanOrEqualBoxCreator, EqualsBoxCreator, NotEqualsBoxCreator } from '../../../extensions/creations/math/box_functions/ComparisonBoxCreator.js';
 import { SumBoxCreator } from '../../../extensions/creations/math/box_functions/SumBox.js';
 import { AverageBoxCreator } from '../../../extensions/creations/math/box_functions/AverageBox.js';
-import { SequencePlotCreator } from '../../../extensions/creations/DesmosCalculator/SequencePlotCreator.js';
+import { ScatterPlotCreator } from '../../../extensions/creations/DesmosCalculator/ScatterPlotCreator.js';
 import { HistogramCreator } from '../../../extensions/creations/DesmosCalculator/HistogramCreator.js';
 import { RGBAColorSampleCreator } from '../../../extensions/creations/ColorSample/RGBAColorSampleCreator.js';
 import { WheelColorSampleCreator } from '../../../extensions/creations/ColorSample/WheelColorSampleCreator.js';
@@ -39,7 +39,7 @@ export class CoinFlipPaper extends Paper {
                 'expression': MathQuillFormulaCreator,
                 'sum': SumBoxCreator,
                 'mean': AverageBoxCreator,
-                'plot': SequencePlotCreator,
+                'plot': ScatterPlotCreator,
                 'histogram': HistogramCreator,
                 'rgb color': RGBAColorSampleCreator,
                 'color wheel': WheelColorSampleCreator,
