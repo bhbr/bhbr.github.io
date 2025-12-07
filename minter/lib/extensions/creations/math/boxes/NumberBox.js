@@ -37,7 +37,7 @@ export class NumberBox extends Linkable {
     }
     set value(newValue) {
         let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(newValue);
-        this.inputElement.value = isFalsy ? '' : newValue.toString();
+        this.inputElement.value = isFalsy ? '' : newValue.toPrecision(4);
     }
     focus() {
         super.focus();

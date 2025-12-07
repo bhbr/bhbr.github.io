@@ -26,6 +26,7 @@ import { MGroup } from 'core/mobjects/MGroup'
 import { View } from 'core/mobjects/View'
 import { IOList } from 'core/linkables/IOList'
 import { TextLabel } from 'core/mobjects/TextLabel'
+import { Dependency } from 'core/mobjects/Dependency'
 
 declare var paper: Paper
 export declare interface Window { webkit?: any }
@@ -806,9 +807,9 @@ The content children can also be dragged and panned.
 			this.remove(link)
 			if (clickedHook.outlet.kind == 'output') {
 				clickedHook.outlet.removeHook()
-				this.createNewOpenLink(link.endHook, link.previousHook)
+				this.createNewOpenLink(link.endHook, link.previousHook, link.dependency)
 			} else {
-				this.createNewOpenLink(link.startHook, link.previousHook)
+				this.createNewOpenLink(link.startHook, link.previousHook, link.dependency)
 			}
 		}
 		this.compatibleHooks = this.getCompatibleHooks(this.openHook)
@@ -831,7 +832,7 @@ The content children can also be dragged and panned.
 		return this.linkForHook(hook) == null
 	}
 
-	createNewOpenLink(hook: LinkHook, previousHook: LinkHook | null = null) {
+	createNewOpenLink(hook: LinkHook, previousHook: LinkHook | null = null, dependency: Dependency | null = null) {
 		this.hideLinksOfContent()
 		hook.outlet.ioList.view.show()
 		this.openHook = hook
@@ -843,7 +844,8 @@ The content children can also be dragged and panned.
 				startBullet: sb,
 				endBullet: eb,
 				startHook: hook,
-				previousHook: previousHook
+				previousHook: previousHook,
+				dependency: dependency
 			})
 			this.openBullet = eb
 		} else {
@@ -851,7 +853,8 @@ The content children can also be dragged and panned.
 				startBullet: sb,
 				endBullet: eb,
 				endHook: hook,
-				previousHook: previousHook
+				previousHook: previousHook,
+				dependency: dependency
 			})
 			this.openBullet = sb
 		}
@@ -946,8 +949,11 @@ The content children can also be dragged and panned.
 				this.remove(this.openLink)
 				if (this.openLink.startHook) {
 					this.openLink.startHook.update({ linked: false })
-					this.openLink.startHook.outlet.ioList.mobject.removedOutputLink(this.openLink)
-				} else if (this.openLink.endHook) {
+					if (this.openLink.previousHook) {
+						this.openLink.startHook.outlet.ioList.mobject.removedOutputLink(this.openLink)
+					}
+				}
+				if (this.openLink.endHook) {
 					this.openLink.endHook.update({ linked: false })
 					this.openLink.endHook.outlet.ioList.mobject.removedInputLink(this.openLink)
 				}
@@ -966,21 +972,17 @@ The content children can also be dragged and panned.
 			this.compatibleHooks = []
 			return
 		}
-		// if (h.constructor.name === 'EditableLinkHook' && h === this.openHook) {
-		// 	// click on a plus button to create a new hook
-		// 	let ed = h as EditableLinkHook
-		// 	ed.editName()
-		// } else if (h.constructor.name === 'EditableLinkHook') {
-		// 	// drag a link onto a plus button
+
 		if (this.openLink.startHook == null) {
-			this.openLink.update({
-				startHook: h
-			})
+			this.openLink.previousHook?.outlet.ioList.mobject.removedOutputLink(this.openLink)
+			this.openLink.update({ startHook: h })
+			this.openLink.previousHook = this.openLink.startHook
+			this.openLink.startHook.outlet.ioList.mobject.addedOutputLink(this.openLink)
 		} else {
-			this.openLink.update({
-				endHook: h
-			})
+			this.openLink.previousHook?.outlet.ioList.mobject.removedInputLink(this.openLink)
+			this.openLink.update({ endHook: h })
 			this.openLink.previousHook = this.openLink.endHook
+			this.openLink.endHook.outlet.ioList.mobject.addedInputLink(this.openLink)
 		}
 		this.openLink.startHook.update({ linked: true })
 		this.openLink.endHook.update({ linked: true })

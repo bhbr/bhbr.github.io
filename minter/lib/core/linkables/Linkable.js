@@ -137,7 +137,7 @@ export class Linkable extends Mobject {
     }
     removedOutputLink(link) {
         this.update();
-        if (!link.startHook || !link.endHook) {
+        if (!link.startHook) {
             return;
         }
         link.startHook.outlet.removeUnlinkedHook();
