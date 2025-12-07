@@ -4,6 +4,7 @@ import { Linkable } from '../../../../core/linkables/Linkable.js';
 import { getPaper, getSidebar } from '../../../../core/functions/getters.js';
 import { ScreenEventHandler, isTouchDevice } from '../../../../core/mobjects/screen_events.js';
 import { DraggingCreator } from '../../../../core/creators/DraggingCreator.js';
+import { prettyPrint } from '../../../../core/functions/various.js';
 export class NumberBox extends Linkable {
     defaults() {
         return {
@@ -37,7 +38,7 @@ export class NumberBox extends Linkable {
     }
     set value(newValue) {
         let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(newValue);
-        this.inputElement.value = isFalsy ? '' : newValue.toPrecision(4);
+        this.inputElement.value = isFalsy ? '' : prettyPrint(newValue);
     }
     focus() {
         super.focus();
@@ -63,7 +64,7 @@ export class NumberBox extends Linkable {
         this.inputElement.style.fontSize = '20px';
         this.inputElement.style.border = 'none';
         this.inputElement.style.outline = 'none';
-        this.inputElement.value = this.value.toString();
+        this.inputElement.value = prettyPrint(this.value);
         this.view.div.appendChild(this.inputElement);
         this.boundKeyPressed = this.keyPressed.bind(this);
         document.addEventListener('keyup', this.boundActivateKeyboard);
@@ -107,7 +108,7 @@ export class NumberBox extends Linkable {
     update(args = {}, redraw = true) {
         super.update(args, redraw);
         if (args['value'] !== undefined) {
-            this.inputElement.textContent = `${args['value']}`;
+            this.inputElement.textContent = prettyPrint(args['value']);
         }
         this.background.update({
             width: this.view.frame.width,

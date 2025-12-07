@@ -43,4 +43,20 @@ export function randomBinomial(n = 1, p = 0.5) {
     }
     return Math.round(gaussianRandom(n * p, (n * p * (1 - p)) ** 0.5));
 }
+function prettyPrintNumber(value, precision = 4) {
+    if (Math.round(value) != value) {
+        return value.toPrecision(precision);
+    }
+    else {
+        return `${value}`;
+    }
+}
+export function prettyPrint(value, precision = 4) {
+    if (typeof value == 'number') {
+        return prettyPrintNumber(value);
+    }
+    else {
+        return `${value}`;
+    }
+}
 //# sourceMappingURL=various.js.map

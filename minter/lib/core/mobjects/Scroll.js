@@ -1,4 +1,5 @@
 import { Mobject } from '../../core/mobjects/Mobject.js';
+import { prettyPrint } from '../../core/functions/various.js';
 export class Scroll extends Mobject {
     defaults() {
         return {
@@ -19,17 +20,9 @@ export class Scroll extends Mobject {
         super.update(args, redraw);
         var innerHTML = '';
         for (var i = 0; i < this.list.length; i++) {
-            innerHTML += (Scroll.stringRepresentation(this.list[i]) + `<br>`);
+            innerHTML += (prettyPrint(this.list[i]) + `<br>`);
         }
         this.view.div.innerHTML = innerHTML;
-    }
-    static stringRepresentation(value) {
-        if (typeof value == 'number') {
-            return value.toPrecision(4);
-        }
-        else {
-            return `${value}`;
-        }
     }
     mutabilities() { return {}; }
 }
