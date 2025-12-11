@@ -90,7 +90,6 @@ export class SidebarButton extends Circle {
 			smallLabelFontSize: 'never',
 			optionSpacing: 'never',
 			label: 'never',
-			sideLabel: 'never',
 			icon: 'on_init',
 			activeScalingFactor: 'never',
 			messages: 'on_update',
@@ -161,13 +160,17 @@ export class SidebarButton extends Circle {
 	}
 
 	commonButtonDown() {
-		if (this.active) { return }
+		this.frame.transform.update({
+			scale: this.activeScalingFactor
+		})
+		this.label.view.show()
+		if (this.active) {
+			this.redraw()
+			return
+		}
 		this.update({
 			active: true,
 			previousIndex: this.currentModeIndex,
-		})
-		this.frame.transform.update({
-			scale: this.activeScalingFactor
 		})
 		this.label.update({
 			anchor: [10, this.anchor[1] - 38]
@@ -175,13 +178,13 @@ export class SidebarButton extends Circle {
 		this.redraw()
 		this.updateIcon()
 		this.updateLabel()
-		this.label.view.show()
 		if (this.touchDownMessages.length == 0) { return }
 		this.messagePaper(this.touchDownMessages[0])
 		if (this.sidebar) {
 			this.sidebar.activeButton = this
 			this.sidebar.add(this.label)
 		}
+		this.paper.helpTextLabel.view.show()
 	}
 
 	onPointerDown(e: ScreenEvent) {
@@ -254,6 +257,7 @@ export class SidebarButton extends Circle {
 		this.updateIcon()
 		this.label.view.hide()
 		
+		//this.paper.helpTextLabel.view.hide()
 	}
 	
 	messagePaper(message: object) {

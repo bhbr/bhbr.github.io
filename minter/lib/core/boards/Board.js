@@ -2,9 +2,8 @@ import { Linkable } from '../../core/linkables/Linkable.js';
 import { DependencyLink } from '../../core/linkables/DependencyLink.js';
 import { LinkBullet } from '../../core/linkables/LinkBullet.js';
 import { RoundedRectangle } from '../../core/shapes/RoundedRectangle.js';
-import { vertexOrigin, vertexCopy, vertexAdd, vertexSubtract, vertexCloseTo } from '../../core/functions/vertex.js';
+import { vertexOrigin, vertexCopy, vertexAdd, vertexSubtract, vertexCloseTo, vertexNorm2 } from '../../core/functions/vertex.js';
 import { remove } from '../../core/functions/arrays.js';
-import { BoardCreator } from './BoardCreator.js';
 import { Freehand } from '../../core/creators/Freehand.js';
 import { ExpandButton } from './ExpandButton.js';
 //import { EditableLinkHook } from './EditableLinkHook'
@@ -15,8 +14,9 @@ import { convertArrayToString } from '../../core/functions/arrays.js';
 import { getPaper } from '../../core/functions/getters.js';
 import { ExpandedBoardInputList } from './ExpandedBoardInputList.js';
 import { ExpandedBoardOutputList } from './ExpandedBoardOutputList.js';
-import { EXPANDED_IO_LIST_HEIGHT, EXPANDED_IO_LIST_INSET } from './constants.js';
+import { EXPANDED_IO_LIST_HEIGHT, EXPANDED_IO_LIST_INSET, HELP_TEXT_LABEL_WIDTH, HELP_TEXT_LABEL_HEIGHT } from './constants.js';
 import { IO_LIST_OFFSET, SNAPPING_DISTANCE } from '../../core/linkables/constants.js';
+import { SIDEBAR_WIDTH } from '../../core/constants.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
 import { TextLabel } from '../../core/mobjects/TextLabel.js';
 export class BoardContent extends MGroup {
@@ -57,13 +57,9 @@ export class Board extends Linkable {
             compactWidth: 400, // defined below in the section 'expand and contract'
             compactHeight: 300, // idem
             compactAnchor: vertexOrigin(),
-            creationConstructors: {
-                'board': BoardCreator
-            },
+            creationConstructors: {},
             buttonNames: [
-                'DragButton',
-                'LinkButton',
-                'BoardButton'
+                'DragButton'
             ],
             creationStroke: [],
             creationMode: 'draw',
@@ -83,16 +79,13 @@ export class Board extends Linkable {
             allowingDrag: false,
             lastHoveredChild: null,
             helpTextLabel: new TextLabel({
-                frameHeight: 50,
+                frameHeight: HELP_TEXT_LABEL_HEIGHT,
+                frameWidth: HELP_TEXT_LABEL_WIDTH,
                 text: '',
                 horizontalAlign: 'center'
             }),
             helpTexts: {
                 'drag': 'Drag objects or pan the board. Slide this button to the right to lock.',
-                'link': 'Show and edit links between objects. Slide this button to the right to lock.',
-                'show controls': 'Show control elements on objects. Slide this button to the right to lock.',
-                'clear strokes': 'Clear all drawing strokes.',
-                'restart': 'Clear the board.',
             }
         };
     }
@@ -155,11 +148,14 @@ export class Board extends Linkable {
         }
         this.hideLinksOfContent();
         this.setControlsVisibility(false);
+        let newAnchor = [this.frameWidth / 2 - HELP_TEXT_LABEL_WIDTH / 2 - SIDEBAR_WIDTH, 20];
         this.helpTextLabel.update({
-            frameWidth: this.expandedWidth
+            anchor: newAnchor,
+            frameWidth: HELP_TEXT_LABEL_WIDTH
         });
         this.add(this.helpTextLabel);
-        this.helpTextLabel.view.hide();
+        //this.helpTextLabel.view.hide()
+        this.helpTextLabel.view.div.style.alignItems = 'start';
     }
     update(args = {}, redraw = true) {
         super.update(args, false);
@@ -354,7 +350,7 @@ export class Board extends Linkable {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    this.helpTextLabel.view.hide();
+                    //this.helpTextLabel.view.hide()
                 }
                 break;
             case 'link':
@@ -368,12 +364,6 @@ export class Board extends Linkable {
                 this.helpTextLabel.update({
                     text: this.helpTexts['link']
                 });
-                if (value) {
-                    this.helpTextLabel.view.show();
-                }
-                else {
-                    this.helpTextLabel.view.hide();
-                }
                 break;
             case 'show controls':
                 this.helpTextLabel.update({
@@ -383,7 +373,7 @@ export class Board extends Linkable {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    this.helpTextLabel.view.hide();
+                    //this.helpTextLabel.view.hide()
                 }
                 this.setControlsVisibility(value);
                 this.isShowingControls = value;
@@ -400,7 +390,7 @@ export class Board extends Linkable {
                         this.helpTextLabel.view.show();
                     }
                     else {
-                        this.helpTextLabel.view.hide();
+                        //this.helpTextLabel.view.hide()
                     }
                     return;
                 }
@@ -414,21 +404,19 @@ export class Board extends Linkable {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    this.helpTextLabel.view.hide();
+                    //this.helpTextLabel.view.hide()
                 }
                 break;
-            case 'clear strokes':
-                if (value) {
-                    this.clearStrokes();
-                }
+            case 'erase':
+                this.setEraser(value);
                 this.helpTextLabel.update({
-                    text: this.helpTexts['clear strokes']
+                    text: this.helpTexts['erase']
                 });
                 if (!value) { // merely touch down
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    this.helpTextLabel.view.hide();
+                    //this.helpTextLabel.view.hide()
                 }
                 break;
             case 'restart':
@@ -442,19 +430,53 @@ export class Board extends Linkable {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    this.helpTextLabel.view.hide();
+                    //this.helpTextLabel.view.hide()
                 }
                 break;
         }
     }
-    clearStrokes() {
-        for (let mob of this.contentChildren) {
-            if (mob instanceof Freehand) {
-                this.content.remove(mob);
-            }
+    setEraser(erasing) {
+        if (erasing) {
+            this.sensor.setMouseMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
+            this.sensor.setPenMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
+            this.sensor.setTouchMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
+        }
+        else {
+            this.sensor.restoreMouseMethods();
+            this.sensor.restorePenMethods();
+            this.sensor.restoreTouchMethods();
         }
     }
+    contentChildClosestTo(p, maxDistance = 50) {
+        var d2 = Infinity;
+        var candidate = null;
+        for (let child of this.contentChildren) {
+            let q = child.frame.viewCenter(this.frame);
+            let pq2 = vertexNorm2(vertexSubtract(p, q));
+            if (pq2 < d2) {
+                candidate = child;
+                d2 = pq2;
+            }
+        }
+        if (d2 < maxDistance ** 2) {
+            return candidate;
+        }
+        else {
+            return null;
+        }
+    }
+    startErasing(e) {
+        this.erasing(e);
+    }
+    erasing(e) {
+        let mob = this.contentChildClosestTo(this.sensor.localEventVertex(e));
+        if (mob) {
+            this.removeFromContent(mob);
+        }
+    }
+    endErasing(e) { }
     restart() {
+        this.setEraser(false);
         var child = this.contentChildren.pop();
         while (child !== undefined) {
             this.content.remove(child);
@@ -569,7 +591,7 @@ export class Board extends Linkable {
             return;
         }
         this.creator.dissolve();
-        this.helpTextLabel.view.hide();
+        //this.helpTextLabel.view.hide()
     }
     startPanning(e) {
         this.panPointStart = this.sensor.localEventVertex(e);
@@ -957,30 +979,6 @@ export class Board extends Linkable {
             }
         }
     }
-    // innerInputHooks(): Array<LinkHook> {
-    // 	let arr: Array<LinkHook>  = []
-    // 	for (let submob of this.linkableChildren()) {
-    // 		for (let inputName of submob.inputNames) {
-    // 			arr.push(submob.inputList.hookNamed(inputName))
-    // 		}
-    // 	}
-    // 	return arr
-    // }
-    // innerOutputHooks(): Array<LinkHook> {
-    // 	let arr: Array<LinkHook>  = []
-    // 	for (let submob of this.linkableChildren()) {
-    // 		for (let outputName of submob.outputNames) {
-    // 			arr.push(submob.outputList.hookNamed(outputName))
-    // 		}
-    // 	}
-    // 	return arr
-    // }
-    // outerInputHooks(): Array<LinkHook> {
-    // 	return this.expandedInputList.linkHooks
-    // }
-    // outerOutputHooks(): Array<LinkHook> {
-    // 	return this.expandedOutputList.linkHooks
-    // }
     allHooks() {
         if (this.contracted) {
             return super.allHooks();

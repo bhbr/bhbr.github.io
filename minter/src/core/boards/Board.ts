@@ -3,7 +3,7 @@ import { Linkable } from 'core/linkables/Linkable'
 import { DependencyLink } from 'core/linkables/DependencyLink'
 import { LinkBullet } from 'core/linkables/LinkBullet'
 import { RoundedRectangle } from 'core/shapes/RoundedRectangle'
-import { vertex, vertexArray, vertexOrigin, vertexCopy, vertexEquals, vertexAdd, vertexSubtract, vertexCloseTo } from 'core/functions/vertex'
+import { vertex, vertexArray, vertexOrigin, vertexCopy, vertexEquals, vertexAdd, vertexSubtract, vertexCloseTo, vertexNorm2 } from 'core/functions/vertex'
 import { log } from 'core/functions/logging'
 import { remove } from 'core/functions/arrays'
 import { BoardCreator } from './BoardCreator'
@@ -19,8 +19,9 @@ import { convertArrayToString } from 'core/functions/arrays'
 import { getPaper } from 'core/functions/getters'
 import { ExpandedBoardInputList } from './ExpandedBoardInputList'
 import { ExpandedBoardOutputList } from './ExpandedBoardOutputList'
-import { EXPANDED_IO_LIST_HEIGHT, EXPANDED_IO_LIST_INSET } from './constants'
+import { EXPANDED_IO_LIST_HEIGHT, EXPANDED_IO_LIST_INSET, HELP_TEXT_LABEL_WIDTH, HELP_TEXT_LABEL_HEIGHT } from './constants'
 import { IO_LIST_OFFSET, SNAPPING_DISTANCE } from 'core/linkables/constants'
+import { SIDEBAR_WIDTH } from 'core/constants'
 import { Paper } from 'core/Paper'
 import { MGroup } from 'core/mobjects/MGroup'
 import { View } from 'core/mobjects/View'
@@ -68,13 +69,9 @@ The content children can also be dragged and panned.
 			compactWidth: 400, // defined below in the section 'expand and contract'
 			compactHeight: 300, // idem
 			compactAnchor: vertexOrigin(),
-			creationConstructors: {
-				'board': BoardCreator
-			},
+			creationConstructors: { },
 			buttonNames: [
-				'DragButton',
-				'LinkButton',
-				'BoardButton'
+				'DragButton'
 			],
 			creationStroke: [],
 			creationMode: 'draw',
@@ -94,16 +91,13 @@ The content children can also be dragged and panned.
 			allowingDrag: false,
 			lastHoveredChild: null,
 			helpTextLabel: new TextLabel({
-				frameHeight: 50,
+				frameHeight: HELP_TEXT_LABEL_HEIGHT,
+				frameWidth: HELP_TEXT_LABEL_WIDTH,
 				text: '',
 				horizontalAlign: 'center'
 			}),
 			helpTexts: {
 				'drag': 'Drag objects or pan the board. Slide this button to the right to lock.',
-				'link': 'Show and edit links between objects. Slide this button to the right to lock.',
-				'show controls': 'Show control elements on objects. Slide this button to the right to lock.',
-				'clear strokes': 'Clear all drawing strokes.',
-				'restart': 'Clear the board.',
 			}
 		}
 	}
@@ -196,11 +190,14 @@ The content children can also be dragged and panned.
 		this.hideLinksOfContent()
 		this.setControlsVisibility(false)
 
+		let newAnchor = [this.frameWidth / 2 - HELP_TEXT_LABEL_WIDTH / 2 - SIDEBAR_WIDTH, 20]
 		this.helpTextLabel.update({
-			frameWidth: this.expandedWidth
+			anchor: newAnchor,
+			frameWidth: HELP_TEXT_LABEL_WIDTH
 		})
 		this.add(this.helpTextLabel)
-		this.helpTextLabel.view.hide()
+		//this.helpTextLabel.view.hide()
+		this.helpTextLabel.view.div.style.alignItems = 'start'
 	}
 
 	update(args: object = {}, redraw: boolean = true) {
@@ -442,7 +439,7 @@ The content children can also be dragged and panned.
 				if (value) {
 					this.helpTextLabel.view.show()
 				} else {
-					this.helpTextLabel.view.hide()
+					//this.helpTextLabel.view.hide()
 				}
 				break
 			case 'link':
@@ -455,11 +452,6 @@ The content children can also be dragged and panned.
 				this.helpTextLabel.update({
 					text: this.helpTexts['link']
 				})
-				if (value) {
-					this.helpTextLabel.view.show()
-				} else {
-					this.helpTextLabel.view.hide()
-				}
 				break
 			case 'show controls':
 				this.helpTextLabel.update({
@@ -468,7 +460,7 @@ The content children can also be dragged and panned.
 				if (value) {
 					this.helpTextLabel.view.show()
 				} else {
-					this.helpTextLabel.view.hide()
+					//this.helpTextLabel.view.hide()
 				}
 				this.setControlsVisibility(value as boolean)
 				this.isShowingControls = value
@@ -484,7 +476,7 @@ The content children can also be dragged and panned.
 					if (value) {
 						this.helpTextLabel.view.show()
 					} else {
-						this.helpTextLabel.view.hide()
+						//this.helpTextLabel.view.hide()
 					}
 					return
 				}
@@ -497,20 +489,18 @@ The content children can also be dragged and panned.
 				if (value) {
 					this.helpTextLabel.view.show()
 				} else {
-					this.helpTextLabel.view.hide()
+					//this.helpTextLabel.view.hide()
 				}
 				break
-			case 'clear strokes':
-				if (value) {
-					this.clearStrokes()
-				}
+			case 'erase':
+				this.setEraser(value as boolean)
 				this.helpTextLabel.update({
-					text: this.helpTexts['clear strokes']
+					text: this.helpTexts['erase']
 				})
 				if (!value) { // merely touch down
 					this.helpTextLabel.view.show()
 				} else {
-					this.helpTextLabel.view.hide()
+					//this.helpTextLabel.view.hide()
 				}
 				break
 			case 'restart':
@@ -523,21 +513,69 @@ The content children can also be dragged and panned.
 				if (!value) { // merely touch down
 					this.helpTextLabel.view.show()
 				} else {
-					this.helpTextLabel.view.hide()
+					//this.helpTextLabel.view.hide()
 				}
 				break
 		}
 	}
 
-	clearStrokes() {
-		for (let mob of this.contentChildren) {
-			if (mob instanceof Freehand) {
-				this.content.remove(mob)
-			}
+	setEraser(erasing: boolean) {
+		if (erasing) {
+			this.sensor.setMouseMethodsTo(
+				this.startErasing.bind(this),
+				this.erasing.bind(this),
+				this.endErasing.bind(this)
+			)
+			this.sensor.setPenMethodsTo(
+				this.startErasing.bind(this),
+				this.erasing.bind(this),
+				this.endErasing.bind(this)
+			)
+			this.sensor.setTouchMethodsTo(
+				this.startErasing.bind(this),
+				this.erasing.bind(this),
+				this.endErasing.bind(this)
+			)
+		} else {
+			this.sensor.restoreMouseMethods()
+			this.sensor.restorePenMethods()
+			this.sensor.restoreTouchMethods()
 		}
 	}
 
+	contentChildClosestTo(p: vertex, maxDistance: number = 50): Mobject | null {
+		var d2 = Infinity
+		var candidate: Mobject | null = null
+		for (let child of this.contentChildren) {
+			let q = child.frame.viewCenter(this.frame)
+			let pq2 = vertexNorm2(vertexSubtract(p, q))
+			if (pq2 < d2) {
+				candidate = child
+				d2 = pq2
+			}
+		}
+		if (d2 < maxDistance ** 2) {
+			return candidate
+		} else {
+			return null
+		}
+	}
+
+	startErasing(e: ScreenEvent) {
+		this.erasing(e)
+	}
+
+	erasing(e: ScreenEvent) {
+		let mob = this.contentChildClosestTo(this.sensor.localEventVertex(e))
+		if (mob) {
+			this.removeFromContent(mob)
+		}
+	}
+
+	endErasing(e: ScreenEvent) { }
+
 	restart() {
+		this.setEraser(false)
 		var child = this.contentChildren.pop()
 		while (child !== undefined) {
 			this.content.remove(child)
@@ -649,7 +687,7 @@ The content children can also be dragged and panned.
 		this.creationTool = null
 		if (this.creator == null) { return }
 		this.creator.dissolve()
-		this.helpTextLabel.view.hide()
+		//this.helpTextLabel.view.hide()
 	}
 
 
@@ -1088,34 +1126,6 @@ The content children can also be dragged and panned.
 			}
 		}
 	}
-
-	// innerInputHooks(): Array<LinkHook> {
-	// 	let arr: Array<LinkHook>  = []
-	// 	for (let submob of this.linkableChildren()) {
-	// 		for (let inputName of submob.inputNames) {
-	// 			arr.push(submob.inputList.hookNamed(inputName))
-	// 		}
-	// 	}
-	// 	return arr
-	// }
-
-	// innerOutputHooks(): Array<LinkHook> {
-	// 	let arr: Array<LinkHook>  = []
-	// 	for (let submob of this.linkableChildren()) {
-	// 		for (let outputName of submob.outputNames) {
-	// 			arr.push(submob.outputList.hookNamed(outputName))
-	// 		}
-	// 	}
-	// 	return arr
-	// }
-
-	// outerInputHooks(): Array<LinkHook> {
-	// 	return this.expandedInputList.linkHooks
-	// }
-
-	// outerOutputHooks(): Array<LinkHook> {
-	// 	return this.expandedOutputList.linkHooks
-	// }
 
 	allHooks(): Array<LinkHook> {
 		if (this.contracted) {

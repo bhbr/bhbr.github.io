@@ -17,7 +17,20 @@ export class Paper extends Board {
             activeKeyboard: true,
             currentColor: Color.white(),
             drawShadow: false,
-            loadedAPIs: []
+            loadedAPIs: [],
+            buttonNames: [
+                'DragButton',
+                'LinkButton',
+                'ControlsButton',
+                'EraseButton'
+            ],
+            helpTexts: {
+                'drag': 'Drag objects or pan the board. Slide this button to the right to lock.',
+                'link': 'Show and edit links between objects. Slide this button to the right to lock.',
+                'show controls': 'Show control elements on objects. Slide this button to the right to lock.',
+                'erase': 'Erase objects or drawings by swiping over them.',
+                'restart': 'Clear the board.',
+            }
         };
     }
     mutabilities() {
@@ -53,11 +66,10 @@ export class Paper extends Board {
             width: width,
             height: height
         });
-        this.helpTextLabel.update({
-            frameWidth: width
-        });
         let el = document.querySelector('#htmlConsole');
-        el.hidden = (isTouchDevice && !SHOW_HTML_CONSOLE) || !isTouchDevice;
+        if (el) {
+            el.hidden = (isTouchDevice && !SHOW_HTML_CONSOLE) || !isTouchDevice;
+        }
         //window.addEventListener('resize', this.resize.bind(this))
         this.resize();
     }

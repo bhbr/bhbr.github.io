@@ -1,5 +1,6 @@
 import { Mobject } from '../../core/mobjects/Mobject.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
+import { vertexArrayImageUnder } from '../../core/functions/vertex.js';
 import { addPointerDown, addPointerMove, addPointerUp, removePointerDown, removePointerMove, removePointerUp } from '../../core/mobjects/screen_events.js';
 import { VView } from './VView.js';
 export class VMobject extends Mobject {
@@ -156,6 +157,10 @@ export class VMobject extends Mobject {
     bottomCenter(frame) { return this.view.frame.transformLocalPoint(this.localBottomCenter(), frame); }
     getWidth() { return this.localXMax() - this.localXMin(); }
     getHeight() { return this.localYMax() - this.localYMin(); }
+    applyTransform(t) {
+        this.vertices = vertexArrayImageUnder(this.vertices, t);
+        this.redraw();
+    }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=VMobject.js.map

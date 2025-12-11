@@ -1,7 +1,9 @@
 import { Creator } from '../../core/creators/Creator.js';
 import { PolygonalLine } from '../../core/vmobjects/PolygonalLine.js';
+import { vertexSubtract } from '../../core/functions/vertex.js';
 import { Color } from '../../core/classes/Color.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
+import { Transform } from '../../core/classes/Transform.js';
 export class Freehand extends Creator {
     defaults() {
         return {
@@ -11,7 +13,8 @@ export class Freehand extends Creator {
             }),
             penStrokeColor: Color.white(),
             penStrokeWidth: 1.0,
-            penStrokeLength: 2.0
+            penStrokeLength: 2.0,
+            helpText: 'freehand',
         };
     }
     mutabilities() {
@@ -39,6 +42,14 @@ export class Freehand extends Creator {
         this.update({
             frameWidth: this.line.getWidth(),
             frameHeight: this.line.getHeight()
+        });
+        let oldAnchor = this.line.anchor;
+        let newAnchor = this.line.ulCorner();
+        let shift = vertexSubtract(oldAnchor, newAnchor);
+        let t = new Transform({ shift: shift });
+        this.line.applyTransform(t);
+        this.update({
+            anchor: vertexSubtract(this.anchor, shift)
         });
         let par = this.parent;
         par.creator = null;

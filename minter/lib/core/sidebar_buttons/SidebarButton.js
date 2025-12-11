@@ -48,7 +48,6 @@ export class SidebarButton extends Circle {
             smallLabelFontSize: 'never',
             optionSpacing: 'never',
             label: 'never',
-            sideLabel: 'never',
             icon: 'on_init',
             activeScalingFactor: 'never',
             messages: 'on_update',
@@ -116,15 +115,17 @@ export class SidebarButton extends Circle {
         }
     }
     commonButtonDown() {
+        this.frame.transform.update({
+            scale: this.activeScalingFactor
+        });
+        this.label.view.show();
         if (this.active) {
+            this.redraw();
             return;
         }
         this.update({
             active: true,
             previousIndex: this.currentModeIndex,
-        });
-        this.frame.transform.update({
-            scale: this.activeScalingFactor
         });
         this.label.update({
             anchor: [10, this.anchor[1] - 38]
@@ -132,7 +133,6 @@ export class SidebarButton extends Circle {
         this.redraw();
         this.updateIcon();
         this.updateLabel();
-        this.label.view.show();
         if (this.touchDownMessages.length == 0) {
             return;
         }
@@ -141,6 +141,7 @@ export class SidebarButton extends Circle {
             this.sidebar.activeButton = this;
             this.sidebar.add(this.label);
         }
+        this.paper.helpTextLabel.view.show();
     }
     onPointerDown(e) {
         this.commonButtonDown();
@@ -209,6 +210,7 @@ export class SidebarButton extends Circle {
         this.updateLabel();
         this.updateIcon();
         this.label.view.hide();
+        //this.paper.helpTextLabel.view.hide()
     }
     messagePaper(message) {
         try {
