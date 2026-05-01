@@ -2,8 +2,7 @@ import { Mobject } from '../../core/mobjects/Mobject.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
 import { InputList } from './InputList.js';
 import { OutputList } from './OutputList.js';
-import { SimpleButton } from '../../core/mobjects/SimpleButton.js';
-import { Checkbox } from '../../core/mobjects/Checkbox.js';
+import { remove } from '../../core/functions/arrays.js';
 export class Linkable extends Mobject {
     defaults() {
         return {
@@ -12,7 +11,8 @@ export class Linkable extends Mobject {
             inputProperties: [],
             outputProperties: [],
             linksEditable: false,
-            screenEventHandler: ScreenEventHandler.Self
+            screenEventHandler: ScreenEventHandler.Self,
+            controls: []
         };
     }
     mutabilities() {
@@ -101,12 +101,16 @@ export class Linkable extends Mobject {
         this.board.updateLinks();
     }
     setControlsVisibility(visible) {
-        for (let mob of this.submobs) {
-            if (mob instanceof SimpleButton || mob instanceof Checkbox) {
-                mob.update({
-                    visible: visible
-                });
-            }
+        for (let mob of this.controls) {
+            mob.view.setVisibility(visible);
+        }
+    }
+    setLinksVisibility(visible) {
+        if (visible) {
+            this.showLinks();
+        }
+        else {
+            this.hideLinks();
         }
     }
     allHooks() {
@@ -153,6 +157,70 @@ export class Linkable extends Mobject {
         this.outputList.positionOutlets();
         this.inputList.positionSelf();
         this.outputList.positionSelf();
+    }
+    createInputVariable(name, value) {
+        this.createProperty(name, value);
+        this.inputProperties.push({
+            name: name,
+            type: 'number',
+            displayName: name
+        });
+        this.inputList.update({
+            outletProperties: this.inputProperties
+        });
+        this.positionIOLists();
+        this.inputList.view.hide();
+    }
+    removeInputVariable(name) {
+        if (name == null) {
+            return;
+        }
+        this.removeProperty(name);
+        for (let prop of this.inputProperties) {
+            if (prop['name'] == name) {
+                remove(this.inputProperties, prop);
+                break;
+            }
+        }
+        this.inputList.update({
+            outletProperties: this.inputProperties
+        });
+        this.positionIOLists();
+        this.inputList.view.hide();
+        this.update();
+    }
+    createOutputVariable(name) {
+        if (name == null) {
+            return;
+        }
+        this.createProperty(name, 0);
+        this.outputProperties = [{
+                name: name,
+                type: 'number',
+                displayName: name
+            }];
+        this.outputList.update({
+            outletProperties: this.outputProperties // should not be necessary
+        });
+        this.positionIOLists();
+        this.outputList.view.hide();
+    }
+    removeOutputVariable(name) {
+        if (name == null) {
+            return;
+        }
+        this.removeProperty(name);
+        for (let prop of this.outputProperties) {
+            if (prop['name'] == name) {
+                remove(this.outputProperties, prop);
+                break;
+            }
+        }
+        this.outputList.update({
+            outletProperties: this.outputProperties // should not be necessary
+        });
+        this.positionIOLists();
+        this.outputList.view.hide();
     }
 }
 //# sourceMappingURL=Linkable.js.map

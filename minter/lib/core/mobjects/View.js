@@ -74,10 +74,17 @@ export class View extends ExtendedObject {
         }
     }
     // called by mobject.add
-    add(subView) {
-        subView.setup();
-        this.div.appendChild(subView.div);
+    add(subview) {
+        subview.setup();
+        this.div.appendChild(subview.div);
     }
+    // insertBefore(subview: View, beforeSubview: View) {
+    // 	if (this.div.contains(subview.div)) {
+    // 		subview.div.remove()
+    // 	}
+    // 	subview.setup()
+    // 	this.div.insertBefore(subview.div, beforeSubview.div)
+    // }
     redraw() {
         this.div.style.transform = this.transform.withoutAnchor().toCSSString();
         this.div.style.left = `${this.anchor[0].toString()}px`;
@@ -89,14 +96,18 @@ export class View extends ExtendedObject {
         this.div.style.borderWidth = `${this.borderWidth}px`;
         this.div.style.borderRadius = `${this.borderRadius}px`;
         this.div.style.opacity = this.opacity.toString();
-        this.setVisibility(this.shouldBeDrawn());
     }
-    // TODO: put into setter for this.visible?
-    setVisibility(visibility) {
-        this.div.style.visibility = visibility ? 'visible' : 'hidden';
-        for (let submob of this.mobject?.submobs ?? []) {
-            submob.view.setVisibility(submob.view.visible && visibility);
+    setCSSVisibility(visibility) {
+        if (visibility) {
+            this.div.style.display = 'flex';
         }
+        else {
+            this.div.style.display = 'none';
+        }
+    }
+    setVisibility(visibility) {
+        this.update({ visible: visibility });
+        this.setCSSVisibility(this.shouldBeDrawn());
     }
     showShadow() {
         if (this.savedDrawShadow !== null) {
@@ -126,14 +137,31 @@ export class View extends ExtendedObject {
     superViews() {
         return this.mobject?.ancestors().map((mob) => mob.view) ?? [];
     }
+    visibilities() {
+        let obj = {};
+        obj[this.mobject.constructor.name] = this.visible;
+        let ret = [obj];
+        var m = this.mobject;
+        while (m.parent) {
+            m = m.parent;
+            let obj2 = {};
+            obj2[m.constructor.name] = m.view.visible;
+            ret.push(obj2);
+        }
+        return ret;
+    }
     // Show and hide //
     show() {
-        this.visible = true;
-        this.setVisibility(this.visible);
+        this.setVisibility(true);
     }
     hide() {
-        this.visible = false;
-        this.setVisibility(this.visible);
+        this.setVisibility(false);
+    }
+    update(args = {}, redraw = true) {
+        super.update(args);
+        if (redraw) {
+            this.redraw();
+        }
     }
     mutabilities() { return {}; }
 }

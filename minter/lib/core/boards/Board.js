@@ -2,7 +2,7 @@ import { Linkable } from '../../core/linkables/Linkable.js';
 import { DependencyLink } from '../../core/linkables/DependencyLink.js';
 import { LinkBullet } from '../../core/linkables/LinkBullet.js';
 import { RoundedRectangle } from '../../core/shapes/RoundedRectangle.js';
-import { vertexOrigin, vertexCopy, vertexAdd, vertexSubtract, vertexCloseTo, vertexNorm2 } from '../../core/functions/vertex.js';
+import { vertexOrigin, vertexCopy, vertexAdd, vertexSubtract, vertexCloseTo } from '../../core/functions/vertex.js';
 import { remove } from '../../core/functions/arrays.js';
 import { Freehand } from '../../core/creators/Freehand.js';
 import { ExpandButton } from './ExpandButton.js';
@@ -14,7 +14,7 @@ import { convertArrayToString } from '../../core/functions/arrays.js';
 import { getPaper } from '../../core/functions/getters.js';
 import { ExpandedBoardInputList } from './ExpandedBoardInputList.js';
 import { ExpandedBoardOutputList } from './ExpandedBoardOutputList.js';
-import { EXPANDED_IO_LIST_HEIGHT, EXPANDED_IO_LIST_INSET, HELP_TEXT_LABEL_WIDTH, HELP_TEXT_LABEL_HEIGHT } from './constants.js';
+import { HELP_TEXT_LABEL_WIDTH, HELP_TEXT_LABEL_HEIGHT } from './constants.js';
 import { IO_LIST_OFFSET, SNAPPING_DISTANCE } from '../../core/linkables/constants.js';
 import { SIDEBAR_WIDTH } from '../../core/constants.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
@@ -45,8 +45,8 @@ export class Board extends Linkable {
                 anchor: vertexOrigin(),
                 cornerRadius: 25,
                 screenEventHandler: ScreenEventHandler.Parent,
-                fillColor: Color.gray(0.1),
-                fillOpacity: 1.0,
+                fillColor: isTouchDevice ? Color.clear() : Color.black(),
+                fillOpacity: isTouchDevice ? 0.0 : 1.0,
                 strokeColor: Color.gray(0.2),
                 strokeWidth: 1.0,
                 drawShadow: true
@@ -61,6 +61,7 @@ export class Board extends Linkable {
             buttonNames: [
                 'DragButton'
             ],
+            globals: {},
             creationStroke: [],
             creationMode: 'draw',
             creator: null,
@@ -77,7 +78,6 @@ export class Board extends Linkable {
             isShowingLinks: false,
             isShowingControls: false,
             allowingDrag: false,
-            lastHoveredChild: null,
             helpTextLabel: new TextLabel({
                 frameHeight: HELP_TEXT_LABEL_HEIGHT,
                 frameWidth: HELP_TEXT_LABEL_WIDTH,
@@ -115,23 +115,23 @@ export class Board extends Linkable {
         this.add(this.content);
         this.moveToTop(this.inputList);
         this.moveToTop(this.outputList);
-        this.add(this.expandButton);
-        this.expandedInputList.update({
-            height: EXPANDED_IO_LIST_HEIGHT,
-            width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,
-            anchor: [this.expandButton.view.frame.width + EXPANDED_IO_LIST_INSET, EXPANDED_IO_LIST_INSET],
-            mobject: this,
-            outletProperties: this.inputProperties
-        });
-        this.add(this.expandedInputList);
-        this.expandedOutputList.update({
-            height: EXPANDED_IO_LIST_HEIGHT,
-            width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,
-            anchor: [this.expandButton.view.frame.width + EXPANDED_IO_LIST_INSET, this.expandedHeight() - EXPANDED_IO_LIST_INSET - EXPANDED_IO_LIST_HEIGHT],
-            mobject: this,
-            outletProperties: this.outputProperties
-        });
-        this.add(this.expandedOutputList);
+        //this.add(this.expandButton)
+        // this.expandedInputList.update({
+        // 	height: EXPANDED_IO_LIST_HEIGHT,
+        // 	width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,
+        // 	anchor: [this.expandButton.view.frame.width + EXPANDED_IO_LIST_INSET, EXPANDED_IO_LIST_INSET],
+        // 	mobject: this,
+        // 	outletProperties: this.inputProperties
+        // })
+        // this.add(this.expandedInputList)
+        // this.expandedOutputList.update({
+        // 	height: EXPANDED_IO_LIST_HEIGHT,
+        // 	width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,
+        // 	anchor: [this.expandButton.view.frame.width + EXPANDED_IO_LIST_INSET, this.expandedHeight() - EXPANDED_IO_LIST_INSET - EXPANDED_IO_LIST_HEIGHT],
+        // 	mobject: this,
+        // 	outletProperties: this.outputProperties
+        // })
+        // this.add(this.expandedOutputList)
         if (this.contracted) {
             this.contractStateChange();
             this.inputList.view.show();
@@ -148,14 +148,13 @@ export class Board extends Linkable {
         }
         this.hideLinksOfContent();
         this.setControlsVisibility(false);
-        let newAnchor = [this.frameWidth / 2 - HELP_TEXT_LABEL_WIDTH / 2 - SIDEBAR_WIDTH, 20];
+        let newAnchor = [0.5 * (this.frameWidth - HELP_TEXT_LABEL_WIDTH - SIDEBAR_WIDTH), 20];
         this.helpTextLabel.update({
             anchor: newAnchor,
             frameWidth: HELP_TEXT_LABEL_WIDTH
         });
         this.add(this.helpTextLabel);
-        //this.helpTextLabel.view.hide()
-        this.helpTextLabel.view.div.style.alignItems = 'start';
+        this.helpTextLabel.view.hide();
     }
     update(args = {}, redraw = true) {
         super.update(args, false);
@@ -306,7 +305,7 @@ export class Board extends Linkable {
             this.moveToTop(this.expandButton);
         }
         if (mob instanceof Linkable) {
-            mob.hideLinks();
+            mob.setLinksVisibility(this.isShowingLinks);
             mob.setControlsVisibility(this.isShowingControls);
         }
         if (mob instanceof Board) {
@@ -350,7 +349,7 @@ export class Board extends Linkable {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    //this.helpTextLabel.view.hide()
+                    this.helpTextLabel.view.hide();
                 }
                 break;
             case 'link':
@@ -364,6 +363,12 @@ export class Board extends Linkable {
                 this.helpTextLabel.update({
                     text: this.helpTexts['link']
                 });
+                if (value) {
+                    this.helpTextLabel.view.show();
+                }
+                else {
+                    this.helpTextLabel.view.hide();
+                }
                 break;
             case 'show controls':
                 this.helpTextLabel.update({
@@ -373,14 +378,23 @@ export class Board extends Linkable {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    //this.helpTextLabel.view.hide()
+                    this.helpTextLabel.view.hide();
                 }
                 this.setControlsVisibility(value);
                 this.isShowingControls = value;
                 break;
+            case 'show help':
+                if (value) {
+                    this.helpTextLabel.view.show();
+                }
+                else {
+                    this.helpTextLabel.view.hide();
+                }
+                break;
             case 'create':
                 this.creationMode = value;
                 if (this.creator == null) {
+                    // create a dummy creator just to display the help text
                     // little hack, I know
                     let dummyCreator = this.createCreator(this.creationMode);
                     this.helpTextLabel.update({
@@ -390,12 +404,15 @@ export class Board extends Linkable {
                         this.helpTextLabel.view.show();
                     }
                     else {
-                        //this.helpTextLabel.view.hide()
+                        this.helpTextLabel.view.hide();
                     }
                     return;
                 }
                 this.remove(this.creator);
                 this.creator = this.createCreator(this.creationMode);
+                this.creator.update({
+                    anchor: (this.creationMode == 'draw') ? [0, 0] : this.creationStroke[0]
+                });
                 this.add(this.creator);
                 this.helpTextLabel.update({
                     text: this.creator.helpText
@@ -404,7 +421,7 @@ export class Board extends Linkable {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    //this.helpTextLabel.view.hide()
+                    this.helpTextLabel.view.hide();
                 }
                 break;
             case 'erase':
@@ -412,11 +429,11 @@ export class Board extends Linkable {
                 this.helpTextLabel.update({
                     text: this.helpTexts['erase']
                 });
-                if (!value) { // merely touch down
+                if (value) {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    //this.helpTextLabel.view.hide()
+                    this.helpTextLabel.view.hide();
                 }
                 break;
             case 'restart':
@@ -430,48 +447,70 @@ export class Board extends Linkable {
                     this.helpTextLabel.view.show();
                 }
                 else {
-                    //this.helpTextLabel.view.hide()
+                    this.helpTextLabel.view.hide();
                 }
+                break;
+            default:
                 break;
         }
     }
     setEraser(erasing) {
-        if (erasing) {
+        if (erasing && this.creationMode !== 'erase') {
             this.sensor.setMouseMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
             this.sensor.setPenMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
             this.sensor.setTouchMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
+            this.update({
+                creationMode: 'erase'
+            });
         }
-        else {
+        else if (!erasing && this.creationMode == 'erase') {
             this.sensor.restoreMouseMethods();
             this.sensor.restorePenMethods();
             this.sensor.restoreTouchMethods();
+            this.handleMessage('create', 'draw');
         }
     }
-    contentChildClosestTo(p, maxDistance = 50) {
-        var d2 = Infinity;
-        var candidate = null;
+    contentChildrenContaining(p) {
+        let mobs = [];
         for (let child of this.contentChildren) {
-            let q = child.frame.viewCenter(this.frame);
-            let pq2 = vertexNorm2(vertexSubtract(p, q));
-            if (pq2 < d2) {
-                candidate = child;
-                d2 = pq2;
+            if (child.frame.contains(p)) {
+                mobs.push(child);
             }
         }
-        if (d2 < maxDistance ** 2) {
-            return candidate;
+        return mobs;
+    }
+    firstContentChildContaining(p) {
+        for (let child of this.contentChildren) {
+            if (child.frame.contains(p)) {
+                return child;
+            }
         }
-        else {
-            return null;
-        }
+        return null;
     }
     startErasing(e) {
         this.erasing(e);
     }
     erasing(e) {
-        let mob = this.contentChildClosestTo(this.sensor.localEventVertex(e));
+        let mob = this.firstContentChildContaining(this.sensor.localEventVertex(e));
         if (mob) {
             this.removeFromContent(mob);
+            let linksToBeRemoved = [];
+            for (let link of this.links) {
+                if (link.startHook.outlet.ioList.mobject == mob || link.endHook.outlet.ioList.mobject == mob) {
+                    link.startHook.update({
+                        linked: false
+                    });
+                    link.startHook.outlet.removeHook();
+                    link.endHook.update({
+                        linked: false
+                    });
+                    linksToBeRemoved.push(link);
+                    this.remove(link);
+                }
+            }
+            for (let link of linksToBeRemoved) {
+                remove(this.links, link);
+            }
         }
     }
     endErasing(e) { }
@@ -504,9 +543,8 @@ export class Board extends Linkable {
                 if (this.creationTool == ScreenEventDevice.Finger) {
                     return new Creator();
                 }
-                let fh = new Freehand();
-                fh.line.update({
-                    vertices: this.creationStroke
+                let fh = new Freehand({
+                    creationStroke: this.creationStroke
                 });
                 return fh;
             default:
@@ -515,13 +553,13 @@ export class Board extends Linkable {
                     creationStroke: this.creationStroke
                 });
                 if (cm.creation instanceof Linkable) {
-                    cm.creation.hideLinks();
+                    cm.creation.setLinksVisibility(this.isShowingLinks);
+                    cm.creation.setControlsVisibility(this.isShowingControls);
                 }
                 return cm;
         }
     }
     onPointerDown(e) {
-        //log('onPointerDown')
         if (this.focusedChild) {
             this.focusedChild.blur();
         }
@@ -560,7 +598,6 @@ export class Board extends Linkable {
         this.add(this.creator);
     }
     onPointerMove(e) {
-        //log('onPointerMove')
         if (this.contracted) {
             return;
         }
@@ -578,7 +615,6 @@ export class Board extends Linkable {
         this.creator.updateFromTip(v);
     }
     onPointerUp(e) {
-        //log('onPointerUp')
         if (this.contracted) {
             return;
         }
@@ -587,11 +623,12 @@ export class Board extends Linkable {
     endCreating(e) {
         this.creationStroke = [];
         this.creationTool = null;
-        if (this.creator == null) {
-            return;
+        this.creationMode = 'draw';
+        if (this.creator !== null) {
+            this.creator.dissolve();
+            this.helpTextLabel.view.hide();
         }
-        this.creator.dissolve();
-        //this.helpTextLabel.view.hide()
+        this.messageSidebar({ 'button': 'collapse' });
     }
     startPanning(e) {
         this.panPointStart = this.sensor.localEventVertex(e);
@@ -656,8 +693,8 @@ export class Board extends Linkable {
         for (let submob of this.linkableChildren()) {
             submob.showLinks();
         }
-        this.expandedInputList.view.show();
-        this.expandedOutputList.view.show();
+        //this.expandedInputList.view.show()
+        //this.expandedOutputList.view.show()
     }
     hideLinksOfContent() {
         // toggled by 'link' button in sidebar
@@ -667,8 +704,8 @@ export class Board extends Linkable {
         for (let submob of this.linkableChildren()) {
             submob.hideLinks();
         }
-        this.expandedInputList.view.hide();
-        this.expandedOutputList.view.hide();
+        //this.expandedInputList.view.hide()
+        //this.expandedOutputList.view.hide()
     }
     renameLinkableProperty(kind, oldName, newName) {
         super.renameLinkableProperty(kind, oldName, newName);
@@ -678,28 +715,29 @@ export class Board extends Linkable {
     setLinking(flag) {
         if (flag && !this.isShowingLinks) {
             this.showLinksOfContent();
-            this.sensor.setTouchMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
-            this.sensor.setPenMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
-            this.sensor.setMouseMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
         }
         else if (!flag && this.isShowingLinks) { // if (!this.editingLinkName) {
             this.hideLinksOfContent();
-            this.sensor.restoreTouchMethods();
-            this.sensor.restorePenMethods();
-            this.sensor.restoreMouseMethods();
         }
         this.isShowingLinks = flag;
         if (flag) {
             this.disableContent();
+            this.sensor.setTouchMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
+            this.sensor.setPenMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
+            this.sensor.setMouseMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
         }
         else {
             this.enableContent();
+            this.sensor.restoreTouchMethods();
+            this.sensor.restorePenMethods();
+            this.sensor.restoreMouseMethods();
         }
     }
     startLinking(e) {
         var p = this.sensor.localEventVertex(e);
         let clickedHook = this.hookAtLocation(p);
         if (clickedHook == null) {
+            this.startCreating(e);
             return;
         }
         p = this.locationOfHook(clickedHook);
@@ -708,6 +746,7 @@ export class Board extends Linkable {
         }
         else {
             let link = this.linkForHook(clickedHook);
+            link.view.show(); //link.showLine()
             link.dependency.source.removeDependency(link.dependency);
             link.previousHook = clickedHook;
             clickedHook.update({ linked: false });
@@ -722,6 +761,7 @@ export class Board extends Linkable {
             }
         }
         this.compatibleHooks = this.getCompatibleHooks(this.openHook);
+        this.greyOutHooksIncompatibleWithHook(clickedHook);
     }
     locationOfHook(hook) {
         return hook.parent.view.frame.transformLocalPoint(hook.midpoint, this.view.frame);
@@ -768,6 +808,7 @@ export class Board extends Linkable {
     }
     linking(e) {
         if (this.openLink === null) {
+            this.creating(e);
             return;
         }
         var p = this.sensor.localEventVertex(e);
@@ -783,35 +824,26 @@ export class Board extends Linkable {
             child.inputList.view.hide();
             child.outputList.view.hide();
         }
-        if (this.openLink.startHook) {
-            this.openLink.startHook.outlet.ioList.view.show();
-        }
-        if (this.openLink.endHook) {
-            this.openLink.endHook.outlet.ioList.view.show();
-        }
+        let linkedHook = this.openLink.startHook ?? this.openLink.endHook;
+        linkedHook.outlet.ioList.view.show();
         let child = this.hoveredChild(p);
         let listOfLists = this.hoveredIOLists(p);
         if (!child && listOfLists.length == 0) {
             return;
         }
         let compHooks = this.getCompatibleHooks(this.openLink.startHook ?? this.openLink.endHook);
-        if (child && listOfLists.length == 0) {
-            for (let hook of child.inputList.allHooks()) {
-                if (compHooks.includes(hook)) {
-                    child.inputList.view.show();
-                    return;
-                }
+        if (child && child !== linkedHook.outlet.ioList.mobject && listOfLists.length == 0) {
+            if (linkedHook.outlet.kind == 'input' && child.outputProperties.length > 0) {
+                child.outputList.view.show();
             }
-            for (let hook of child.outputList.allHooks()) {
-                if (compHooks.includes(hook)) {
-                    child.outputList.view.show();
-                    return;
-                }
+            else if (linkedHook.outlet.kind == 'output' && child.inputProperties.length > 0) {
+                child.inputList.view.show();
             }
         }
-        if (child && listOfLists.length > 1) {
+        if (child && child !== linkedHook.outlet.ioList.mobject && listOfLists.length > 1) {
             for (let list of listOfLists) {
                 if (list.mobject == child) {
+                    //log(`showing ${list.constructor.name}`)
                     list.view.show();
                     return;
                 }
@@ -819,11 +851,8 @@ export class Board extends Linkable {
         }
         let list = listOfLists[0];
         if (list) {
-            for (let hook of list.allHooks()) {
-                if (compHooks.includes(hook)) {
-                    list.view.show();
-                    return;
-                }
+            if (list.kind !== linkedHook.outlet.kind && list.mobject !== linkedHook.outlet.ioList.mobject && list.linkOutlets.length > 0) {
+                list.view.show();
             }
         }
     }
@@ -831,26 +860,36 @@ export class Board extends Linkable {
         for (let child of this.linkableChildren()) {
             if (child.anchor[0] <= p[0] && p[0] <= child.anchor[0] + child.view.frameWidth
                 && child.anchor[1] <= p[1] && p[1] <= child.anchor[1] + child.view.frameHeight) {
-                this.lastHoveredChild = child;
+                return child;
             }
         }
-        return this.lastHoveredChild;
     }
     hoveredIOLists(p) {
         let ret = [];
         for (let child of this.linkableChildren()) {
-            if (child.anchor[0] + child.inputList.anchor[0] <= p[0] && p[0] <= child.anchor[0] + child.inputList.anchor[0] + child.inputList.view.frameWidth
-                && child.anchor[1] + child.inputList.anchor[1] <= p[1] && p[1] <= child.anchor[1]) {
+            let minX1 = child.anchor[0] + child.inputList.anchor[0];
+            let maxX1 = minX1 + child.inputList.view.frameWidth;
+            let minY1 = child.anchor[1] + child.inputList.anchor[1];
+            let maxY1 = child.anchor[1];
+            if (minX1 <= p[0] && p[0] <= maxX1 && minY1 <= p[1] && p[1] <= maxY1) {
                 ret.push(child.inputList);
             }
-            if (child.anchor[0] + child.outputList.anchor[0] <= p[0] && p[0] <= child.anchor[0] + child.outputList.anchor[0] + child.outputList.view.frameWidth
-                && child.anchor[1] + child.view.frameHeight <= p[1] && p[1] <= child.anchor[1] + child.outputList.anchor[1] + child.outputList.view.frameHeight) {
+            let minX2 = child.anchor[0] + child.outputList.anchor[0];
+            let maxX2 = minX2 + child.outputList.view.frameWidth;
+            let minY2 = child.anchor[1] + child.view.frameHeight;
+            let maxY2 = minY2 + child.outputList.view.frameHeight;
+            if (minX2 <= p[0] && p[0] <= maxX2 && minY2 <= p[1] && p[1] <= maxY2) {
                 ret.push(child.outputList);
             }
         }
         return ret;
     }
     endLinking(e) {
+        if (!this.openLink) {
+            this.endCreating(e);
+            return;
+        }
+        this.showAllHooks();
         let h = this.freeCompatibleHookAtLocation(this.sensor.localEventVertex(e));
         if (h === null) {
             if (this.openLink) {
@@ -866,7 +905,6 @@ export class Board extends Linkable {
                     this.openLink.endHook.outlet.ioList.mobject.removedInputLink(this.openLink);
                 }
                 if (this.openLink.previousHook) {
-                    this.openLink.previousHook.update({ linked: false });
                     if (this.openLink.previousHook.outlet.kind == 'input') {
                         this.openLink.previousHook.outlet.ioList.mobject.removedInputLink(this.openLink);
                     }
@@ -896,12 +934,43 @@ export class Board extends Linkable {
         this.openLink.startHook.update({ linked: true });
         this.openLink.endHook.update({ linked: true });
         this.openLink.previousHook = null;
+        this.openLink.view.hide(); //this.openLink.hideLine()
         this.links.push(this.openLink);
         this.createNewDependency();
         this.openLink = null;
         this.openHook = null;
         this.openBullet = null;
         this.compatibleHooks = [];
+    }
+    showAllHooks() {
+        for (let mob of this.linkableChildren()) {
+            for (let outlet of mob.inputList.linkOutlets) {
+                outlet.label.update({
+                    opacity: 1
+                });
+                for (let hook of outlet.linkHooks) {
+                    hook.update({
+                        opacity: 1
+                    });
+                }
+            }
+        }
+    }
+    greyOutHooksIncompatibleWithHook(baseHook) {
+        for (let mob of this.linkableChildren()) {
+            for (let outlet of mob.inputList.linkOutlets) {
+                for (let hook of outlet.linkHooks) {
+                    if (!this.compatibleHooks.includes(hook) && baseHook !== hook) {
+                        hook.update({
+                            opacity: 0.25
+                        });
+                        outlet.label.update({
+                            opacity: 0.25
+                        });
+                    }
+                }
+            }
+        }
     }
     getCompatibleHooks(startHook) {
         return this.allHooks().filter((endHook) => this.areCompatibleHooks(startHook, endHook));
@@ -1026,14 +1095,12 @@ export class Board extends Linkable {
     //                                                      //
     //////////////////////////////////////////////////////////
     messageSidebar(message) {
-        if (isTouchDevice) {
+        try {
             let w = window;
             w.webkit.messageHandlers.handleMessageFromPaper.postMessage(message);
         }
-        else {
-            if (this.sidebar !== null && this.sidebar !== undefined) {
-                this.sidebar.getMessage(message);
-            }
+        catch {
+            this.sidebar.getMessage(message);
         }
     }
 }

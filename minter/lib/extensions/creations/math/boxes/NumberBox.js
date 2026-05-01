@@ -141,7 +141,6 @@ export class NumberBoxCreator extends DraggingCreator {
     }
     updateFromTip(q, redraw = true) {
         super.updateFromTip(q, redraw);
-        this.creation.hideLinks();
     }
     mutabilities() { return {}; }
 }

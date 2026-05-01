@@ -28,7 +28,7 @@ export class CoinFlipSidebar extends Sidebar {
 				AlgebraButton,
 				ListFunctionsButton,
 				PlotButton,
-				ColorSampleButton,
+				//ColorSampleButton,
 				EraseButton
 			],
 			buttons: [
@@ -39,10 +39,10 @@ export class CoinFlipSidebar extends Sidebar {
 				new NumberButton(),
 				new ArithmeticButton(),
 				new ComparisonButton(),
-				new AlgebraButton(),
+				//new AlgebraButton(),
 				new ListFunctionsButton(),
 				new PlotButton(),
-				new ColorSampleButton(),
+				//new ColorSampleButton(),
 				new EraseButton()
 			],
 		}

@@ -7,7 +7,7 @@ import { TextLabel } from 'core/mobjects/TextLabel'
 import { ScreenEvent, ScreenEventHandler } from 'core/mobjects/screen_events'
 import { Playable } from 'extensions/mobjects/PlayButton/Playable'
 import { PlayButton } from 'extensions/mobjects/PlayButton/PlayButton'
-import { SimpleNumberBox } from 'extensions/creations/math/boxes/SimpleNumberBox'
+import { SimpleNumberInputBox } from 'extensions/creations/math/boxes/SimpleNumberInputBox'
 import { getPaper } from 'core/functions/getters'
 import { log } from 'core/functions/logging'
 import { DependencyLink } from 'core/linkables/DependencyLink'
@@ -24,7 +24,7 @@ export class CoinStack extends Linkable implements Playable {
 	tailsBar: Rectangle
 	headsLabel: TextLabel
 	tailsLabel: TextLabel
-	nbCoinsInputBox: SimpleNumberBox
+	nbCoinsInputBox: SimpleNumberInputBox
 	labelHeight: number
 	labelSpacing: number
 	maxBarHeight: number
@@ -58,13 +58,13 @@ export class CoinStack extends Linkable implements Playable {
 			playButton: new PlayButton({
 				anchor: [0, 50]
 			}),
-			nbCoinsInputBox: new SimpleNumberBox({
+			nbCoinsInputBox: new SimpleNumberInputBox({
 				value: 100
 			}),
 			inputProperties: [
 				{ name: 'tailsProbability', displayName: 'p(tails)', type: 'number' },
-				{ name: 'headsColor', displayName: 'heads color', type: 'Color' },
-				{ name: 'tailsColor', displayName: 'tails color', type: 'Color' },
+				//{ name: 'headsColor', displayName: 'heads color', type: 'Color' },
+				//{ name: 'tailsColor', displayName: 'tails color', type: 'Color' },
 				{ name: 'nbCoins', displayName: '# coins', type: 'number' }
 			],
 			outputProperties: [
@@ -164,6 +164,7 @@ export class CoinStack extends Linkable implements Playable {
 		this.playButton.update({
 			mobject: this
 		})
+		this.controls.push(this.playButton)
 	}
 
 	positionButton() {
@@ -179,6 +180,7 @@ export class CoinStack extends Linkable implements Playable {
 		this.nbCoinsInputBox.blur = this.endNbCoinsEditing.bind(this)
 		this.nbCoinsInputBox.onReturn = this.endNbCoinsEditing.bind(this)
 		this.add(this.nbCoinsInputBox)
+		this.controls.push(this.nbCoinsInputBox)
 	}
 
 	endNbCoinsEditing() {
@@ -187,7 +189,6 @@ export class CoinStack extends Linkable implements Playable {
 		document.removeEventListener('keydown', this.nbCoinsInputBox.boundKeyPressed)
 		this.update({ nbCoins: this.nbCoinsInputBox.value })
 	}
-
 
 	headsBarHeight(): number {
 		return Math.round(this.nbHeads / this.nbCoins * this.height)

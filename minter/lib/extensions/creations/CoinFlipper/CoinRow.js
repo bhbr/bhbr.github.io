@@ -4,6 +4,8 @@ import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.j
 import { TextLabel } from '../../../core/mobjects/TextLabel.js';
 import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
 import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
+import { SimpleNumberInputBox } from '../../../extensions/creations/math/boxes/SimpleNumberInputBox.js';
+import { getPaper } from '../../../core/functions/getters.js';
 export class CoinRow extends Linkable {
     defaults() {
         return {
@@ -30,16 +32,21 @@ export class CoinRow extends Linkable {
             inputProperties: [
                 { name: 'tailsProbability', displayName: 'p(tails)', type: 'number' },
                 { name: 'nbCoins', displayName: '# coins', type: 'number' },
-                { name: 'headsColor', displayName: 'heads color', type: 'Color' },
-                { name: 'tailsColor', displayName: 'tails color', type: 'Color' }
+                //{ name: 'headsColor', displayName: 'heads color', type: 'Color' },
+                //{ name: 'tailsColor', displayName: 'tails color', type: 'Color' }
             ],
             outputProperties: [
                 { name: 'nbHeads', displayName: '# heads', type: 'number' },
                 { name: 'nbTails', displayName: '# tails', type: 'number' },
+                { name: 'nbCoins', displayName: '# coins', type: 'number' },
                 { name: 'mean', displayName: 'mean', type: 'number' }
             ],
             frameWidth: 300,
-            frameHeight: 50
+            frameHeight: 50,
+            nbCoinsInputBox: new SimpleNumberInputBox({
+                labelText: '# coins:',
+                value: 1
+            }),
         };
     }
     setup() {
@@ -47,6 +54,7 @@ export class CoinRow extends Linkable {
         this.createCoins();
         this.setupLabels();
         this.setupButton();
+        this.setupInputBox();
     }
     createCoins() {
         for (var i = 0; i < this.nbCoins; i++) {
@@ -75,6 +83,22 @@ export class CoinRow extends Linkable {
         this.playButton.update({
             mobject: this
         });
+        this.controls.push(this.playButton);
+    }
+    setupInputBox() {
+        this.add(this.nbCoinsInputBox);
+        this.nbCoinsInputBox.blur = this.endNbCoinsEditing.bind(this);
+        this.nbCoinsInputBox.onReturn = this.endNbCoinsEditing.bind(this);
+        this.controls.push(this.nbCoinsInputBox);
+        this.nbCoinsInputBox.update({
+            anchor: [this.frameWidth / 2 - this.nbCoinsInputBox.frameWidth / 2, 0]
+        });
+    }
+    endNbCoinsEditing() {
+        getPaper().blurFocusedChild();
+        this.nbCoinsInputBox.inputElement.blur();
+        document.removeEventListener('keydown', this.nbCoinsInputBox.boundKeyPressed);
+        this.update({ nbCoins: this.nbCoinsInputBox.value });
     }
     addCoin() {
         let coin = new Coin({
@@ -96,13 +120,21 @@ export class CoinRow extends Linkable {
         this.adjustFrameWidth();
         this.positionTailsLabel();
         this.positionButton();
+        this.positionNbCoinsInputBox();
+        this.positionIOLists();
+        this.updateDependents(); // in particular this updates the heads and tails labels
     }
     removeCoin() {
         let coin = this.coins.pop();
         this.remove(coin);
+        if (coin.state == 'tails') {
+            this.updateDependents(); // in particular this updates the heads and tails labels
+        }
         this.adjustFrameWidth();
         this.positionTailsLabel();
         this.positionButton();
+        this.positionNbCoinsInputBox();
+        this.positionIOLists();
     }
     adjustFrameWidth() {
         this.update({
@@ -122,6 +154,14 @@ export class CoinRow extends Linkable {
             anchor: [
                 this.frameWidth / 2 - this.playButton.frameWidth / 2,
                 2 * this.coinRadius + 15
+            ]
+        });
+    }
+    positionNbCoinsInputBox() {
+        this.nbCoinsInputBox.update({
+            anchor: [
+                this.frameWidth / 2 - this.nbCoinsInputBox.frameWidth / 2 - 25,
+                -35
             ]
         });
     }
@@ -182,9 +222,22 @@ export class CoinRow extends Linkable {
                 this.addCoin();
             }
         }
+        this.nbCoinsInputBox.inputElement.value = newNbCoins.toString();
     }
     computeWidth() {
         return (this.nbCoins - 1) * this.coinSpacing + 2 * this.coinRadius + this.nbHeadsLabel.frameWidth + this.nbTailsLabel.frameWidth;
+    }
+    addedInputLink(link) {
+        super.addedInputLink(link);
+        if (link.endHook.outlet.name == 'nbCoins') {
+            this.nbCoinsInputBox.inputElement.disabled = true;
+        }
+    }
+    removedInputLink(link) {
+        super.removedInputLink(link);
+        if (link.endHook.outlet.name == 'nbCoins') {
+            this.nbCoinsInputBox.inputElement.disabled = false;
+        }
     }
     mutabilities() { return {}; }
 }

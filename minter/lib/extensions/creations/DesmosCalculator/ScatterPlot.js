@@ -16,8 +16,16 @@ export class ScatterPlot extends DesmosCalculator {
             showLinesCheckbox: new Checkbox({
                 text: 'lines',
                 state: false
-            })
+            }),
+            options: {
+                expressions: false
+            }
         };
+    }
+    setup() {
+        super.setup();
+        this.controls.push(this.showPointsCheckbox);
+        this.controls.push(this.showLinesCheckbox);
     }
     setXArrayExpression(listString) {
         this.calculator.setExpression({ id: 'xData', latex: `X = [${listString}]` });
@@ -39,9 +47,8 @@ export class ScatterPlot extends DesmosCalculator {
             this.setYArrayExpression(`${this.yData}`);
         }
     }
-    createCalculator(options = {}) {
-        options['expressions'] = false;
-        super.createCalculator(options);
+    createCalculator() {
+        super.createCalculator();
         this.setDataExpressions();
         this.calculator.setExpression({ id: 'dots', latex: `(X, Y)` });
         this.calculator.setMathBounds({

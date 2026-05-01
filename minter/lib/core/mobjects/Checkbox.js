@@ -9,7 +9,6 @@ export class Checkbox extends MGroup {
             screenEventHandler: ScreenEventHandler.Self,
             frameWidth: 100,
             frameHeight: 20,
-            visible: false,
             boxBorder: new Square({
                 sidelength: 18
             }),

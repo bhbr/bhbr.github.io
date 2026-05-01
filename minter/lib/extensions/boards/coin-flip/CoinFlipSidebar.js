@@ -9,7 +9,6 @@ import { AlgebraButton } from '../../../extensions/sidebar_buttons/AlgebraButton
 import { ListFunctionsButton } from '../../../extensions/sidebar_buttons/ListFunctionsButton.js';
 import { PlotButton } from '../../../extensions/sidebar_buttons/PlotButton.js';
 import { NumberButton } from '../../../extensions/sidebar_buttons/NumberButton.js';
-import { ColorSampleButton } from '../../../extensions/creations/ColorSample/ColorSampleButton.js';
 import { EraseButton } from '../../../core/sidebar_buttons/EraseButton.js';
 export class CoinFlipSidebar extends Sidebar {
     defaults() {
@@ -25,7 +24,7 @@ export class CoinFlipSidebar extends Sidebar {
                 AlgebraButton,
                 ListFunctionsButton,
                 PlotButton,
-                ColorSampleButton,
+                //ColorSampleButton,
                 EraseButton
             ],
             buttons: [
@@ -36,10 +35,10 @@ export class CoinFlipSidebar extends Sidebar {
                 new NumberButton(),
                 new ArithmeticButton(),
                 new ComparisonButton(),
-                new AlgebraButton(),
+                //new AlgebraButton(),
                 new ListFunctionsButton(),
                 new PlotButton(),
-                new ColorSampleButton(),
+                //new ColorSampleButton(),
                 new EraseButton()
             ],
         };

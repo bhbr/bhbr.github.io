@@ -93,7 +93,7 @@ export class LinkOutlet extends MGroup {
         });
     }
     update(args = {}, redraw = true) {
-        let newName = args['displayName'];
+        let newName = args['displayName'] ?? args['name'];
         if (newName == '') {
             throw `Name of property ${this.displayName} cannot be changed to an empty string`;
         }

@@ -24,16 +24,16 @@ export class Creator extends Mobject {
         });
     }
     getStartPoint() {
-        return vertexAdd(this.creationStroke[0] ?? this.view.frame.anchor, this.pointOffset);
+        return this.creationStroke[0] ?? this.view.frame.anchor;
     }
     getEndPoint() {
-        return vertexAdd(this.creationStroke[this.creationStroke.length - 1] ?? this.view.frame.anchor, this.pointOffset);
+        return this.creationStroke[this.creationStroke.length - 1] ?? this.view.frame.anchor;
     }
     dissolve() {
         this.remove(this.creation);
         this.creation = this.createMobject();
         this.creation.update({
-            anchor: this.getStartPoint()
+            anchor: vertexAdd(this.getStartPoint(), this.pointOffset)
         }, true);
         this.parent.addToContent(this.creation);
         this.parent.creator = null;
@@ -45,7 +45,6 @@ export class Creator extends Mobject {
         });
     }
     updateFromTip(q, redraw = true) {
-        this.creationStroke.push(q);
         this.updateDependents();
         if (redraw) {
             this.view.redraw();

@@ -20,7 +20,14 @@ export class Frame extends ExtendedObject {
         this.transform.anchor = newValue;
     }
     get parent() {
-        return this.view?.parent.frame ?? null;
+        return this.view?.mobject.parent?.frame ?? null;
+    }
+    contains(p) {
+        let flag1 = (p[0] > this.anchor[0]);
+        let flag2 = (p[0] < this.anchor[0] + this.width);
+        let flag3 = (p[1] > this.anchor[1]);
+        let flag4 = (p[1] < this.anchor[1] + this.height);
+        return (flag1 && flag2 && flag3 && flag4);
     }
     relativeTransform(frame) {
         /*
@@ -48,8 +55,7 @@ export class Frame extends ExtendedObject {
     transformLocalPoint(point, frame) {
         /*
         Given a point (vertex) in local coordinates,
-        compute its coordinates in the given ancestor
-        Frame's frame.
+        compute its coordinates in the given ancestor's frame.
         */
         let t = this.relativeTransform(frame);
         return t.appliedTo(point);

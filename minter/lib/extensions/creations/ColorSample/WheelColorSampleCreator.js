@@ -16,7 +16,6 @@ export class WheelColorSampleCreator extends DraggingCreator {
     updateFromTip(q, redraw = true) {
         let r = this.creation.circle.radius;
         super.updateFromTip(q, redraw);
-        this.creation.hideLinks();
     }
     mutabilities() { return {}; }
 }

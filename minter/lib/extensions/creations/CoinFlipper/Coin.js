@@ -46,6 +46,9 @@ export class Coin extends Circle {
     flip(animate = false) {
         let x = Math.random();
         let newState = (x < this.tailsProbability) ? 'tails' : 'heads';
+        this.flipToState(newState, animate);
+    }
+    flipToState(newState, animate = false) {
         if (animate) {
             this.update({
                 fillColor: Color.black(),

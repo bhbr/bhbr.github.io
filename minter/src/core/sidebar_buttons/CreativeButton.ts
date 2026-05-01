@@ -1,5 +1,6 @@
 
 import { SidebarButton } from './SidebarButton'
+import { log } from 'core/functions/logging'
 
 export class CreativeButton extends SidebarButton {
 
@@ -7,8 +8,7 @@ export class CreativeButton extends SidebarButton {
 
 	defaults(): object {
 		return {
-			creations: [],
-			touchUpMessages: [{ create: 'draw' }]
+			creations: []
 		}
 	}
 
@@ -18,26 +18,34 @@ export class CreativeButton extends SidebarButton {
 		}
 	}
 
-	setup() {
+	setupMessages() {
+		let newSelectMessages = []
+		let newDeselectMessages = []
 		for (let c of this.creations) {
-			this.touchDownMessages.push({ create: c })
+			newSelectMessages.push({ create: c })
+			newDeselectMessages.push({ create: 'draw' })
 		}
-		super.setup()
+		this.update({
+			selectMessages: newSelectMessages,
+			deselectMessages: newDeselectMessages
+		})
 	}
 
 	labelFromMessage(msg: object): string {
-		var key = Object.values(msg)[0]
-		if (this.currentModeIndex > 0) {
-			key = '&#9666; ' + key
-		}
-		if (this.currentModeIndex < this.creations.length - 1) {
-			key = key + ' &#9656;'
-		}
-		return key
+		return Object.values(msg)[0]
+	}
+
+	baseIconName(): string {
+		return this.creations[0].replaceAll(' ', '_')
 	}
 
 	imageNameForIndex(index: number): string {
-		return (Object.values(this.touchDownMessages[index] ?? {}) ?? ['key'])[0]
+		return (Object.values(this.selectMessages[index] ?? {}) ?? ['key'])[0]
 	}
+
+	updateHelpText() {
+		// do nothing because the board handles it
+	}
+
 
 }

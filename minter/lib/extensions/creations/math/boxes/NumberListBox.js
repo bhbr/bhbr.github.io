@@ -52,11 +52,11 @@ export class NumberListBox extends Linkable {
             anchor: [20, this.frameHeight + 10]
         });
         this.clearButton.action = this.clear.bind(this);
+        this.clearButton.remove(this.clearButton.label);
+        // remove and add the label to fight lazy rendering bug
         this.add(this.clearButton);
-        // for (let i = 0; i < 5; i++) {
-        // 	this.list.push(Math.random())
-        // }
-        // this.scroll.update({ list: this.list })
+        this.clearButton.add(this.clearButton.label);
+        this.controls.push(this.clearButton);
     }
     update(args = {}, redraw = true) {
         super.update(args, redraw);
@@ -78,7 +78,10 @@ export class NumberListBox extends Linkable {
         this.scroll.preventDefault = false;
     }
     clear() {
+        // remove and add to fight lazy rendering bug
+        this.remove(this.scroll);
         this.update({ value: [] });
+        this.add(this.scroll);
         this.updateDependents();
         for (let dep of this.dependents()) {
             if (dep instanceof NumberListBox) {
@@ -90,7 +93,7 @@ export class NumberListBox extends Linkable {
         return this.list.length;
     }
     get newestEntry() {
-        return undefined; // this.list[this.list.length - 1]
+        return undefined;
     }
     set newestEntry(newValue) {
         let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(newValue);
@@ -98,6 +101,7 @@ export class NumberListBox extends Linkable {
             return;
         }
         this.list.push(newValue);
+        this.scroll.view.div.scrollTop = this.scroll.view.div.scrollHeight;
     }
     addedInputLink(link) {
         if (link.endHook.outlet.name == 'newestEntry') {
@@ -120,7 +124,6 @@ export class NumberListBoxCreator extends DraggingCreator {
     }
     updateFromTip(q, redraw = true) {
         super.updateFromTip(q, redraw);
-        this.creation.hideLinks();
     }
     mutabilities() { return {}; }
 }

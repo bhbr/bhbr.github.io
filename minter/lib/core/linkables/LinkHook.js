@@ -1,6 +1,7 @@
 import { Circle } from '../../core/shapes/Circle.js';
 import { Color } from '../../core/classes/Color.js';
-import { HOOK_RADIUS, BULLET_RADIUS } from './constants.js';
+import { HOOK_RADIUS } from './constants.js';
+import { LinkBullet } from './LinkBullet.js';
 export class LinkHook extends Circle {
     defaults() {
         return {
@@ -12,10 +13,7 @@ export class LinkHook extends Circle {
             mobject: null,
             outlet: null,
             linked: false,
-            linkedBulletIndicator: new Circle({
-                radius: BULLET_RADIUS,
-                fillColor: Color.white(),
-                fillOpacity: 1,
+            linkedBulletIndicator: new LinkBullet({
                 midpoint: [HOOK_RADIUS, HOOK_RADIUS]
             })
         };

@@ -1,14 +1,9 @@
 import { CreativeButton } from '../../core/sidebar_buttons/CreativeButton.js';
-import { ImageView } from '../../core/mobjects/ImageView.js';
 export class NumberButton extends CreativeButton {
     defaults() {
         return {
-            creations: ['number', 'list', 'slider', 'stepper'],
-            icon: new ImageView({
-                imageLocation: '../../assets/number.png',
-                frameWidth: 25,
-                frameHeight: 25
-            })
+            creations: ['number', 'slider', 'stepper', 'list'],
+            iconSize: 25
         };
     }
     mutabilities() {

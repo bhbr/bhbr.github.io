@@ -39,7 +39,7 @@ export class DesmosCalculator extends Linkable {
             this.loadDesmosAPI();
         }
         else {
-            this.createCalculator(this.options);
+            this.createCalculator();
         }
     }
     setupCanvases() {
@@ -108,13 +108,13 @@ export class DesmosCalculator extends Linkable {
         scriptTag.onload = this.createCalculator.bind(this, this.options);
         document.head.append(scriptTag);
     }
-    createCalculator(options = {}) {
+    createCalculator() {
         //log('createCalculator')
         let apis = getPaper().loadedAPIs;
         if (!apis.includes('desmos-calc')) {
             apis.push('desmos-calc');
         }
-        this.calculator = Desmos.GraphingCalculator(this.innerCanvas.view.div, options);
+        this.calculator = Desmos.GraphingCalculator(this.innerCanvas.view.div, this.options);
         this.calculator.observeEvent('change', this.onChange.bind(this));
         window.setTimeout(this.layoutContent.bind(this), 50);
     }

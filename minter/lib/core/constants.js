@@ -1,7 +1,7 @@
 import { Color } from '../core/classes/Color.js';
-export const SIDEBAR_WIDTH = 210;
+export const SIDEBAR_WIDTH = 100;
 export const SHOW_HTML_CONSOLE = false;
-export const DRAW_BORDERS = true;
+export const DRAW_BORDERS = false;
 export const MAX_TAP_DELAY = 250;
 export const MERE_TAP_DELAY = 250;
 export const LONG_PRESS_DURATION = 1000;

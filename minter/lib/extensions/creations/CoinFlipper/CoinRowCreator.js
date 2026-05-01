@@ -1,6 +1,6 @@
 import { Creator } from '../../../core/creators/Creator.js';
 import { CoinRow } from './CoinRow.js';
-import { vertexSubtract } from '../../../core/functions/vertex.js';
+import { vertexAdd } from '../../../core/functions/vertex.js';
 export class CoinRowCreator extends Creator {
     defaults() {
         return {
@@ -12,7 +12,7 @@ export class CoinRowCreator extends Creator {
         super.setup();
         this.creation = this.createMobject();
         this.creation.update({
-            anchor: vertexSubtract(this.getEndPoint(), this.getStartPoint())
+            anchor: this.pointOffset
         });
         this.add(this.creation);
     }
@@ -23,7 +23,7 @@ export class CoinRowCreator extends Creator {
         });
     }
     updateFromTip(q, redraw = true) {
-        let width = q[0] - this.getStartPoint()[0] - 100;
+        let width = q[0] - this.getStartPoint()[0];
         let nbCoins = Math.max(Math.floor(width / this.creation.coinSpacing), 1);
         this.creation.update({
             nbCoins: nbCoins
@@ -34,7 +34,7 @@ export class CoinRowCreator extends Creator {
             return;
         }
         this.creation.update({
-            anchor: this.getStartPoint(),
+            anchor: vertexAdd(this.getStartPoint(), this.pointOffset),
             frameWidth: this.creation.computeWidth()
         });
         this.creation.inputList.positionSelf();

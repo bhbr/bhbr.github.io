@@ -4,7 +4,7 @@ import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
 import { Rectangle } from '../../../core/shapes/Rectangle.js';
 import { TextLabel } from '../../../core/mobjects/TextLabel.js';
 import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.js';
-import { SimpleNumberBox } from '../../../extensions/creations/math/boxes/SimpleNumberBox.js';
+import { SimpleNumberInputBox } from '../../../extensions/creations/math/boxes/SimpleNumberInputBox.js';
 import { getPaper } from '../../../core/functions/getters.js';
 import { randomBinomial } from '../../../core/functions/various.js';
 export class CoinStack extends Linkable {
@@ -32,13 +32,13 @@ export class CoinStack extends Linkable {
             playButton: new PlayButton({
                 anchor: [0, 50]
             }),
-            nbCoinsInputBox: new SimpleNumberBox({
+            nbCoinsInputBox: new SimpleNumberInputBox({
                 value: 100
             }),
             inputProperties: [
                 { name: 'tailsProbability', displayName: 'p(tails)', type: 'number' },
-                { name: 'headsColor', displayName: 'heads color', type: 'Color' },
-                { name: 'tailsColor', displayName: 'tails color', type: 'Color' },
+                //{ name: 'headsColor', displayName: 'heads color', type: 'Color' },
+                //{ name: 'tailsColor', displayName: 'tails color', type: 'Color' },
                 { name: 'nbCoins', displayName: '# coins', type: 'number' }
             ],
             outputProperties: [
@@ -132,6 +132,7 @@ export class CoinStack extends Linkable {
         this.playButton.update({
             mobject: this
         });
+        this.controls.push(this.playButton);
     }
     positionButton() {
         this.playButton.update({
@@ -145,6 +146,7 @@ export class CoinStack extends Linkable {
         this.nbCoinsInputBox.blur = this.endNbCoinsEditing.bind(this);
         this.nbCoinsInputBox.onReturn = this.endNbCoinsEditing.bind(this);
         this.add(this.nbCoinsInputBox);
+        this.controls.push(this.nbCoinsInputBox);
     }
     endNbCoinsEditing() {
         getPaper().blurFocusedChild();

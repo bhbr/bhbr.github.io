@@ -19,10 +19,13 @@ export class BoxSliderCreator extends Creator {
             return;
         }
         this.add(this.creation);
-        this.creation.hideLinks();
     }
     createMobject() {
-        return this.creation || new BoxSlider({ height: 0 });
+        if (this.creation) {
+            return this.creation;
+        }
+        let slider = new BoxSlider({ height: 0 });
+        return slider;
     }
     updateFromTip(q, redraw = true) {
         let p = this.getStartPoint();
@@ -43,7 +46,6 @@ export class BoxSliderCreator extends Creator {
         this.creation.filledBar.update({
             fillColor: Color.gray(0.5)
         }, redraw);
-        this.creation.hideLinks();
         if (redraw) {
             this.view.redraw();
         }
@@ -58,8 +60,8 @@ export class BoxSliderCreator extends Creator {
             frameHeight: this.creation.height
         });
         this.creation.outerBar.update({ anchor: vertexOrigin() }); // necessary?
-        this.creation.label.update({
-            anchor: [this.creation.width / 2 - this.creation.label.view.frame.width / 2, this.creation.height / 2 - this.creation.label.view.frame.height / 2]
+        this.creation.valueLabel.update({
+            anchor: [this.creation.width / 2 - this.creation.valueLabel.view.frame.width / 2, this.creation.height / 2 - this.creation.valueLabel.view.frame.height / 2]
         });
         this.creation.outputList.positionSelf();
     }

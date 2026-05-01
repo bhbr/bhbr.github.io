@@ -2,6 +2,8 @@
 import { DesmosCalculator } from 'extensions/creations/DesmosCalculator/DesmosCalculator'
 import { Color } from 'core/classes/Color'
 import { log } from 'core/functions/logging'
+import { RadioButtonList } from 'core/mobjects/RadioButtonList'
+import { TextLabel } from 'core/mobjects/TextLabel'
 
 export class Histogram extends DesmosCalculator {
 
@@ -12,6 +14,9 @@ export class Histogram extends DesmosCalculator {
 	max: number
 	leftColor: Color
 	rightColor: Color
+	scale: number
+	scalingSelector: RadioButtonList
+	frequencyLabel: TextLabel
 
 	defaults(): object {
 		return {
@@ -20,6 +25,7 @@ export class Histogram extends DesmosCalculator {
 			max: 10,
 			binWidth: 1,
 			data: [],
+			scale: 1,
 			leftColor: Color.blue(),
 			rightColor: Color.red(),
 			inputProperties: [
@@ -27,24 +33,60 @@ export class Histogram extends DesmosCalculator {
 				{ name: 'nbBins', displayName: '# bins', type: 'number' },
 				{ name: 'min', displayName: 'minimum', type: 'number' },
 				{ name: 'max', displayName: 'maximum', type: 'number' },
-				{ name: 'leftColor', displayName: 'left color', type: 'Color' },
-				{ name: 'rightColor', displayName: 'right color', type: 'Color' }
+				//{ name: 'leftColor', displayName: 'left color', type: 'Color' },
+				//{ name: 'rightColor', displayName: 'right color', type: 'Color' }
 			],
 			outputProperties: [
 				{ name: 'bins', type: 'Array<number>' }
-			]
+			],
+			scalingSelector: new RadioButtonList({
+				options: ['absolute', 'relative'],
+				orientation: 'horizontal',
+				optionSpacing: 100
+			}),
+			frequencyLabel: new TextLabel({
+				text: 'frequency'
+			}),
+			options: {
+				expressions: false
+			}
 		}
 	}
 
 	setup() {
 		super.setup()
 		this.binWidth = (this.max - this.min) / this.nbBins
+		this.scalingSelector.update({
+			action: this.setScaling.bind(this),
+			anchor: [0, this.frameHeight + 10]
+		})
+		this.scalingSelector.radioButtons[0].select()
+		this.add(this.scalingSelector)
+		this.controls.push(this.scalingSelector)
+		this.frequencyLabel.update({
+			anchor: [200, this.frameHeight + 10],
+			frameHeight: 18
+		})
+		this.add(this.frequencyLabel)
+		this.controls.push(this.frequencyLabel)
 	}
 
-	createCalculator(options: object = {}) {
-		options['expressions'] = false
-		super.createCalculator(options)
-		this.calculator.setExpression({ id:'B', latex: `B=[${this.bins()}]` })
+	setScaling(option: string) {
+		switch (option) {
+			case 'absolute':
+				this.scale = 1
+				break
+			case 'relative':
+				this.scale = this.data.length
+				break
+			default:
+				break
+		}
+	}
+
+	createCalculator() {
+		super.createCalculator()
+		this.calculator.setExpression({ id:'B', latex: `B=[${this.bins()}]/${this.scale}` })
 		this.calculator.setMathBounds({
 			left: this.min - 0.1 * (this.max - this.min),
 			right: this.max + 0.1 * (this.max - this.min),
@@ -94,7 +136,7 @@ export class Histogram extends DesmosCalculator {
 			this.binWidth = (this.max - this.min) / this.nbBins
 		}
 		if (args['data'] !== undefined) {
-			this.calculator.setExpression({ id:'B', latex: `B=[${this.bins()}]` })
+			this.calculator.setExpression({ id:'B', latex: `B=[${this.bins()}]/${this.scale}` })
 			this.createBars()
 		}
 	}

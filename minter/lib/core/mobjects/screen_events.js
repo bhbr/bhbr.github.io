@@ -16,7 +16,7 @@ export var ScreenEventType;
     ScreenEventType[ScreenEventType["Cancel"] = 3] = "Cancel";
     ScreenEventType[ScreenEventType["Unknown"] = 4] = "Unknown";
 })(ScreenEventType || (ScreenEventType = {}));
-window.emulatedDevice = ScreenEventDevice.Mouse;
+window.emulatedDevice = ScreenEventDevice.Pen;
 export var ScreenEventHandler;
 (function (ScreenEventHandler) {
     ScreenEventHandler[ScreenEventHandler["Auto"] = 0] = "Auto";
@@ -74,11 +74,13 @@ export function screenEventTypeAsString(e) {
 export function screenEventDevice(e) {
     if (isTouchDevice) {
         if (e instanceof TouchEvent) {
-            if (e.touches[0].force == 0) {
-                return ScreenEventDevice.Finger;
-            }
-            else {
-                return ScreenEventDevice.Pen;
+            switch (e.touches[0].touchType) {
+                case 'direct':
+                    return ScreenEventDevice.Finger;
+                case 'stylus':
+                    return ScreenEventDevice.Pen;
+                default:
+                    return ScreenEventDevice.Unknown;
             }
         }
         else if (e instanceof MouseEvent) {

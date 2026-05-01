@@ -3,7 +3,7 @@ import { PlayableCoin } from './PlayableCoin.js';
 export class PlayableCoinCreator extends DraggingCreator {
     defaults() {
         return {
-            helpText: 'A coin that shows either heads (H) or tails (T). Tap the coin or the play button to flip it.',
+            helpText: 'A coin that shows either heads (H) or tails (T). Tap the coin or the play button to flip it. Swipe the coin left or right to fix the outcome, e. g. for creating an artificial streak.',
             pointOffset: [-25, -50]
         };
     }

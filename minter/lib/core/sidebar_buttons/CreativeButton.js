@@ -2,8 +2,7 @@ import { SidebarButton } from './SidebarButton.js';
 export class CreativeButton extends SidebarButton {
     defaults() {
         return {
-            creations: [],
-            touchUpMessages: [{ create: 'draw' }]
+            creations: []
         };
     }
     mutabilities() {
@@ -11,24 +10,29 @@ export class CreativeButton extends SidebarButton {
             creations: 'on_init'
         };
     }
-    setup() {
+    setupMessages() {
+        let newSelectMessages = [];
+        let newDeselectMessages = [];
         for (let c of this.creations) {
-            this.touchDownMessages.push({ create: c });
+            newSelectMessages.push({ create: c });
+            newDeselectMessages.push({ create: 'draw' });
         }
-        super.setup();
+        this.update({
+            selectMessages: newSelectMessages,
+            deselectMessages: newDeselectMessages
+        });
     }
     labelFromMessage(msg) {
-        var key = Object.values(msg)[0];
-        if (this.currentModeIndex > 0) {
-            key = '&#9666; ' + key;
-        }
-        if (this.currentModeIndex < this.creations.length - 1) {
-            key = key + ' &#9656;';
-        }
-        return key;
+        return Object.values(msg)[0];
+    }
+    baseIconName() {
+        return this.creations[0].replaceAll(' ', '_');
     }
     imageNameForIndex(index) {
-        return (Object.values(this.touchDownMessages[index] ?? {}) ?? ['key'])[0];
+        return (Object.values(this.selectMessages[index] ?? {}) ?? ['key'])[0];
+    }
+    updateHelpText() {
+        // do nothing because the board handles it
     }
 }
 //# sourceMappingURL=CreativeButton.js.map

@@ -13,16 +13,22 @@ export class PlayableCoin extends Linkable {
             valueHistory: [],
             inputProperties: [
                 { name: 'tailsProbability', displayName: 'p(tails)', type: 'number' },
-                { name: 'headsColor', displayName: 'heads color', type: 'Color' },
-                { name: 'tailsColor', displayName: 'tails color', type: 'Color' }
+                //{ name: 'headsColor', displayName: 'heads color', type: 'Color' },
+                //{ name: 'tailsColor', displayName: 'tails color', type: 'Color' }
             ],
             outputProperties: [
-                { name: 'value', type: 'number' }
+                { name: 'value', type: 'number' },
             ],
             frameWidth: 50,
-            frameHeight: 80,
-            tailsProbability: 0.5
+            frameHeight: 50,
+            swipedSide: null
         };
+    }
+    get tailsProbability() {
+        return this.coin.tailsProbability;
+    }
+    set tailsProbability(newValue) {
+        this.coin.tailsProbability = newValue;
     }
     setup() {
         super.setup();
@@ -36,10 +42,43 @@ export class PlayableCoin extends Linkable {
         });
         this.add(this.coin);
         this.add(this.playButton);
+        this.controls.push(this.playButton);
         this.playButton.mobject = this;
     }
     onTap(e) {
         this.flip(true);
+        this.coin.update({
+            opacity: 1
+        });
+    }
+    onPointerDown(e) {
+        this.sensor.eventStartLocation = this.sensor.localEventVertex(e);
+        this.coin.update({
+            opacity: 0.5
+        });
+    }
+    onPointerMove(e) {
+        if (this.sensor.eventStartLocation === null) {
+            return;
+        }
+        let dx = this.sensor.localEventVertex(e)[0] - this.sensor.eventStartLocation[0];
+        if (dx > 10) {
+            this.swipedSide = 'tails';
+        }
+        else if (dx < -10) {
+            this.swipedSide = 'heads';
+        }
+    }
+    onPointerUp(e) {
+        this.coin.update({
+            opacity: 1
+        });
+        if (this.swipedSide) {
+            this.coin.flipToState(this.swipedSide, true);
+            this.update();
+            this.updateDependents();
+            this.swipedSide = null;
+        }
     }
     flip(animate = false) {
         this.coin.flip(animate);
@@ -66,6 +105,15 @@ export class PlayableCoin extends Linkable {
     }
     get value() { return this.coin.value; }
     set value(newValue) { this.coin.value = newValue; }
+    update(args = {}, redraw = true) {
+        let p = args['tailsProbability'];
+        if (p !== undefined) {
+            this.coin.update({
+                tailsProbability: p
+            }, true);
+        }
+        super.update(args, redraw);
+    }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=PlayableCoin.js.map

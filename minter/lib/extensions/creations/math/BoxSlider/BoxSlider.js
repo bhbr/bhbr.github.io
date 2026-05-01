@@ -5,7 +5,8 @@ import { Color } from '../../../../core/classes/Color.js';
 import { TextLabel } from '../../../../core/mobjects/TextLabel.js';
 import { eventVertex, ScreenEventHandler } from '../../../../core/mobjects/screen_events.js';
 import { Rectangle } from '../../../../core/shapes/Rectangle.js';
-import { SimpleNumberBox } from '../../../../extensions/creations/math/boxes/SimpleNumberBox.js';
+import { SimpleNumberInputBox } from '../../../../extensions/creations/math/boxes/SimpleNumberInputBox.js';
+import { VariableNameBox } from './VariableNameBox.js';
 export class BoxSlider extends Linkable {
     defaults() {
         return {
@@ -13,7 +14,23 @@ export class BoxSlider extends Linkable {
             outputProperties: [
                 { name: 'value', type: 'number' }
             ],
+            nameInputBox: new VariableNameBox({
+                width: 20,
+                anchor: [10, -30],
+            }),
+            nameLabel: new TextLabel({
+                backgroundColor: Color.clear(),
+                frameWidth: 50,
+                frameHeight: 20,
+                text: '',
+                anchor: [10, -30]
+            }),
+            maxValueInputBox: new SimpleNumberInputBox({
+                anchor: [-60, -10],
+                value: 1
+            }),
             outerBar: new Rectangle({
+                anchor: [0, 0],
                 fillColor: Color.black(),
                 fillOpacity: 1,
                 strokeColor: Color.white()
@@ -21,12 +38,17 @@ export class BoxSlider extends Linkable {
             filledBar: new Rectangle({
                 fillOpacity: 0.5
             }),
-            label: new TextLabel({
+            valueLabel: new TextLabel({
                 frameHeight: 25,
                 horizontalAlign: 'center',
                 verticalAlign: 'center',
                 fontSize: 20
             }),
+            minValueInputBox: new SimpleNumberInputBox({
+                anchor: [-60, 10],
+                value: 0
+            }),
+            name: null,
             min: 0,
             max: 1,
             value: 0.6,
@@ -36,15 +58,7 @@ export class BoxSlider extends Linkable {
             fillColor: Color.black(),
             barFillColor: Color.gray(0.5),
             screenEventHandler: ScreenEventHandler.Self,
-            precision: 3,
-            minValueInputBox: new SimpleNumberBox({
-                anchor: [10, 10],
-                value: 0
-            }),
-            maxValueInputBox: new SimpleNumberBox({
-                anchor: [10, -30],
-                value: 1
-            })
+            precision: 3
         };
     }
     mutabilities() {
@@ -53,14 +67,14 @@ export class BoxSlider extends Linkable {
             outputNames: 'never',
             outerBar: 'never',
             filledBar: 'never',
-            label: 'never'
+            valueLabel: 'never'
         };
     }
     setup() {
         super.setup();
         this.add(this.outerBar);
         this.add(this.filledBar);
-        this.add(this.label);
+        this.add(this.valueLabel);
         this.addDependency('width', this.outerBar, 'width');
         this.addDependency('height', this.outerBar, 'height');
         this.update({
@@ -75,6 +89,26 @@ export class BoxSlider extends Linkable {
         this.minValueInputBox.onReturn = this.endMinValueEditing.bind(this);
         this.maxValueInputBox.blur = this.endMaxValueEditing.bind(this);
         this.maxValueInputBox.onReturn = this.endMaxValueEditing.bind(this);
+        this.controls.push(this.nameInputBox);
+        this.controls.push(this.minValueInputBox);
+        this.controls.push(this.maxValueInputBox);
+        //this.add(this.nameLabel)
+        //this.add(this.nameInputBox)
+        this.nameLabel.update({
+            horizontalAlign: 'center',
+            verticalAlign: 'center',
+            fontSize: 14,
+            screenEventHandler: ScreenEventHandler.Below
+        });
+        // this.nameInputBox.update({
+        // 	width: 20,
+        // 	anchor: [(this.width - 20) / 2, this.height + 20]
+        // })
+        this.nameInputBox.onReturn = function () {
+            this.update({
+                name: this.nameInputBox.value
+            });
+        }.bind(this);
         this.updateDependents();
         this.outputList.update();
         this.moveToTop(this.outputList);
@@ -118,6 +152,12 @@ export class BoxSlider extends Linkable {
         return (this.value - this.min) / (this.max - this.min);
     }
     update(args = {}, redraw = true) {
+        if (args['name'] !== undefined) {
+            this.renameLinkableProperty('output', this.name ?? 'value', args['name']);
+            this.nameLabel.update({
+                text: args['name']
+            });
+        }
         super.update(args, false);
         if (args['width'] !== undefined) {
             this.view.frame.width = this.width;
@@ -125,7 +165,7 @@ export class BoxSlider extends Linkable {
         if (args['height'] !== undefined) {
             this.view.frame.height = this.height;
             this.minValueInputBox.update({
-                anchor: [10, this.height + 10]
+                anchor: [-60, this.height - 10]
             });
         }
         //// updating submobs
@@ -138,14 +178,17 @@ export class BoxSlider extends Linkable {
             height: a * this.height,
             anchor: [0, this.height - a * this.height]
         }, redraw);
-        this.updateLabel(redraw);
+        this.updateValueLabel(redraw);
+        if (this.name != null) {
+            getPaper().globals[this.name] = this.value;
+        }
         this.updateDependents();
         if (redraw) {
             this.view.redraw();
         }
     }
-    updateLabel(redraw = true) {
-        this.label.update({
+    updateValueLabel(redraw = true) {
+        this.valueLabel.update({
             text: this.value.toString(),
             anchor: [this.width / 2 - this.width / 2, this.height / 2 - 25 / 2],
             frameWidth: this.width

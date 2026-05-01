@@ -5,6 +5,7 @@ import { ExtendedObjectTest } from './unit_tests/core/classes/ExtendedObjectTest
 import { MobjectTest } from './unit_tests/core/mobjects/MobjectTest.js';
 import { TransformTest } from './unit_tests/core/classes/TransformTest.js';
 import { VertexTest } from './unit_tests/core/functions/VertexTest.js';
+import { FrameTest } from './unit_tests/core/mobjects/FrameTest.js';
 export const AllTests = new BundledTest({
     name: 'all tests',
     subtests: [
@@ -13,8 +14,9 @@ export const AllTests = new BundledTest({
         ExtendedObjectTest,
         MobjectTest,
         TransformTest,
-        VertexTest
+        VertexTest,
+        FrameTest
     ],
-    silenceSubtests: true
+    silenceSubtests: false
 });
 //# sourceMappingURL=allTests.js.map

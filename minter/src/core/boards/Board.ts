@@ -30,7 +30,8 @@ import { TextLabel } from 'core/mobjects/TextLabel'
 import { Dependency } from 'core/mobjects/Dependency'
 
 declare var paper: Paper
-export declare interface Window { webkit?: any }
+
+interface Window { webkit?: any }
 
 export class BoardContent extends MGroup { }
 
@@ -57,8 +58,8 @@ The content children can also be dragged and panned.
 				anchor: vertexOrigin(),
 				cornerRadius: 25,
 				screenEventHandler: ScreenEventHandler.Parent,
-				fillColor: Color.gray(0.1),
-				fillOpacity: 1.0,
+				fillColor: isTouchDevice ? Color.clear() : Color.black(),
+				fillOpacity: isTouchDevice ? 0.0 : 1.0,
 				strokeColor: Color.gray(0.2),
 				strokeWidth: 1.0,
 				drawShadow: true
@@ -73,6 +74,7 @@ The content children can also be dragged and panned.
 			buttonNames: [
 				'DragButton'
 			],
+			globals: {},
 			creationStroke: [],
 			creationMode: 'draw',
 			creator: null,
@@ -89,7 +91,6 @@ The content children can also be dragged and panned.
 			isShowingLinks: false,
 			isShowingControls: false,
 			allowingDrag: false,
-			lastHoveredChild: null,
 			helpTextLabel: new TextLabel({
 				frameHeight: HELP_TEXT_LABEL_HEIGHT,
 				frameWidth: HELP_TEXT_LABEL_WIDTH,
@@ -117,6 +118,8 @@ The content children can also be dragged and panned.
 	sidebar?: any
 	// by creating buttons named this:
 	buttonNames: Array<string>
+
+	globals: object // global variables e. g. for computing MathExpressions
 
 	//////////////////////////////////////////////////////////
 	//                                                      //
@@ -154,25 +157,25 @@ The content children can also be dragged and panned.
 		this.add(this.content)
 		this.moveToTop(this.inputList)
 		this.moveToTop(this.outputList)
-		this.add(this.expandButton)
+		//this.add(this.expandButton)
 
-		this.expandedInputList.update({
-			height: EXPANDED_IO_LIST_HEIGHT,
-			width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,
-			anchor: [this.expandButton.view.frame.width + EXPANDED_IO_LIST_INSET, EXPANDED_IO_LIST_INSET],
-			mobject: this,
-			outletProperties: this.inputProperties
-		})
-		this.add(this.expandedInputList)
+		// this.expandedInputList.update({
+		// 	height: EXPANDED_IO_LIST_HEIGHT,
+		// 	width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,
+		// 	anchor: [this.expandButton.view.frame.width + EXPANDED_IO_LIST_INSET, EXPANDED_IO_LIST_INSET],
+		// 	mobject: this,
+		// 	outletProperties: this.inputProperties
+		// })
+		// this.add(this.expandedInputList)
 
-		this.expandedOutputList.update({
-			height: EXPANDED_IO_LIST_HEIGHT,
-			width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,
-			anchor: [this.expandButton.view.frame.width + EXPANDED_IO_LIST_INSET, this.expandedHeight() - EXPANDED_IO_LIST_INSET - EXPANDED_IO_LIST_HEIGHT],
-			mobject: this,
-			outletProperties: this.outputProperties
-		})
-		this.add(this.expandedOutputList)
+		// this.expandedOutputList.update({
+		// 	height: EXPANDED_IO_LIST_HEIGHT,
+		// 	width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,
+		// 	anchor: [this.expandButton.view.frame.width + EXPANDED_IO_LIST_INSET, this.expandedHeight() - EXPANDED_IO_LIST_INSET - EXPANDED_IO_LIST_HEIGHT],
+		// 	mobject: this,
+		// 	outletProperties: this.outputProperties
+		// })
+		// this.add(this.expandedOutputList)
 
 		if (this.contracted) {
 			this.contractStateChange()
@@ -190,14 +193,13 @@ The content children can also be dragged and panned.
 		this.hideLinksOfContent()
 		this.setControlsVisibility(false)
 
-		let newAnchor = [this.frameWidth / 2 - HELP_TEXT_LABEL_WIDTH / 2 - SIDEBAR_WIDTH, 20]
+		let newAnchor = [0.5 * (this.frameWidth - HELP_TEXT_LABEL_WIDTH - SIDEBAR_WIDTH), 20]
 		this.helpTextLabel.update({
 			anchor: newAnchor,
 			frameWidth: HELP_TEXT_LABEL_WIDTH
 		})
 		this.add(this.helpTextLabel)
-		//this.helpTextLabel.view.hide()
-		this.helpTextLabel.view.div.style.alignItems = 'start'
+		this.helpTextLabel.view.hide()
 	}
 
 	update(args: object = {}, redraw: boolean = true) {
@@ -401,7 +403,7 @@ The content children can also be dragged and panned.
 			this.moveToTop(this.expandButton)
 		}
 		if (mob instanceof Linkable) {
-			mob.hideLinks()
+			mob.setLinksVisibility(this.isShowingLinks)
 			mob.setControlsVisibility(this.isShowingControls)
 		}
 		if (mob instanceof Board) {
@@ -439,7 +441,7 @@ The content children can also be dragged and panned.
 				if (value) {
 					this.helpTextLabel.view.show()
 				} else {
-					//this.helpTextLabel.view.hide()
+					this.helpTextLabel.view.hide()
 				}
 				break
 			case 'link':
@@ -452,6 +454,11 @@ The content children can also be dragged and panned.
 				this.helpTextLabel.update({
 					text: this.helpTexts['link']
 				})
+				if (value) {
+					this.helpTextLabel.view.show()
+				} else {
+					this.helpTextLabel.view.hide()
+				}
 				break
 			case 'show controls':
 				this.helpTextLabel.update({
@@ -460,14 +467,22 @@ The content children can also be dragged and panned.
 				if (value) {
 					this.helpTextLabel.view.show()
 				} else {
-					//this.helpTextLabel.view.hide()
+					this.helpTextLabel.view.hide()
 				}
 				this.setControlsVisibility(value as boolean)
 				this.isShowingControls = value
 				break
+			case 'show help':
+				if (value as boolean) {
+					this.helpTextLabel.view.show()
+				} else {
+					this.helpTextLabel.view.hide()
+				}
+				break
 			case 'create':
 				this.creationMode = value
 				if (this.creator == null) {
+					// create a dummy creator just to display the help text
 					// little hack, I know
 					let dummyCreator = this.createCreator(this.creationMode)
 					this.helpTextLabel.update({
@@ -476,12 +491,15 @@ The content children can also be dragged and panned.
 					if (value) {
 						this.helpTextLabel.view.show()
 					} else {
-						//this.helpTextLabel.view.hide()
+						this.helpTextLabel.view.hide()
 					}
 					return
 				}
 				this.remove(this.creator)
 				this.creator = this.createCreator(this.creationMode)
+				this.creator.update({
+					anchor: (this.creationMode == 'draw') ? [0, 0] : this.creationStroke[0]
+				})
 				this.add(this.creator)
 				this.helpTextLabel.update({
 					text: this.creator.helpText
@@ -489,7 +507,7 @@ The content children can also be dragged and panned.
 				if (value) {
 					this.helpTextLabel.view.show()
 				} else {
-					//this.helpTextLabel.view.hide()
+					this.helpTextLabel.view.hide()
 				}
 				break
 			case 'erase':
@@ -497,10 +515,10 @@ The content children can also be dragged and panned.
 				this.helpTextLabel.update({
 					text: this.helpTexts['erase']
 				})
-				if (!value) { // merely touch down
+				if (value) {
 					this.helpTextLabel.view.show()
 				} else {
-					//this.helpTextLabel.view.hide()
+					this.helpTextLabel.view.hide()
 				}
 				break
 			case 'restart':
@@ -513,14 +531,16 @@ The content children can also be dragged and panned.
 				if (!value) { // merely touch down
 					this.helpTextLabel.view.show()
 				} else {
-					//this.helpTextLabel.view.hide()
+					this.helpTextLabel.view.hide()
 				}
+				break
+			default:
 				break
 		}
 	}
 
 	setEraser(erasing: boolean) {
-		if (erasing) {
+		if (erasing && this.creationMode !== 'erase') {
 			this.sensor.setMouseMethodsTo(
 				this.startErasing.bind(this),
 				this.erasing.bind(this),
@@ -536,29 +556,34 @@ The content children can also be dragged and panned.
 				this.erasing.bind(this),
 				this.endErasing.bind(this)
 			)
-		} else {
+			this.update({
+				creationMode: 'erase'
+			})
+		} else if (!erasing && this.creationMode == 'erase') {
 			this.sensor.restoreMouseMethods()
 			this.sensor.restorePenMethods()
 			this.sensor.restoreTouchMethods()
+			this.handleMessage('create', 'draw')
 		}
 	}
 
-	contentChildClosestTo(p: vertex, maxDistance: number = 50): Mobject | null {
-		var d2 = Infinity
-		var candidate: Mobject | null = null
+	contentChildrenContaining(p: vertex): Array<Mobject> {
+		let mobs: Array<Mobject> = []
 		for (let child of this.contentChildren) {
-			let q = child.frame.viewCenter(this.frame)
-			let pq2 = vertexNorm2(vertexSubtract(p, q))
-			if (pq2 < d2) {
-				candidate = child
-				d2 = pq2
+			if (child.frame.contains(p)) {
+				mobs.push(child)
 			}
 		}
-		if (d2 < maxDistance ** 2) {
-			return candidate
-		} else {
-			return null
+		return mobs
+	}
+
+	firstContentChildContaining(p: vertex): Mobject | null {
+		for (let child of this.contentChildren) {
+			if (child.frame.contains(p)) {
+				return child
+			}
 		}
+		return null
 	}
 
 	startErasing(e: ScreenEvent) {
@@ -566,9 +591,26 @@ The content children can also be dragged and panned.
 	}
 
 	erasing(e: ScreenEvent) {
-		let mob = this.contentChildClosestTo(this.sensor.localEventVertex(e))
+		let mob = this.firstContentChildContaining(this.sensor.localEventVertex(e))
 		if (mob) {
 			this.removeFromContent(mob)
+			let linksToBeRemoved: Array<Mobject> = []
+			for (let link of this.links) {
+				if (link.startHook.outlet.ioList.mobject == mob || link.endHook.outlet.ioList.mobject == mob) {
+					link.startHook.update({
+						linked: false
+					})
+					link.startHook.outlet.removeHook()
+					link.endHook.update({
+						linked: false
+					})
+					linksToBeRemoved.push(link)
+					this.remove(link)
+				}
+			}
+			for (let link of linksToBeRemoved) {
+				remove(this.links, link)
+			}
 		}
 	}
 
@@ -606,9 +648,8 @@ The content children can also be dragged and panned.
 				if (this.creationTool == ScreenEventDevice.Finger) {
 					return new Creator()
 				}
-				let fh = new Freehand()
-				fh.line.update({
-					vertices: this.creationStroke
+				let fh = new Freehand({
+					creationStroke: this.creationStroke
 				})
 				return fh
 			default:
@@ -617,14 +658,14 @@ The content children can also be dragged and panned.
 					creationStroke: this.creationStroke
 				})
 				if (cm.creation instanceof Linkable) {
-					cm.creation.hideLinks()
+					cm.creation.setLinksVisibility(this.isShowingLinks)
+					cm.creation.setControlsVisibility(this.isShowingControls)
 				}
 				return cm
 		}
 	}
 
 	onPointerDown(e: ScreenEvent) {
-		//log('onPointerDown')
 		if (this.focusedChild) {
 			this.focusedChild.blur()
 		}
@@ -661,7 +702,6 @@ The content children can also be dragged and panned.
 	}
 
 	onPointerMove(e: ScreenEvent) {
-		//log('onPointerMove')
 		if (this.contracted) { return }
 		if (this.creationStroke.length == 0) { return }
 		this.creating(e)
@@ -677,7 +717,6 @@ The content children can also be dragged and panned.
 	}
 
 	onPointerUp(e: ScreenEvent) {
-		//log('onPointerUp')
 		if (this.contracted) { return }
 		this.endCreating(e)
 	}
@@ -685,9 +724,12 @@ The content children can also be dragged and panned.
 	endCreating(e: ScreenEvent) {
 		this.creationStroke = []
 		this.creationTool = null
-		if (this.creator == null) { return }
-		this.creator.dissolve()
-		//this.helpTextLabel.view.hide()
+		this.creationMode = 'draw'
+		if (this.creator !== null) {
+			this.creator.dissolve()
+			this.helpTextLabel.view.hide()
+		}
+		this.messageSidebar({ 'button': 'collapse' })
 	}
 
 
@@ -764,7 +806,6 @@ The content children can also be dragged and panned.
 	links: Array<DependencyLink>
 	isShowingLinks: boolean
 	isShowingControls: boolean
-	lastHoveredChild: Linkable | null
 
 	linkableChildren(): Array<Linkable> {
 	// the content children that are linkable
@@ -786,8 +827,8 @@ The content children can also be dragged and panned.
 		for (let submob of this.linkableChildren()) {
 			submob.showLinks()
 		}
-		this.expandedInputList.view.show()
-		this.expandedOutputList.view.show()
+		//this.expandedInputList.view.show()
+		//this.expandedOutputList.view.show()
 	}
 	
 	hideLinksOfContent() {
@@ -799,8 +840,8 @@ The content children can also be dragged and panned.
 			submob.hideLinks()
 		}
 
-		this.expandedInputList.view.hide()
-		this.expandedOutputList.view.hide()
+		//this.expandedInputList.view.hide()
+		//this.expandedOutputList.view.hide()
 	}
 
 	renameLinkableProperty(kind: 'input' | 'output', oldName: string, newName: string) {
@@ -812,32 +853,37 @@ The content children can also be dragged and panned.
 	setLinking(flag: boolean) {
 		if (flag && !this.isShowingLinks) {
 			this.showLinksOfContent()
-			this.sensor.setTouchMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this))
-			this.sensor.setPenMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this))
-			this.sensor.setMouseMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this))
 		} else if (!flag && this.isShowingLinks) { // if (!this.editingLinkName) {
 			this.hideLinksOfContent()
-			this.sensor.restoreTouchMethods()
-			this.sensor.restorePenMethods()
-			this.sensor.restoreMouseMethods()
 		}
 		this.isShowingLinks = flag
 		if (flag) {
 			this.disableContent()
+			this.sensor.setTouchMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this))
+			this.sensor.setPenMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this))
+			this.sensor.setMouseMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this))
+
 		} else {
 			this.enableContent()
+			this.sensor.restoreTouchMethods()
+			this.sensor.restorePenMethods()
+			this.sensor.restoreMouseMethods()
 		}
 	}
 
 	startLinking(e: ScreenEvent) {
 		var p = this.sensor.localEventVertex(e)
 		let clickedHook = this.hookAtLocation(p)
-		if (clickedHook == null) { return }
+		if (clickedHook == null) {
+			this.startCreating(e)
+			return
+		}
 		p = this.locationOfHook(clickedHook)
 		if (this.isFree(clickedHook)) {
 			this.createNewOpenLink(clickedHook)
 		} else {
 			let link = this.linkForHook(clickedHook)
+			link.view.show() //link.showLine()
 			link.dependency.source.removeDependency(link.dependency)
 			link.previousHook = clickedHook
 			clickedHook.update({ linked: false })
@@ -851,6 +897,7 @@ The content children can also be dragged and panned.
 			}
 		}
 		this.compatibleHooks = this.getCompatibleHooks(this.openHook)
+		this.greyOutHooksIncompatibleWithHook(clickedHook)
 	}
 
 	locationOfHook(hook: LinkHook): vertex {
@@ -900,7 +947,10 @@ The content children can also be dragged and panned.
 	}
 
 	linking(e: ScreenEvent) {
-		if (this.openLink === null) { return }
+		if (this.openLink === null) {
+			this.creating(e)
+			return
+		}
 		var p = this.sensor.localEventVertex(e)
 		let endHook = this.freeCompatibleHookAtLocation(p)
 		if (endHook !== null) {
@@ -915,30 +965,24 @@ The content children can also be dragged and panned.
 			child.inputList.view.hide()
 			child.outputList.view.hide()
 		}
-		if (this.openLink.startHook) { this.openLink.startHook.outlet.ioList.view.show() }
-		if (this.openLink.endHook) { this.openLink.endHook.outlet.ioList.view.show() }
+		let linkedHook = this.openLink.startHook ?? this.openLink.endHook
+		linkedHook.outlet.ioList.view.show()
 
 		let child = this.hoveredChild(p)
 		let listOfLists = this.hoveredIOLists(p)
 		if (!child && listOfLists.length == 0) { return }
 		let compHooks = this.getCompatibleHooks(this.openLink.startHook ?? this.openLink.endHook)
-		if (child && listOfLists.length == 0) {
-			for (let hook of child.inputList.allHooks()) {
-				if (compHooks.includes(hook)) {
-					child.inputList.view.show()
-					return
-				}
-			}
-			for (let hook of child.outputList.allHooks()) {
-				if (compHooks.includes(hook)) {
-					child.outputList.view.show()
-					return
-				}
+		if (child && child !== linkedHook.outlet.ioList.mobject && listOfLists.length == 0) {
+			if (linkedHook.outlet.kind == 'input' && child.outputProperties.length > 0) {
+				child.outputList.view.show()
+			} else if (linkedHook.outlet.kind == 'output' && child.inputProperties.length > 0) {
+				child.inputList.view.show()
 			}
 		}
-		if (child && listOfLists.length > 1) {
+		if (child && child !== linkedHook.outlet.ioList.mobject && listOfLists.length > 1) {
 			for (let list of listOfLists) {
 				if (list.mobject == child) {
+					//log(`showing ${list.constructor.name}`)
 					list.view.show()
 					return
 				}
@@ -946,11 +990,8 @@ The content children can also be dragged and panned.
 		}
 		let list = listOfLists[0]
 		if (list) {
-			for (let hook of list.allHooks()) {
-				if (compHooks.includes(hook)) {
-					list.view.show()
-					return
-				}
+			if (list.kind !== linkedHook.outlet.kind && list.mobject !== linkedHook.outlet.ioList.mobject && list.linkOutlets.length > 0) {
+				list.view.show()
 			}
 		}
 	}
@@ -959,21 +1000,26 @@ The content children can also be dragged and panned.
 		for (let child of this.linkableChildren()) {
 			if (child.anchor[0] <= p[0] && p[0] <= child.anchor[0] + child.view.frameWidth
 				&& child.anchor[1] <= p[1] && p[1] <= child.anchor[1] + child.view.frameHeight) {
-				this.lastHoveredChild = child
+				return child
 			}
 		}
-		return this.lastHoveredChild
 	}
 
 	hoveredIOLists(p: vertex): Array<IOList> {
 		let ret: Array<IOList> = []
 		for (let child of this.linkableChildren()) {
-			if (child.anchor[0] + child.inputList.anchor[0] <= p[0] && p[0] <= child.anchor[0] + child.inputList.anchor[0] + child.inputList.view.frameWidth
-				&& child.anchor[1] + child.inputList.anchor[1] <= p[1] && p[1] <= child.anchor[1]) {
+			let minX1 = child.anchor[0] + child.inputList.anchor[0]
+			let maxX1 = minX1 + child.inputList.view.frameWidth
+			let minY1 = child.anchor[1] + child.inputList.anchor[1]
+			let maxY1 = child.anchor[1]
+			if (minX1 <= p[0] && p[0] <= maxX1 && minY1 <= p[1] && p[1] <= maxY1) {
 				ret.push(child.inputList)
 			}
-			if (child.anchor[0] + child.outputList.anchor[0] <= p[0] && p[0] <= child.anchor[0] + child.outputList.anchor[0] + child.outputList.view.frameWidth
-				&& child.anchor[1] + child.view.frameHeight <= p[1] && p[1] <= child.anchor[1] + child.outputList.anchor[1] + child.outputList.view.frameHeight) {
+			let minX2 = child.anchor[0] + child.outputList.anchor[0]
+			let maxX2 = minX2 + child.outputList.view.frameWidth
+			let minY2 = child.anchor[1] + child.view.frameHeight
+			let maxY2 = minY2 + child.outputList.view.frameHeight
+			if (minX2 <= p[0] && p[0] <= maxX2 && minY2 <= p[1] && p[1] <= maxY2) {
 				ret.push(child.outputList)
 			}
 		}
@@ -981,6 +1027,11 @@ The content children can also be dragged and panned.
 	}
 
 	endLinking(e: ScreenEvent) {
+		if (!this.openLink) {
+			this.endCreating(e)
+			return
+		}
+		this.showAllHooks()
 		let h = this.freeCompatibleHookAtLocation(this.sensor.localEventVertex(e))
 		if (h === null) {
 			if (this.openLink) {
@@ -996,7 +1047,6 @@ The content children can also be dragged and panned.
 					this.openLink.endHook.outlet.ioList.mobject.removedInputLink(this.openLink)
 				}
 				if (this.openLink.previousHook) {
-					this.openLink.previousHook.update({ linked: false })
 					if (this.openLink.previousHook.outlet.kind == 'input') {
 						this.openLink.previousHook.outlet.ioList.mobject.removedInputLink(this.openLink)
 					} else {
@@ -1025,6 +1075,7 @@ The content children can also be dragged and panned.
 		this.openLink.startHook.update({ linked: true })
 		this.openLink.endHook.update({ linked: true })
 		this.openLink.previousHook = null
+		this.openLink.view.hide() //this.openLink.hideLine()
 
 		this.links.push(this.openLink)
 		this.createNewDependency()
@@ -1033,6 +1084,38 @@ The content children can also be dragged and panned.
 		this.openBullet = null
 		this.compatibleHooks = []
 
+	}
+
+	showAllHooks() {
+		for (let mob of this.linkableChildren()) {
+			for (let outlet of mob.inputList.linkOutlets) {
+				outlet.label.update({
+					opacity: 1
+				})
+				for (let hook of outlet.linkHooks) {
+					hook.update({
+						opacity: 1
+					})
+				}
+			}
+		}
+	}
+
+	greyOutHooksIncompatibleWithHook(baseHook: LinkHook) {
+		for (let mob of this.linkableChildren()) {
+			for (let outlet of mob.inputList.linkOutlets) {
+				for (let hook of outlet.linkHooks) {
+					if (!this.compatibleHooks.includes(hook) && baseHook !== hook) {
+						hook.update({
+							opacity: 0.25
+						})
+						outlet.label.update({
+							opacity: 0.25
+						})
+					}
+				}
+			}
+		}
 	}
 
 	getCompatibleHooks(startHook: LinkHook): Array<LinkHook> {
@@ -1183,18 +1266,15 @@ The content children can also be dragged and panned.
 	//////////////////////////////////////////////////////////
 
 	messageSidebar(message: object) {
-		if (isTouchDevice) {
+		try {
 			let w = window as Window
 			w.webkit.messageHandlers.handleMessageFromPaper.postMessage(message)
-		} else {
-			if (this.sidebar !== null && this.sidebar !== undefined) {
-				this.sidebar.getMessage(message)
-			}
+		} catch {
+			this.sidebar.getMessage(message)
 		}
 	}
 
 }
-
 
 
 
