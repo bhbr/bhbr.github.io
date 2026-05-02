@@ -298,6 +298,7 @@ export class SidebarButton extends Pill {
     }
     commonMereButtonUp() {
         if (!this.sidebar || !this.isActive()) {
+            this.hideOptions();
             return;
         }
         this.sidebar.setActiveButton(null);

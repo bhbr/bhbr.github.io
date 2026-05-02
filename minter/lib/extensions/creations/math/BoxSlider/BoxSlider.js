@@ -26,7 +26,10 @@ export class BoxSlider extends Linkable {
                 anchor: [10, -30]
             }),
             maxValueInputBox: new SimpleNumberInputBox({
-                anchor: [-60, -10],
+                labelText: '',
+                labelWidth: 0,
+                labelGap: 0,
+                anchor: [-70, -10],
                 value: 1
             }),
             outerBar: new Rectangle({
@@ -45,7 +48,10 @@ export class BoxSlider extends Linkable {
                 fontSize: 20
             }),
             minValueInputBox: new SimpleNumberInputBox({
-                anchor: [-60, 10],
+                labelText: '',
+                labelWidth: 0,
+                labelGap: 0,
+                anchor: [-70, 10],
                 value: 0
             }),
             name: null,

@@ -5,6 +5,7 @@ import { CoinFlipPaper } from './extensions/boards/coin-flip/CoinFlipPaper'
 import { Coin } from './extensions/creations/CoinFlipper/Coin'
 import { Transform } from './core/classes/Transform'
 import { MathExpressionField } from './extensions/creations/MathExpressionField/MathExpressionField'
+import { isTouchDevice, separateSidebar } from './core/mobjects/screen_events'
 
 export class StartPaper extends CoinFlipPaper { }
 

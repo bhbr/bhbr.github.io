@@ -33,6 +33,7 @@ export class CoinStack extends Linkable {
                 anchor: [0, 50]
             }),
             nbCoinsInputBox: new SimpleNumberInputBox({
+                labelText: '# coins:',
                 value: 100
             }),
             inputProperties: [
@@ -124,7 +125,6 @@ export class CoinStack extends Linkable {
         this.addDependency('tailsColor', this.tailsLabel, 'textColor');
         this.add(this.headsLabel);
         this.add(this.tailsLabel);
-        this.nbCoinsInputBox.inputElement.style.left = '25px';
     }
     setupButton() {
         this.add(this.playButton);
@@ -145,6 +145,9 @@ export class CoinStack extends Linkable {
     setupInputBox() {
         this.nbCoinsInputBox.blur = this.endNbCoinsEditing.bind(this);
         this.nbCoinsInputBox.onReturn = this.endNbCoinsEditing.bind(this);
+        this.nbCoinsInputBox.update({
+            anchor: [this.frameWidth / 2 - this.nbCoinsInputBox.frameWidth / 2 - 40, 0]
+        });
         this.add(this.nbCoinsInputBox);
         this.controls.push(this.nbCoinsInputBox);
     }

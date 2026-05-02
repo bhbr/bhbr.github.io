@@ -459,6 +459,9 @@ export class Board extends Linkable {
             this.sensor.setMouseMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
             this.sensor.setPenMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
             this.sensor.setTouchMethodsTo(this.startErasing.bind(this), this.erasing.bind(this), this.endErasing.bind(this));
+            this.sensor.onMouseClick = this.onTap.bind(this);
+            this.sensor.onPenTap = this.onTap.bind(this);
+            this.sensor.onTouchTap = this.onTap.bind(this);
             this.update({
                 creationMode: 'erase'
             });
@@ -563,10 +566,19 @@ export class Board extends Linkable {
         if (this.focusedChild) {
             this.focusedChild.blur();
         }
-        if (this.contracted) {
-            return;
+        if (this.creationMode !== 'erase') {
+            this.startCreating(e);
         }
-        this.startCreating(e);
+    }
+    onTap(e) {
+        if (this.creationMode == 'erase') {
+            this.sidebar.setActiveButton(null);
+            this.setEraser(false);
+            this.update({ creationMode: 'draw ' });
+            this.sensor.onMouseClick = this.sensor.savedOnMouseClick;
+            this.sensor.onPenTap = this.sensor.savedOnPenTap;
+            this.sensor.onTouchTap = this.sensor.savedOnTouchTap;
+        }
     }
     focusOn(child) {
         this.focusedChild = child;
@@ -843,7 +855,6 @@ export class Board extends Linkable {
         if (child && child !== linkedHook.outlet.ioList.mobject && listOfLists.length > 1) {
             for (let list of listOfLists) {
                 if (list.mobject == child) {
-                    //log(`showing ${list.constructor.name}`)
                     list.view.show();
                     return;
                 }

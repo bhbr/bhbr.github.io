@@ -127,9 +127,7 @@ export class CoinRow extends Linkable {
     removeCoin() {
         let coin = this.coins.pop();
         this.remove(coin);
-        if (coin.state == 'tails') {
-            this.updateDependents(); // in particular this updates the heads and tails labels
-        }
+        this.updateDependents(); // in particular this updates the heads and tails labels
         this.adjustFrameWidth();
         this.positionTailsLabel();
         this.positionButton();

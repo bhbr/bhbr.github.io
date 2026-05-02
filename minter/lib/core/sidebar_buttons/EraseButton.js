@@ -25,6 +25,11 @@ export class EraseButton extends SidebarButton {
             backgroundColor: this.innerCircle.fillColor
         });
     }
+    commonButtonTap() {
+        if (this.selectedIndex == 1) {
+            this.commonMereButtonUp();
+        }
+    }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=EraseButton.js.map

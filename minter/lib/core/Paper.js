@@ -56,6 +56,18 @@ export class Paper extends Board {
             strokeWidth: 0.0
         });
         this.background.view.hideShadow();
+        if (isTouchDevice) {
+            if (separateSidebar) {
+                this.view.div.style.background = 'clear';
+                this.view.div.style.backgroundColor = 'clear';
+                this.background.update({
+                    fillColor: Color.clear()
+                });
+            }
+            else {
+                document.body.style.backgroundColor = 'black';
+            }
+        }
         let width = window.innerWidth - (separateSidebar ? 0 : SIDEBAR_WIDTH);
         let height = window.innerHeight;
         this.update({
