@@ -68,6 +68,9 @@ export class ToggleButton extends SidebarButton {
         });
         this.label.view.hide();
     }
+    getID() {
+        return this.messageKey;
+    }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=ToggleButton.js.map

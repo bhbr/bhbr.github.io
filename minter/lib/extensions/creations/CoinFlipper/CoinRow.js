@@ -1,10 +1,10 @@
 import { Coin } from './Coin.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
-import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.js';
-import { TextLabel } from '../../../core/mobjects/TextLabel.js';
+import { PlayButton } from '../../../extensions/ui/PlayButton/PlayButton.js';
+import { TextLabel } from '../../../core/ui/TextLabel.js';
 import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
 import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
-import { SimpleNumberInputBox } from '../../../extensions/creations/math/boxes/SimpleNumberInputBox.js';
+import { NumberInputBox } from '../../../extensions/ui/InputBox/NumberInputBox.js';
 import { getPaper } from '../../../core/functions/getters.js';
 export class CoinRow extends Linkable {
     defaults() {
@@ -43,7 +43,7 @@ export class CoinRow extends Linkable {
             ],
             frameWidth: 300,
             frameHeight: 50,
-            nbCoinsInputBox: new SimpleNumberInputBox({
+            nbCoinsInputBox: new NumberInputBox({
                 labelText: '# coins:',
                 value: 1
             }),
@@ -83,13 +83,13 @@ export class CoinRow extends Linkable {
         this.playButton.update({
             mobject: this
         });
-        this.controls.push(this.playButton);
+        this.controls.add(this.playButton);
     }
     setupInputBox() {
         this.add(this.nbCoinsInputBox);
         this.nbCoinsInputBox.blur = this.endNbCoinsEditing.bind(this);
         this.nbCoinsInputBox.onReturn = this.endNbCoinsEditing.bind(this);
-        this.controls.push(this.nbCoinsInputBox);
+        this.controls.add(this.nbCoinsInputBox);
         this.nbCoinsInputBox.update({
             anchor: [this.frameWidth / 2 - this.nbCoinsInputBox.frameWidth / 2, 0]
         });
@@ -98,7 +98,8 @@ export class CoinRow extends Linkable {
         getPaper().blurFocusedChild();
         this.nbCoinsInputBox.inputElement.blur();
         document.removeEventListener('keydown', this.nbCoinsInputBox.boundKeyPressed);
-        this.update({ nbCoins: this.nbCoinsInputBox.value });
+        this.updateNbCoins(this.nbCoinsInputBox.value, false);
+        this.updateDependents();
     }
     addCoin() {
         let coin = new Coin({
@@ -122,17 +123,17 @@ export class CoinRow extends Linkable {
         this.positionButton();
         this.positionNbCoinsInputBox();
         this.positionIOLists();
-        this.updateDependents(); // in particular this updates the heads and tails labels
+        this.updateDependents();
     }
     removeCoin() {
         let coin = this.coins.pop();
         this.remove(coin);
-        this.updateDependents(); // in particular this updates the heads and tails labels
         this.adjustFrameWidth();
         this.positionTailsLabel();
         this.positionButton();
         this.positionNbCoinsInputBox();
         this.positionIOLists();
+        this.updateDependents();
     }
     adjustFrameWidth() {
         this.update({
@@ -196,8 +197,13 @@ export class CoinRow extends Linkable {
         }
         return t;
     }
-    nbTailsAsString() { return this.nbTails().toString(); }
-    nbHeads() { return this.nbCoins - this.nbTails(); }
+    nbTailsAsString() {
+        return this.nbTails().toString();
+    }
+    nbHeads() {
+        let h = this.nbCoins - this.nbTails();
+        return this.nbCoins - this.nbTails();
+    }
     nbHeadsAsString() { return this.nbHeads().toString(); }
     mean() {
         return this.nbTails() / this.nbCoins;
@@ -205,11 +211,11 @@ export class CoinRow extends Linkable {
     update(args = {}, redraw = false) {
         let newNbCoins = args['nbCoins'];
         if (newNbCoins !== undefined && newNbCoins != this.nbCoins) {
-            this.updateNbCoins(newNbCoins);
+            this.updateNbCoins(newNbCoins, true);
         }
         super.update(args, redraw);
     }
-    updateNbCoins(newNbCoins) {
+    updateNbCoins(newNbCoins, updateInputBox = false) {
         if (newNbCoins < this.nbCoins) {
             for (var i = this.nbCoins - 1; i >= newNbCoins; i--) {
                 this.removeCoin();
@@ -220,7 +226,13 @@ export class CoinRow extends Linkable {
                 this.addCoin();
             }
         }
-        this.nbCoinsInputBox.inputElement.value = newNbCoins.toString();
+        this.nbCoins = this.coins.length;
+        this.updateDependents();
+        if (updateInputBox) {
+            this.nbCoinsInputBox.update({
+                value: newNbCoins
+            });
+        }
     }
     computeWidth() {
         return (this.nbCoins - 1) * this.coinSpacing + 2 * this.coinRadius + this.nbHeadsLabel.frameWidth + this.nbTailsLabel.frameWidth;

@@ -1,9 +1,9 @@
 import { Linkable } from '../../../../core/linkables/Linkable.js';
-import { Scroll } from '../../../../core/mobjects/Scroll.js';
+import { Scroll } from '../../../../core/ui/Scroll.js';
 import { Rectangle } from '../../../../core/shapes/Rectangle.js';
 import { Color } from '../../../../core/classes/Color.js';
 import { DraggingCreator } from '../../../../core/creators/DraggingCreator.js';
-import { SimpleButton } from '../../../../core/mobjects/SimpleButton.js';
+import { SimpleButton } from '../../../../core/ui/SimpleButton.js';
 export class NumberListBox extends Linkable {
     defaults() {
         return {
@@ -54,9 +54,10 @@ export class NumberListBox extends Linkable {
         this.clearButton.action = this.clear.bind(this);
         this.clearButton.remove(this.clearButton.label);
         // remove and add the label to fight lazy rendering bug
-        this.add(this.clearButton);
         this.clearButton.add(this.clearButton.label);
-        this.controls.push(this.clearButton);
+        this.controls.add(this.clearButton);
+        this.moveToTop(this.inputList);
+        this.moveToTop(this.outputList);
     }
     update(args = {}, redraw = true) {
         super.update(args, redraw);
@@ -66,6 +67,7 @@ export class NumberListBox extends Linkable {
             list: this.list
         }, redraw);
         this.scroll.view.div.style['overflow-y'] = 'auto';
+        this.scroll.view.div.scrollTop = this.scroll.view.div.scrollHeight;
     }
     startDragging(e) {
         super.startDragging(e);

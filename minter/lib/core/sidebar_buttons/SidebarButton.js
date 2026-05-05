@@ -3,7 +3,7 @@ import { Color } from '../../core/classes/Color.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
 import { BUTTON_RADIUS, OPTION_SPACING } from './button_geometry.js';
 import { MAX_TAP_DELAY } from '../../core/constants.js';
-import { TextLabel } from '../../core/mobjects/TextLabel.js';
+import { TextLabel } from '../../core/ui/TextLabel.js';
 import { separateSidebar } from '../../core/mobjects/screen_events.js';
 import { ImageView } from '../../core/mobjects/ImageView.js';
 import { SidebarButtonView } from './SidebarButtonView.js';
@@ -358,6 +358,9 @@ export class SidebarButton extends Pill {
         if (key == this.shortcutKey) {
             this.commonButtonUp();
         }
+    }
+    getID() {
+        return 'button';
     }
 }
 //# sourceMappingURL=SidebarButton.js.map

@@ -1,6 +1,6 @@
 import { Circle } from '../../../core/shapes/Circle.js';
 import { Color } from '../../../core/classes/Color.js';
-import { TextLabel } from '../../../core/mobjects/TextLabel.js';
+import { TextLabel } from '../../../core/ui/TextLabel.js';
 import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
 export class Coin extends Circle {
     defaults() {

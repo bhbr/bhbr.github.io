@@ -4,12 +4,12 @@ import { CoinRowCreator } from '../../../extensions/creations/CoinFlipper/CoinRo
 import { CoinStackCreator } from '../../../extensions/creations/CoinFlipper/CoinStackCreator.js';
 import { NumberBoxCreator } from '../../../extensions/creations/math/boxes/NumberBox.js';
 import { NumberListBoxCreator } from '../../../extensions/creations/math/boxes/NumberListBox.js';
-import { BoxSliderCreator } from '../../../extensions/creations/math/BoxSlider/BoxSliderCreator.js';
-import { BoxStepperCreator } from '../../../extensions/creations/math/BoxStepper/BoxStepperCreator.js';
-import { AddBoxCreator, SubtractBoxCreator, MultiplyBoxCreator, DivideBoxCreator } from '../../../extensions/creations/math/box_functions/BinaryOperatorBoxCreator.js';
-import { LessThanBoxCreator, LessThanOrEqualBoxCreator, GreaterThanBoxCreator, GreaterThanOrEqualBoxCreator, EqualsBoxCreator, NotEqualsBoxCreator } from '../../../extensions/creations/math/box_functions/ComparisonBoxCreator.js';
-import { SumBoxCreator } from '../../../extensions/creations/math/box_functions/SumBox.js';
-import { AverageBoxCreator } from '../../../extensions/creations/math/box_functions/AverageBox.js';
+import { SliderCreator } from '../../../extensions/creations/math/Slider/SliderCreator.js';
+import { StepperCreator } from '../../../extensions/creations/math/Stepper/StepperCreator.js';
+import { AddBoxCreator, SubtractBoxCreator, MultiplyBoxCreator, DivideBoxCreator } from '../../../extensions/creations/math/boxes/BinaryOperatorBoxCreator.js';
+import { LessThanBoxCreator, LessThanOrEqualBoxCreator, GreaterThanBoxCreator, GreaterThanOrEqualBoxCreator, EqualsBoxCreator, NotEqualsBoxCreator } from '../../../extensions/creations/math/boxes/ComparisonBoxCreator.js';
+import { SumBoxCreator } from '../../../extensions/creations/math/boxes/SumBox.js';
+import { AverageBoxCreator } from '../../../extensions/creations/math/boxes/AverageBox.js';
 import { ScatterPlotCreator } from '../../../extensions/creations/DesmosCalculator/ScatterPlotCreator.js';
 import { HistogramCreator } from '../../../extensions/creations/DesmosCalculator/HistogramCreator.js';
 import { RGBAColorSampleCreator } from '../../../extensions/creations/ColorSample/RGBAColorSampleCreator.js';
@@ -21,8 +21,8 @@ export class CoinFlipPaper extends Paper {
             creationConstructors: {
                 'number': NumberBoxCreator,
                 'list': NumberListBoxCreator,
-                'slider': BoxSliderCreator,
-                'stepper': BoxStepperCreator,
+                'slider': SliderCreator,
+                'stepper': StepperCreator,
                 'coin': PlayableCoinCreator,
                 'coin row': CoinRowCreator,
                 'coin stack': CoinStackCreator,

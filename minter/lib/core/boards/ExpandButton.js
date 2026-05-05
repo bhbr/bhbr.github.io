@@ -1,4 +1,4 @@
-import { TextLabel } from '../../core/mobjects/TextLabel.js';
+import { TextLabel } from '../../core/ui/TextLabel.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
 import { Transform } from '../../core/classes/Transform.js';
 import { Color } from '../../core/classes/Color.js';

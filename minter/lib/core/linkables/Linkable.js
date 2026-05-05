@@ -1,4 +1,5 @@
 import { Mobject } from '../../core/mobjects/Mobject.js';
+import { MGroup } from '../../core/mobjects/MGroup.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
 import { InputList } from './InputList.js';
 import { OutputList } from './OutputList.js';
@@ -12,7 +13,7 @@ export class Linkable extends Mobject {
             outputProperties: [],
             linksEditable: false,
             screenEventHandler: ScreenEventHandler.Self,
-            controls: []
+            controls: new MGroup()
         };
     }
     mutabilities() {
@@ -37,6 +38,11 @@ export class Linkable extends Mobject {
     }
     setup() {
         super.setup();
+        this.controls.update({
+            frameWidth: this.frameWidth,
+            frameHeight: this.frameHeight
+        });
+        this.add(this.controls);
         this.inputList.update({
             mobject: this,
             outletProperties: this.inputProperties,
@@ -101,9 +107,10 @@ export class Linkable extends Mobject {
         this.board.updateLinks();
     }
     setControlsVisibility(visible) {
-        for (let mob of this.controls) {
-            mob.view.setVisibility(visible);
-        }
+        this.controls.view.setVisibility(visible);
+        // 	for (let mob of this.controls.children) {
+        // 		mob.view.setVisibility(visible)
+        // 	}
     }
     setLinksVisibility(visible) {
         if (visible) {

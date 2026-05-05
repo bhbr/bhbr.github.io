@@ -1,7 +1,7 @@
 import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
 import { Mobject } from '../../../core/mobjects/Mobject.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
-import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.js';
+import { PlayButton } from '../../../extensions/ui/PlayButton/PlayButton.js';
 import { Rectangle } from '../../../core/shapes/Rectangle.js';
 import { getPaper } from '../../../core/functions/getters.js';
 export class CindyCanvas extends Linkable {
@@ -67,7 +67,7 @@ export class CindyCanvas extends Linkable {
             started: false
         });
         this.add(this.playButton);
-        this.controls.push(this.playButton);
+        this.controls.add(this.playButton);
         this.playButton.update({
             mobject: this
         });

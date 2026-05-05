@@ -2,7 +2,7 @@ import { CreativeButton } from '../../core/sidebar_buttons/CreativeButton.js';
 export class ListFunctionsButton extends CreativeButton {
     defaults() {
         return {
-            creations: ['sum', 'mean'],
+            creations: ['list', 'sum', 'mean'],
             iconSize: 25
         };
     }

@@ -2,9 +2,9 @@ import { Linkable } from '../../../core/linkables/Linkable.js';
 import { Color } from '../../../core/classes/Color.js';
 import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
 import { Rectangle } from '../../../core/shapes/Rectangle.js';
-import { TextLabel } from '../../../core/mobjects/TextLabel.js';
-import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.js';
-import { SimpleNumberInputBox } from '../../../extensions/creations/math/boxes/SimpleNumberInputBox.js';
+import { TextLabel } from '../../../core/ui/TextLabel.js';
+import { PlayButton } from '../../../extensions/ui/PlayButton/PlayButton.js';
+import { NumberInputBox } from '../../../extensions/ui/InputBox/NumberInputBox.js';
 import { getPaper } from '../../../core/functions/getters.js';
 import { randomBinomial } from '../../../core/functions/various.js';
 export class CoinStack extends Linkable {
@@ -32,7 +32,7 @@ export class CoinStack extends Linkable {
             playButton: new PlayButton({
                 anchor: [0, 50]
             }),
-            nbCoinsInputBox: new SimpleNumberInputBox({
+            nbCoinsInputBox: new NumberInputBox({
                 labelText: '# coins:',
                 value: 100
             }),
@@ -132,7 +132,7 @@ export class CoinStack extends Linkable {
         this.playButton.update({
             mobject: this
         });
-        this.controls.push(this.playButton);
+        this.controls.add(this.playButton);
     }
     positionButton() {
         this.playButton.update({
@@ -149,7 +149,7 @@ export class CoinStack extends Linkable {
             anchor: [this.frameWidth / 2 - this.nbCoinsInputBox.frameWidth / 2 - 40, 0]
         });
         this.add(this.nbCoinsInputBox);
-        this.controls.push(this.nbCoinsInputBox);
+        this.controls.add(this.nbCoinsInputBox);
     }
     endNbCoinsEditing() {
         getPaper().blurFocusedChild();

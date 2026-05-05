@@ -4,7 +4,7 @@ import { getPaper, getSidebar } from '../../../core/functions/getters.js';
 import { Lexer } from './Lexer.js';
 import { Parser } from './Parser.js';
 import { AssignmentNode } from './MathNode.js';
-import { TextLabel } from '../../../core/mobjects/TextLabel.js';
+import { TextLabel } from '../../../core/ui/TextLabel.js';
 import { Color } from '../../../core/classes/Color.js';
 import { DesmosCalculator } from '../../../extensions/creations/DesmosCalculator/DesmosCalculator.js';
 import { Mobject } from '../../../core/mobjects/Mobject.js';

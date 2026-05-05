@@ -34,5 +34,13 @@ export class CreativeButton extends SidebarButton {
     updateHelpText() {
         // do nothing because the board handles it
     }
+    getID() {
+        if (this.creations.length > 0) {
+            return this.creations[0];
+        }
+        else {
+            return super.getID();
+        }
+    }
 }
 //# sourceMappingURL=CreativeButton.js.map

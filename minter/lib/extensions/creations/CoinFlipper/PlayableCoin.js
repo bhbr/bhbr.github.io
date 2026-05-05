@@ -1,6 +1,6 @@
 import { Coin } from './Coin.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
-import { PlayButton } from '../../../extensions/mobjects/PlayButton/PlayButton.js';
+import { PlayButton } from '../../../extensions/ui/PlayButton/PlayButton.js';
 export class PlayableCoin extends Linkable {
     defaults() {
         return {
@@ -41,8 +41,8 @@ export class PlayableCoin extends Linkable {
             tailsProbability: this.tailsProbability
         });
         this.add(this.coin);
-        this.add(this.playButton);
-        this.controls.push(this.playButton);
+        //this.add(this.playButton)
+        this.controls.add(this.playButton);
         this.playButton.mobject = this;
     }
     onTap(e) {

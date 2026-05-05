@@ -26,7 +26,7 @@ import { Paper } from 'core/Paper'
 import { MGroup } from 'core/mobjects/MGroup'
 import { View } from 'core/mobjects/View'
 import { IOList } from 'core/linkables/IOList'
-import { TextLabel } from 'core/mobjects/TextLabel'
+import { TextLabel } from 'core/ui/TextLabel'
 import { Dependency } from 'core/mobjects/Dependency'
 
 declare var paper: Paper
@@ -421,6 +421,11 @@ The content children can also be dragged and panned.
 
 	setInternalDragging(value: boolean) {
 		if (value == this.allowingDrag) { return }
+		// if (value) {
+		// 	this.disableContent()
+		// } else {
+		// 	this.enableContent()
+		// }
 		this.allowingDrag = value
 		this.setPanning(value)
 		for (let mob of this.contentChildren) {
@@ -431,7 +436,6 @@ The content children can also be dragged and panned.
 	handleMessage(key: string, value: any) {
 		if (value === '0') { value = false }
 		if (value === '1') { value = true }
-		this.enableContent()
 		switch (key) {
 			case 'drag':
 				this.setInternalDragging(value as boolean)
@@ -445,8 +449,11 @@ The content children can also be dragged and panned.
 				}
 				break
 			case 'link':
+				if ((value as boolean) === this.isShowingLinks) {
+					break
+				}
 				this.setLinking(value as boolean)
-				if (value) {
+				if (value as boolean) {
 					this.setControlsVisibility(false)
 				} else {
 					this.setControlsVisibility(this.isShowingControls)
@@ -454,20 +461,29 @@ The content children can also be dragged and panned.
 				this.helpTextLabel.update({
 					text: this.helpTexts['link']
 				})
-				if (value) {
+				if (value as boolean) {
 					this.helpTextLabel.view.show()
 				} else {
 					this.helpTextLabel.view.hide()
 				}
 				break
 			case 'show controls':
+				if ((value as boolean) === this.isShowingControls) { return }
 				this.helpTextLabel.update({
 					text: this.helpTexts['show controls']
 				})
-				if (value) {
+				if (value as boolean) {
 					this.helpTextLabel.view.show()
+					//this.hideLinksOfContent()
 				} else {
 					this.helpTextLabel.view.hide()
+					if (this.isShowingLinks) {
+						this.showLinksOfContent()
+						this.disableContent()
+					} else {
+						this.hideLinksOfContent()
+						this.enableContent()
+					}
 				}
 				this.setControlsVisibility(value as boolean)
 				this.isShowingControls = value
@@ -480,6 +496,7 @@ The content children can also be dragged and panned.
 				}
 				break
 			case 'create':
+				this.enableContent()
 				this.creationMode = value
 				if (this.creator == null) {
 					// create a dummy creator just to display the help text
@@ -634,6 +651,9 @@ The content children can also be dragged and panned.
 		for (let link of this.links) {
 			this.content.remove(link)
 		}
+		if (this.openLink) { // edge case
+			this.content.remove(this.openLink)
+		}
 	}
 
 	setControlsVisibility(visible: boolean) {
@@ -678,9 +698,9 @@ The content children can also be dragged and panned.
 
 	onTap(e: ScreenEvent) {
 		if (this.creationMode == 'erase') {
-			this.sidebar.setActiveButton(null)
+			this.messageSidebar({ 'buttonUp': 'erase' })
 			this.setEraser(false)
-			this.update({ creationMode: 'draw '})
+			this.update({ creationMode: 'draw' })
 			this.sensor.onMouseClick = this.sensor.savedOnMouseClick
 			this.sensor.onPenTap = this.sensor.savedOnPenTap
 			this.sensor.onTouchTap = this.sensor.savedOnTouchTap
@@ -775,8 +795,8 @@ The content children can also be dragged and panned.
 			if (mob.dragAnchorStart == null) { return }
 			let newAnchor: vertex = vertexAdd(mob.dragAnchorStart, dr)
 			mob.update({ anchor: newAnchor })
-			mob.view.div.style.left = `${newAnchor[0]}px`
-			mob.view.div.style.top = `${newAnchor[1]}px`
+			mob.view.div.style.left = `${newAnchor[0]}px`;
+			mob.view.div.style.top = `${newAnchor[1]}px`;
 		}
 		this.updateLinks()
 	}
@@ -853,6 +873,9 @@ The content children can also be dragged and panned.
 		for (let submob of this.linkableChildren()) {
 			submob.hideLinks()
 		}
+		if (this.openLink) {
+			this.content.remove(this.openLink)
+		}
 
 		//this.expandedInputList.view.hide()
 		//this.expandedOutputList.view.hide()
@@ -865,10 +888,16 @@ The content children can also be dragged and panned.
 	}
 
 	setLinking(flag: boolean) {
+		if (flag === this.isShowingLinks) {
+			return
+		}
 		if (flag && !this.isShowingLinks) {
 			this.showLinksOfContent()
+			this.disableContent()
+			this.ungreyAllHooks()
 		} else if (!flag && this.isShowingLinks) { // if (!this.editingLinkName) {
 			this.hideLinksOfContent()
+			this.enableContent()
 		}
 		this.isShowingLinks = flag
 		if (flag) {
@@ -889,6 +918,12 @@ The content children can also be dragged and panned.
 		var p = this.sensor.localEventVertex(e)
 		let clickedHook = this.hookAtLocation(p)
 		if (clickedHook == null) {
+			let l = this.sensor.eventTargetMobjectChain(e)
+			for (let mob of l) {
+				if (mob instanceof IOList) {
+					return
+				}
+			}
 			this.startCreating(e)
 			return
 		}
@@ -897,7 +932,7 @@ The content children can also be dragged and panned.
 			this.createNewOpenLink(clickedHook)
 		} else {
 			let link = this.linkForHook(clickedHook)
-			link.view.show() //link.showLine()
+			link.showLine()
 			link.dependency.source.removeDependency(link.dependency)
 			link.previousHook = clickedHook
 			clickedHook.update({ linked: false })
@@ -1040,6 +1075,9 @@ The content children can also be dragged and panned.
 	}
 
 	endLinking(e: ScreenEvent) {
+		this.disableContent()
+		this.ungreyAllHooks()
+		this.showLinksOfContent()
 		if (!this.openLink) {
 			this.endCreating(e)
 			return
@@ -1126,6 +1164,21 @@ The content children can also be dragged and panned.
 							opacity: 0.25
 						})
 					}
+				}
+			}
+		}
+	}
+
+	ungreyAllHooks() {
+		for (let mob of this.linkableChildren()) {
+			for (let outlet of mob.inputList.linkOutlets) {
+				for (let hook of outlet.linkHooks) {
+					hook.update({
+						opacity: 1.0
+					})
+					outlet.label.update({
+						opacity: 1.0
+					})
 				}
 			}
 		}

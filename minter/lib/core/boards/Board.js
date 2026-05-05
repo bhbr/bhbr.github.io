@@ -18,7 +18,8 @@ import { HELP_TEXT_LABEL_WIDTH, HELP_TEXT_LABEL_HEIGHT } from './constants.js';
 import { IO_LIST_OFFSET, SNAPPING_DISTANCE } from '../../core/linkables/constants.js';
 import { SIDEBAR_WIDTH } from '../../core/constants.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
-import { TextLabel } from '../../core/mobjects/TextLabel.js';
+import { IOList } from '../../core/linkables/IOList.js';
+import { TextLabel } from '../../core/ui/TextLabel.js';
 export class BoardContent extends MGroup {
     defaults() { return {}; }
     mutabilities() { return {}; }
@@ -325,6 +326,11 @@ export class Board extends Linkable {
         if (value == this.allowingDrag) {
             return;
         }
+        // if (value) {
+        // 	this.disableContent()
+        // } else {
+        // 	this.enableContent()
+        // }
         this.allowingDrag = value;
         this.setPanning(value);
         for (let mob of this.contentChildren) {
@@ -338,7 +344,6 @@ export class Board extends Linkable {
         if (value === '1') {
             value = true;
         }
-        this.enableContent();
         switch (key) {
             case 'drag':
                 this.setInternalDragging(value);
@@ -353,6 +358,9 @@ export class Board extends Linkable {
                 }
                 break;
             case 'link':
+                if (value === this.isShowingLinks) {
+                    break;
+                }
                 this.setLinking(value);
                 if (value) {
                     this.setControlsVisibility(false);
@@ -371,14 +379,26 @@ export class Board extends Linkable {
                 }
                 break;
             case 'show controls':
+                if (value === this.isShowingControls) {
+                    return;
+                }
                 this.helpTextLabel.update({
                     text: this.helpTexts['show controls']
                 });
                 if (value) {
                     this.helpTextLabel.view.show();
+                    //this.hideLinksOfContent()
                 }
                 else {
                     this.helpTextLabel.view.hide();
+                    if (this.isShowingLinks) {
+                        this.showLinksOfContent();
+                        this.disableContent();
+                    }
+                    else {
+                        this.hideLinksOfContent();
+                        this.enableContent();
+                    }
                 }
                 this.setControlsVisibility(value);
                 this.isShowingControls = value;
@@ -392,6 +412,7 @@ export class Board extends Linkable {
                 }
                 break;
             case 'create':
+                this.enableContent();
                 this.creationMode = value;
                 if (this.creator == null) {
                     // create a dummy creator just to display the help text
@@ -532,6 +553,9 @@ export class Board extends Linkable {
         for (let link of this.links) {
             this.content.remove(link);
         }
+        if (this.openLink) { // edge case
+            this.content.remove(this.openLink);
+        }
     }
     setControlsVisibility(visible) {
         for (let mob of this.contentChildren) {
@@ -572,9 +596,9 @@ export class Board extends Linkable {
     }
     onTap(e) {
         if (this.creationMode == 'erase') {
-            this.sidebar.setActiveButton(null);
+            this.messageSidebar({ 'buttonUp': 'erase' });
             this.setEraser(false);
-            this.update({ creationMode: 'draw ' });
+            this.update({ creationMode: 'draw' });
             this.sensor.onMouseClick = this.sensor.savedOnMouseClick;
             this.sensor.onPenTap = this.sensor.savedOnPenTap;
             this.sensor.onTouchTap = this.sensor.savedOnTouchTap;
@@ -716,6 +740,9 @@ export class Board extends Linkable {
         for (let submob of this.linkableChildren()) {
             submob.hideLinks();
         }
+        if (this.openLink) {
+            this.content.remove(this.openLink);
+        }
         //this.expandedInputList.view.hide()
         //this.expandedOutputList.view.hide()
     }
@@ -725,11 +752,17 @@ export class Board extends Linkable {
         expandedList.renameProperty(oldName, newName);
     }
     setLinking(flag) {
+        if (flag === this.isShowingLinks) {
+            return;
+        }
         if (flag && !this.isShowingLinks) {
             this.showLinksOfContent();
+            this.disableContent();
+            this.ungreyAllHooks();
         }
         else if (!flag && this.isShowingLinks) { // if (!this.editingLinkName) {
             this.hideLinksOfContent();
+            this.enableContent();
         }
         this.isShowingLinks = flag;
         if (flag) {
@@ -749,6 +782,12 @@ export class Board extends Linkable {
         var p = this.sensor.localEventVertex(e);
         let clickedHook = this.hookAtLocation(p);
         if (clickedHook == null) {
+            let l = this.sensor.eventTargetMobjectChain(e);
+            for (let mob of l) {
+                if (mob instanceof IOList) {
+                    return;
+                }
+            }
             this.startCreating(e);
             return;
         }
@@ -758,7 +797,7 @@ export class Board extends Linkable {
         }
         else {
             let link = this.linkForHook(clickedHook);
-            link.view.show(); //link.showLine()
+            link.showLine();
             link.dependency.source.removeDependency(link.dependency);
             link.previousHook = clickedHook;
             clickedHook.update({ linked: false });
@@ -896,6 +935,9 @@ export class Board extends Linkable {
         return ret;
     }
     endLinking(e) {
+        this.disableContent();
+        this.ungreyAllHooks();
+        this.showLinksOfContent();
         if (!this.openLink) {
             this.endCreating(e);
             return;
@@ -979,6 +1021,20 @@ export class Board extends Linkable {
                             opacity: 0.25
                         });
                     }
+                }
+            }
+        }
+    }
+    ungreyAllHooks() {
+        for (let mob of this.linkableChildren()) {
+            for (let outlet of mob.inputList.linkOutlets) {
+                for (let hook of outlet.linkHooks) {
+                    hook.update({
+                        opacity: 1.0
+                    });
+                    outlet.label.update({
+                        opacity: 1.0
+                    });
                 }
             }
         }

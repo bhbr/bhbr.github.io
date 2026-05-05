@@ -1,6 +1,6 @@
 
 import { Rectangle } from 'core/shapes/Rectangle'
-import { TextLabel } from 'core/mobjects/TextLabel'
+import { TextLabel } from 'core/ui/TextLabel'
 import { Color } from 'core/classes/Color'
 import { Linkable } from 'core/linkables/Linkable'
 import { log } from 'core/functions/logging'
@@ -51,7 +51,7 @@ export class NumberBox extends Linkable {
 		return Number(this.inputElement.value)
 	}
 	set value(newValue: number) {
-		let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(newValue)
+		let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(newValue) && (newValue !== 0)
 		this.inputElement.value = isFalsy ? '' : prettyPrint(newValue)
 	}
 

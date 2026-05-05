@@ -2,8 +2,9 @@
 import { DesmosCalculator } from 'extensions/creations/DesmosCalculator/DesmosCalculator'
 import { Color } from 'core/classes/Color'
 import { log } from 'core/functions/logging'
-import { RadioButtonList } from 'core/mobjects/RadioButtonList'
-import { TextLabel } from 'core/mobjects/TextLabel'
+import { RadioButtonList } from 'core/ui/RadioButtonList'
+import { TextLabel } from 'core/ui/TextLabel'
+import { Checkbox } from 'core/ui/Checkbox'
 
 export class Histogram extends DesmosCalculator {
 
@@ -14,9 +15,11 @@ export class Histogram extends DesmosCalculator {
 	max: number
 	leftColor: Color
 	rightColor: Color
-	scale: number
 	scalingSelector: RadioButtonList
-	frequencyLabel: TextLabel
+	scaling: 'absolute' | 'relative'
+	scale: number
+	autoadjustScale: boolean
+	autoadjustScaleCheckBox: Checkbox
 
 	defaults(): object {
 		return {
@@ -25,7 +28,6 @@ export class Histogram extends DesmosCalculator {
 			max: 10,
 			binWidth: 1,
 			data: [],
-			scale: 1,
 			leftColor: Color.blue(),
 			rightColor: Color.red(),
 			inputProperties: [
@@ -40,16 +42,20 @@ export class Histogram extends DesmosCalculator {
 				{ name: 'bins', type: 'Array<number>' }
 			],
 			scalingSelector: new RadioButtonList({
-				options: ['absolute', 'relative'],
+				options: ['absolute frequency', 'relative frequency'],
 				orientation: 'horizontal',
-				optionSpacing: 100
+				optionSpacing: 200
 			}),
-			frequencyLabel: new TextLabel({
-				text: 'frequency'
-			}),
+			scale: 1,
+			scaling: 'absolute',
 			options: {
 				expressions: false
-			}
+			},
+			autoadjustScale: false,
+			autoadjustScaleCheckBox: new Checkbox({
+				text: 'auto-adjust scale',
+				state: false
+			})
 		}
 	}
 
@@ -60,27 +66,33 @@ export class Histogram extends DesmosCalculator {
 			action: this.setScaling.bind(this),
 			anchor: [0, this.frameHeight + 10]
 		})
-		this.scalingSelector.radioButtons[0].select()
-		this.add(this.scalingSelector)
-		this.controls.push(this.scalingSelector)
-		this.frequencyLabel.update({
-			anchor: [200, this.frameHeight + 10],
-			frameHeight: 18
+		this.scalingSelector.radioButtons[0].label.update({
+			frameWidth: 180
 		})
-		this.add(this.frequencyLabel)
-		this.controls.push(this.frequencyLabel)
+		this.scalingSelector.radioButtons[1].label.update({
+			frameWidth: 180
+		})
+		this.scalingSelector.radioButtons[0].select()
+		this.controls.add(this.scalingSelector)
+		this.autoadjustScaleCheckBox.update({
+			anchor: [0, this.frameHeight + 40]
+		})
+		this.autoadjustScaleCheckBox.label.update({
+			frameWidth: 180
+		})
+		this.controls.add(this.autoadjustScaleCheckBox)
+		this.autoadjustScaleCheckBox.onToggle = this.toggleYScale.bind(this)
 	}
 
-	setScaling(option: string) {
-		switch (option) {
-			case 'absolute':
-				this.scale = 1
-				break
-			case 'relative':
-				this.scale = this.data.length
-				break
-			default:
-				break
+	setScaling(redraw: boolean = true) {
+		if (this.scalingSelector.selectedButton == this.scalingSelector.radioButtons[1]) {
+			this.scale = this.data.length
+		} else {
+			this.scale = 1
+		}
+		if (redraw) {
+			this.calculator.setExpression({ id:'B', latex: `B=[${this.bins()}]/${this.scale}` })
+			this.createBars()
 		}
 	}
 
@@ -109,7 +121,7 @@ export class Histogram extends DesmosCalculator {
 		}
 		for (var n of this.data) {
 			let i = Math.floor((n - this.min) / this.binWidth)
-			if (i < this.nbBins) {
+			if (i >= 0 && i < this.nbBins) {
 				bins[i]++
 			}
 		}
@@ -130,14 +142,48 @@ export class Histogram extends DesmosCalculator {
 		}
 	}
 
+	toggleYScale() {
+		this.autoadjustScale = !this.autoadjustScale
+	}
+
+	setYMax(unpaddedYMax: number) {
+		let xMin = this.calculator.graphpaperBounds.mathCoordinates.left
+		let xMax = this.calculator.graphpaperBounds.mathCoordinates.right
+		let yMin = -0.1 * unpaddedYMax
+		let yMax = 1.1 * unpaddedYMax
+		this.calculator.setMathBounds({
+			left: xMin,
+			right: xMax,
+			top: yMax,
+			bottom: yMin
+		})
+	}
+
 	update(args: object = {}, redraw: boolean = true) {
 		super.update(args, redraw)
 		if (args['min'] !== undefined || args['max'] !== undefined || args['nbBins'] !== undefined) {
 			this.binWidth = (this.max - this.min) / this.nbBins
 		}
 		if (args['data'] !== undefined) {
+			this.setScaling(false)
 			this.calculator.setExpression({ id:'B', latex: `B=[${this.bins()}]/${this.scale}` })
 			this.createBars()
+			if (this.autoadjustScale) {
+				let yMax = Math.max(...this.bins())
+				this.setYMax(yMax)
+			}
+		}
+		if (args['min'] !== undefined || args['max'] !== undefined) {
+			let newXMin = args['min'] ?? this.min
+			let newXMax = args['max'] ?? this.max
+			let yMin = this.calculator.graphpaperBounds.mathCoordinates.bottom
+			let yMax = this.calculator.graphpaperBounds.mathCoordinates.top
+			this.calculator.setMathBounds({
+				left: newXMin - 0.1 * (this.max - newXMin),
+				right: newXMax + 0.1 * (newXMax - this.min),
+				top: yMax,
+				bottom: yMin
+			})
 		}
 	}
 

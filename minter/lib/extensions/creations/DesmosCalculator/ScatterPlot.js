@@ -1,5 +1,5 @@
 import { DesmosCalculator } from '../../../extensions/creations/DesmosCalculator/DesmosCalculator.js';
-import { Checkbox } from '../../../core/mobjects/Checkbox.js';
+import { Checkbox } from '../../../core/ui/Checkbox.js';
 export class ScatterPlot extends DesmosCalculator {
     defaults() {
         return {
@@ -24,8 +24,8 @@ export class ScatterPlot extends DesmosCalculator {
     }
     setup() {
         super.setup();
-        this.controls.push(this.showPointsCheckbox);
-        this.controls.push(this.showLinesCheckbox);
+        this.controls.add(this.showPointsCheckbox);
+        this.controls.add(this.showLinesCheckbox);
     }
     setXArrayExpression(listString) {
         this.calculator.setExpression({ id: 'xData', latex: `X = [${listString}]` });

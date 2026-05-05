@@ -1,5 +1,5 @@
-import { TextLabel } from '../../core/mobjects/TextLabel.js';
-import { InputTextBox } from '../../core/mobjects/InputTextBox.js';
+import { TextLabel } from '../../core/ui/TextLabel.js';
+import { InputTextBox } from '../../core/ui/InputTextBox.js';
 import { LinkHook } from './LinkHook.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
 import { HOOK_HORIZONTAL_SPACING, IO_LIST_WIDTH } from './constants.js';
