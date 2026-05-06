@@ -62,7 +62,12 @@ export class InputBox extends Mobject {
     blur() {
         super.blur();
         this.inputElement.blur();
-        document.removeEventListener('keydown', this.boundKeyPressed);
+        this.updateOnReturn();
+    }
+    updateOnReturn() {
+        this.update();
+        this.updateDependents();
+        this.onReturn();
     }
     setup() {
         super.setup();
@@ -94,7 +99,6 @@ export class InputBox extends Mobject {
         this.boundKeyPressed = this.keyPressed.bind(this);
         document.addEventListener('keyup', this.boundActivateKeyboard);
     }
-    boundKeyPressed(e) { }
     keyPressed(e) {
         if (e.which != 13) {
             return;
@@ -106,10 +110,9 @@ export class InputBox extends Mobject {
                 button.activeKeyboard = true;
             }
         }
-        this.update({ value: this.valueFromString(this.inputElement.value) });
-        this.updateDependents();
-        this.onReturn();
+        this.updateOnReturn();
     }
+    boundKeyPressed(e) { }
     valueFromString(valueString) {
         return valueString;
     }
@@ -129,6 +132,7 @@ export class InputBox extends Mobject {
             button.activeKeyboard = true;
         }
     }
+    boundDeactivateKeyboard() { }
     onReturn() { }
     update(args = {}, redraw = true) {
         let newLabelWidth = args['labelWidth'];

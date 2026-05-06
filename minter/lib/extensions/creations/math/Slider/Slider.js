@@ -142,7 +142,7 @@ export class Slider extends Linkable {
         if (args['height'] !== undefined) {
             this.view.frame.height = this.height;
             this.minValueInputBox.update({
-                anchor: [-60, this.height - 10]
+                anchor: [-70, this.height - 10]
             });
         }
         //// updating submobs

@@ -11,4 +11,10 @@ export class NumberInputBox extends InputBox {
 		this.inputElement.value = isFalsy ? '' : newValue.toString()
 	}
 
+	setup() {
+		super.setup()
+		//this.inputElement.setAttribute('type', 'number')
+		// needs adjustment for iPad
+	}
+
 }

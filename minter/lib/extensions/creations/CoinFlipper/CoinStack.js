@@ -175,11 +175,17 @@ export class CoinStack extends Linkable {
     onTap(e) {
         this.flip();
     }
-    flip() {
-        this.update({
-            nbTails: randomBinomial(this.nbCoins, this.tailsProbability)
-        });
-        this.updateDependents();
+    onLongPress(e) {
+        this.flip(100);
+    }
+    flip(nbFlips = 1) {
+        for (let i = 0; i < nbFlips; i++) {
+            this.update({
+                nbTails: randomBinomial(this.nbCoins, this.tailsProbability)
+            }, false);
+            this.updateDependents();
+        }
+        this.update();
     }
     play() {
         this.playIntervalID = window.setInterval(this.flip.bind(this), 100);

@@ -7,6 +7,11 @@ export class NumberInputBox extends InputBox {
         let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(newValue);
         this.inputElement.value = isFalsy ? '' : newValue.toString();
     }
+    setup() {
+        super.setup();
+        //this.inputElement.setAttribute('type', 'number')
+        // needs adjustment for iPad
+    }
     defaults() { return {}; }
     mutabilities() { return {}; }
 }

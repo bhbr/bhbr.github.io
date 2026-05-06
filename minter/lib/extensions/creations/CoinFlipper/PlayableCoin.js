@@ -46,7 +46,13 @@ export class PlayableCoin extends Linkable {
         this.playButton.mobject = this;
     }
     onTap(e) {
-        this.flip(true);
+        this.flip();
+        this.coin.update({
+            opacity: 1
+        });
+    }
+    onLongPress(e) {
+        this.flip(true, 100);
         this.coin.update({
             opacity: 1
         });
@@ -80,10 +86,13 @@ export class PlayableCoin extends Linkable {
             this.swipedSide = null;
         }
     }
-    flip(animate = false) {
-        this.coin.flip(animate);
-        this.update();
-        this.updateDependents();
+    flip(animate = false, nbFlips = 1) {
+        for (let i = 0; i < nbFlips; i++) {
+            var an = (i == nbFlips - 1);
+            this.coin.flip(animate && an);
+            this.update({}, an);
+            this.updateDependents();
+        }
     }
     play() {
         this.playIntervalID = window.setInterval(function () {

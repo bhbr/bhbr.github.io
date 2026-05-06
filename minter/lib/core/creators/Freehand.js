@@ -58,6 +58,7 @@ export class Freehand extends Creator {
         par.remove(this);
         if (this.view.visible) {
             par.addToContent(this);
+            par.content.moveToBack(this);
         }
     }
 }

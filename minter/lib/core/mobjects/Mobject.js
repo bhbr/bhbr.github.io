@@ -194,9 +194,9 @@ export class Mobject extends ExtendedObject {
         this.view.add(submob.view);
         submob.view.redraw();
     }
-    insertRelativeTo(submob, child, shift) {
-        if (submob.parent == this) {
-            this.remove(submob);
+    insertRelativeTo(newChild, child, shift) {
+        if (newChild.parent == this) {
+            this.remove(newChild);
         }
         let i = this.children.indexOf(child);
         if (i == -1) {
@@ -204,24 +204,24 @@ export class Mobject extends ExtendedObject {
             return;
         }
         if (i + shift >= this.children.length) {
-            this.add(submob);
+            this.add(newChild);
             return;
         }
         let shiftedChild = this.children[i + shift];
-        this.children.splice(i + shift, 0, submob);
-        this.view.insertBehind(submob.view, shiftedChild.view);
+        this.children.splice(i + shift, 0, newChild);
+        this.view.insertBehind(newChild.view, shiftedChild.view);
     }
-    insertBehind(submob, child) {
-        this.insertRelativeTo(submob, child, 0);
+    insertBehind(newChild, child) {
+        this.insertRelativeTo(newChild, child, 0);
     }
-    insertBefore(submob, child) {
-        this.insertRelativeTo(submob, child, 1);
+    insertBefore(newChild, child) {
+        this.insertRelativeTo(newChild, child, 1);
     }
-    remove(submob) {
+    remove(child) {
         // Remove from the array of children (with an imported helper method)
-        remove(this.children, submob);
-        submob.parent = null;
-        submob.view.div.remove();
+        remove(this.children, child);
+        child.parent = null;
+        child.view.div.remove();
     }
     removeAllChildren() {
         while (this.children.length > 0) {
@@ -230,16 +230,24 @@ export class Mobject extends ExtendedObject {
             child.view.div.remove();
         }
     }
-    moveToTop(submob) {
+    moveToTop(newChild) {
         /*
         Put this submob in front of every other sibling,
         so that it will obstruct them and catch screen events
         */
-        if (submob.parent != this) {
+        if (newChild.parent === this) {
+            this.remove(newChild);
+        }
+        this.add(newChild);
+    }
+    moveToBack(newChild) {
+        if (newChild.parent !== this) {
+            this.add(newChild);
+        }
+        if (this.children.length < 2) {
             return;
         }
-        this.remove(submob);
-        this.add(submob);
+        this.insertBehind(newChild, this.children[0]);
     }
     dependents() {
         // All mobjects that depend directly on this
@@ -335,6 +343,25 @@ export class Mobject extends ExtendedObject {
         }
         if (redraw) {
             this.view.redraw();
+        }
+    }
+    batchUpdate(batchArgs, redraw = true) {
+        var length = undefined;
+        for (let value of Object.values(batchArgs)) {
+            if (length === undefined) {
+                length = value.length;
+                continue;
+            }
+            if (value.length != length) {
+                throw 'Argument arrays in batch update must have the same length';
+            }
+        }
+        for (let i = 0; i < length; i++) {
+            var args = {};
+            for (let key of Object.keys(batchArgs)) {
+                args[key] = batchArgs[key][i];
+            }
+            this.update(args, redraw);
         }
     }
     getUpdateCalls() {

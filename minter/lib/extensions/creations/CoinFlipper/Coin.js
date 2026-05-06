@@ -43,10 +43,12 @@ export class Coin extends Circle {
         args['labelText'] = (newState === 'heads') ? 'H' : 'T';
         return args;
     }
-    flip(animate = false) {
-        let x = Math.random();
-        let newState = (x < this.tailsProbability) ? 'tails' : 'heads';
-        this.flipToState(newState, animate);
+    flip(animate = false, nbFlips = 1) {
+        for (let i = 0; i < nbFlips; i++) {
+            let x = Math.random();
+            let newState = (x < this.tailsProbability) ? 'tails' : 'heads';
+            this.flipToState(newState, i == nbFlips - 1 ? animate : false);
+        }
     }
     flipToState(newState, animate = false) {
         if (animate) {

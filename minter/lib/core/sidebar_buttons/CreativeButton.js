@@ -23,6 +23,9 @@ export class CreativeButton extends SidebarButton {
         });
     }
     labelFromMessage(msg) {
+        if (!msg) {
+            return;
+        }
         return Object.values(msg)[0];
     }
     baseIconName() {

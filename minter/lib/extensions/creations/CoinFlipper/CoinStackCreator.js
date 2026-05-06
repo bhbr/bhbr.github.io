@@ -3,7 +3,7 @@ import { CoinStack } from './CoinStack.js';
 export class CoinStackCreator extends DraggingCreator {
     defaults() {
         return {
-            helpText: 'A stack of coins automatically sorted into heads (H) and tails (T). Tap the stack or the play button to flip all the coins. The number of coins can be edited.',
+            helpText: 'A stack of coins automatically sorted into heads (H) and tails (T). Tap the stack or the play button to flip all the coins. Long press to flip 100 times. The number of coins can be edited.',
             pointOffset: [-50, -250]
         };
     }
