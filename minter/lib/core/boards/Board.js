@@ -3,6 +3,7 @@ import { DependencyLink } from '../../core/linkables/DependencyLink.js';
 import { LinkBullet } from '../../core/linkables/LinkBullet.js';
 import { RoundedRectangle } from '../../core/shapes/RoundedRectangle.js';
 import { vertexOrigin, vertexCopy, vertexAdd, vertexSubtract, vertexCloseTo } from '../../core/functions/vertex.js';
+import { log } from '../../core/functions/logging.js';
 import { remove } from '../../core/functions/arrays.js';
 import { Freehand } from '../../core/creators/Freehand.js';
 import { ExpandButton } from './ExpandButton.js';
@@ -87,7 +88,9 @@ export class Board extends Linkable {
             }),
             helpTexts: {
                 'drag': 'Drag objects or pan the board. Slide this button to the right to lock.',
-            }
+            },
+            // zoomStartCenter: [0, 0],
+            // zoomStartScale: 1,
         };
     }
     mutabilities() {
@@ -323,6 +326,7 @@ export class Board extends Linkable {
         this.content.remove(mob);
     }
     setInternalDragging(value) {
+        log(`setInternalDragging ${value}`);
         if (value == this.allowingDrag) {
             return;
         }
@@ -667,6 +671,12 @@ export class Board extends Linkable {
         this.messageSidebar({ 'button': 'collapse' });
     }
     startPanning(e) {
+        // if (e instanceof TouchEvent) {
+        // 	if (e.touches.length == 2) {
+        // 		this.startZooming(e)
+        // 		return
+        // 	}
+        // }
         this.panPointStart = this.sensor.localEventVertex(e);
         for (let mob of this.contentChildren) {
             mob.dragAnchorStart = vertexCopy(mob.view.frame.anchor);
@@ -674,6 +684,14 @@ export class Board extends Linkable {
         }
     }
     panning(e) {
+        // log(e.constructor.name)
+        // if (e instanceof TouchEvent) {
+        // 	log(e.touches.length)
+        // 	if (e.touches.length == 2) {
+        // 		this.zooming(e)
+        // 		return
+        // 	}
+        // } else
         if (this.panPointStart == null) {
             this.startPanning(e);
             return;

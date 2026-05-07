@@ -1,6 +1,7 @@
 import { Rectangle } from '../../../../core/shapes/Rectangle.js';
 import { Color } from '../../../../core/classes/Color.js';
 import { Linkable } from '../../../../core/linkables/Linkable.js';
+import { log } from '../../../../core/functions/logging.js';
 import { getPaper, getSidebar } from '../../../../core/functions/getters.js';
 import { ScreenEventHandler, isTouchDevice } from '../../../../core/mobjects/screen_events.js';
 import { DraggingCreator } from '../../../../core/creators/DraggingCreator.js';
@@ -113,6 +114,8 @@ export class NumberBox extends Linkable {
     update(args = {}, redraw = true) {
         super.update(args, redraw);
         if (args['value'] !== undefined) {
+            log(args['value']);
+            log(prettyPrint(args['value']));
             this.inputElement.textContent = prettyPrint(args['value']);
         }
         this.background.update({

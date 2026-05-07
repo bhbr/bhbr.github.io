@@ -147,7 +147,7 @@ export class DesmosCalculator extends Linkable {
         }
         else {
             this.outerFrame.update({
-                screenEventHandler: ScreenEventHandler.Self
+                screenEventHandler: ScreenEventHandler.Below
             });
         }
     }
