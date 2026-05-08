@@ -16,7 +16,7 @@ export class AverageBox extends NumberValuedFunctionBox {
             return numberArraySum(this.argument) / this.argument.length;
         }
         else {
-            return 0;
+            return NaN;
         }
     }
     mutabilities() { return {}; }

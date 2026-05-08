@@ -3,7 +3,6 @@ import { DependencyLink } from '../../core/linkables/DependencyLink.js';
 import { LinkBullet } from '../../core/linkables/LinkBullet.js';
 import { RoundedRectangle } from '../../core/shapes/RoundedRectangle.js';
 import { vertexOrigin, vertexCopy, vertexAdd, vertexSubtract, vertexCloseTo } from '../../core/functions/vertex.js';
-import { log } from '../../core/functions/logging.js';
 import { remove } from '../../core/functions/arrays.js';
 import { Freehand } from '../../core/creators/Freehand.js';
 import { ExpandButton } from './ExpandButton.js';
@@ -326,15 +325,9 @@ export class Board extends Linkable {
         this.content.remove(mob);
     }
     setInternalDragging(value) {
-        log(`setInternalDragging ${value}`);
         if (value == this.allowingDrag) {
             return;
         }
-        // if (value) {
-        // 	this.disableContent()
-        // } else {
-        // 	this.enableContent()
-        // }
         this.allowingDrag = value;
         this.setPanning(value);
         for (let mob of this.contentChildren) {
@@ -990,24 +983,29 @@ export class Board extends Linkable {
             this.compatibleHooks = [];
             return;
         }
-        if (this.openLink.startHook == null) {
-            this.openLink.previousHook?.outlet.ioList.mobject.removedOutputLink(this.openLink);
+        let startHookWasNull = this.openLink.startHook == null;
+        if (startHookWasNull) {
             this.openLink.update({ startHook: h });
             this.openLink.previousHook = this.openLink.startHook;
+        }
+        else {
+            this.openLink.update({ endHook: h });
+            this.openLink.previousHook = this.openLink.endHook;
+        }
+        this.openLink.startHook.update({ linked: true });
+        this.openLink.endHook.update({ linked: true });
+        this.openLink.view.hide(); //this.openLink.hideLine()
+        this.links.push(this.openLink);
+        this.createNewDependency();
+        if (startHookWasNull) {
+            this.openLink.previousHook?.outlet.ioList.mobject.removedOutputLink(this.openLink);
             this.openLink.startHook.outlet.ioList.mobject.addedOutputLink(this.openLink);
         }
         else {
             this.openLink.previousHook?.outlet.ioList.mobject.removedInputLink(this.openLink);
-            this.openLink.update({ endHook: h });
-            this.openLink.previousHook = this.openLink.endHook;
             this.openLink.endHook.outlet.ioList.mobject.addedInputLink(this.openLink);
         }
-        this.openLink.startHook.update({ linked: true });
-        this.openLink.endHook.update({ linked: true });
         this.openLink.previousHook = null;
-        this.openLink.view.hide(); //this.openLink.hideLine()
-        this.links.push(this.openLink);
-        this.createNewDependency();
         this.openLink = null;
         this.openHook = null;
         this.openBullet = null;

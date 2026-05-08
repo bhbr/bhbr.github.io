@@ -364,9 +364,12 @@ export class Mobject extends ExtendedObject {
             this.update(args, redraw);
         }
     }
-    getUpdateCalls() {
+    getUpdateCalls(onlyValues = false) {
         let ret = new UpdateCalls();
         for (let dep of this.dependencies) {
+            if (onlyValues && dep.kind == 'action') {
+                continue;
+            }
             let dict = {};
             if (typeof this[dep.outputName] == 'function') {
                 dict[dep.inputName] = this[dep.outputName].bind(this);
@@ -380,8 +383,8 @@ export class Mobject extends ExtendedObject {
         }
         return ret;
     }
-    updateDependents() {
-        let calls = this.getUpdateCalls();
+    updateDependents(onlyValues = false) {
+        let calls = this.getUpdateCalls(onlyValues);
         calls.call();
     }
     disable() { this.sensor.disable(); }

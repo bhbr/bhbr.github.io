@@ -1,7 +1,6 @@
 import { Rectangle } from '../../../../core/shapes/Rectangle.js';
 import { Color } from '../../../../core/classes/Color.js';
 import { Linkable } from '../../../../core/linkables/Linkable.js';
-import { log } from '../../../../core/functions/logging.js';
 import { getPaper, getSidebar } from '../../../../core/functions/getters.js';
 import { ScreenEventHandler, isTouchDevice } from '../../../../core/mobjects/screen_events.js';
 import { DraggingCreator } from '../../../../core/creators/DraggingCreator.js';
@@ -22,7 +21,8 @@ export class NumberBox extends Linkable {
             frameWidth: 80,
             frameHeight: 40,
             strokeWidth: 0.0,
-            screenEventHandler: ScreenEventHandler.Self
+            screenEventHandler: ScreenEventHandler.Self,
+            value: NaN
         };
     }
     mutabilities() {
@@ -33,13 +33,6 @@ export class NumberBox extends Linkable {
     }
     onPointerUp(e) {
         this.focus();
-    }
-    get value() {
-        return Number(this.inputElement.value);
-    }
-    set value(newValue) {
-        let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(newValue) && (newValue !== 0);
-        this.inputElement.value = isFalsy ? '' : prettyPrint(newValue);
     }
     focus() {
         super.focus();
@@ -67,7 +60,7 @@ export class NumberBox extends Linkable {
         this.inputElement.style.fontSize = '20px';
         this.inputElement.style.border = 'none';
         this.inputElement.style.outline = 'none';
-        this.inputElement.value = prettyPrint(this.value);
+        this.updateInputElement();
         this.view.div.appendChild(this.inputElement);
         this.boundKeyPressed = this.keyPressed.bind(this);
         document.addEventListener('keyup', this.boundActivateKeyboard);
@@ -114,14 +107,24 @@ export class NumberBox extends Linkable {
     update(args = {}, redraw = true) {
         super.update(args, redraw);
         if (args['value'] !== undefined) {
-            log(args['value']);
-            log(prettyPrint(args['value']));
-            this.inputElement.textContent = prettyPrint(args['value']);
+            this.updateInputElement();
         }
         this.background.update({
             width: this.view.frame.width,
             height: this.view.frame.height
         }, redraw);
+    }
+    updateInputElement() {
+        let v = this.value;
+        let isFalsy = [null, undefined, NaN, Infinity, -Infinity].includes(v) && (v !== 0);
+        if (!isFalsy) {
+            this.inputElement.textContent = prettyPrint(v);
+            this.inputElement.value = prettyPrint(v);
+        }
+        else {
+            this.inputElement.textContent = '';
+            this.inputElement.value = '';
+        }
     }
     addedInputLink(link) {
         this.inputElement.disabled = true;

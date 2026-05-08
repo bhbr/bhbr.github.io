@@ -137,11 +137,11 @@ export class Linkable extends Mobject {
         }
     }
     addedInputLink(link) {
-        link.startHook.outlet.ioList.mobject.updateDependents();
+        link.startHook.outlet.ioList.mobject.updateDependents(true);
     }
     addedOutputLink(link) {
         this.update();
-        this.updateDependents();
+        this.updateDependents(true);
     }
     removedInputLink(link) {
         this.update();

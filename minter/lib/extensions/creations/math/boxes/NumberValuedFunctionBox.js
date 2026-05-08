@@ -41,8 +41,11 @@ export class NumberValuedFunctionBox extends NumberBox {
         return NaN;
     }
     update(args = {}, redraw = true) {
-        args['value'] = this.result();
-        super.update(args, redraw);
+        let hasNewValue = (args['argument'] !== undefined);
+        super.update(args, !hasNewValue);
+        if (hasNewValue) {
+            super.update({ value: this.result() }, redraw);
+        }
     }
     mutabilities() { return {}; }
 }
