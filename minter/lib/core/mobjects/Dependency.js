@@ -10,6 +10,7 @@ export class Dependency {
         if (this.inputName === undefined) {
             this.inputName = null;
         }
+        this.kind = args['kind'] ?? 'value';
     }
     delete() {
         this.source.removeDependency(this);

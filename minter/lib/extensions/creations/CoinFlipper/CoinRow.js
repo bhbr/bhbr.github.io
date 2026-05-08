@@ -6,6 +6,7 @@ import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
 import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
 import { NumberInputBox } from '../../../extensions/ui/InputBox/NumberInputBox.js';
 import { getPaper } from '../../../core/functions/getters.js';
+import { MERE_TAP_DELAY } from '../../../core/constants.js';
 export class CoinRow extends Linkable {
     defaults() {
         return {
@@ -47,6 +48,7 @@ export class CoinRow extends Linkable {
                 labelText: '# coins:',
                 value: 1
             }),
+            doubleTapStartTime: null
         };
     }
     setup() {
@@ -175,10 +177,19 @@ export class CoinRow extends Linkable {
         this.update();
     }
     onTap(e) {
-        this.flipCoins();
-    }
-    onLongPress(e) {
-        this.flipCoins(100);
+        if (this.doubleTapStartTime) {
+            if (Date.now() - this.doubleTapStartTime < MERE_TAP_DELAY) {
+                this.flipCoins(99);
+            }
+            this.doubleTapStartTime = null;
+        }
+        else {
+            this.doubleTapStartTime = Date.now();
+            window.setTimeout(function () {
+                this.doubleTapStartTime = null;
+            }.bind(this), MERE_TAP_DELAY);
+            this.flipCoins();
+        }
     }
     play() {
         this.playIntervalID = window.setInterval(function () {

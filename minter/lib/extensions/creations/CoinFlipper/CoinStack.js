@@ -7,6 +7,7 @@ import { PlayButton } from '../../../extensions/ui/PlayButton/PlayButton.js';
 import { NumberInputBox } from '../../../extensions/ui/InputBox/NumberInputBox.js';
 import { getPaper } from '../../../core/functions/getters.js';
 import { randomBinomial } from '../../../core/functions/various.js';
+import { MERE_TAP_DELAY } from '../../../core/constants.js';
 export class CoinStack extends Linkable {
     defaults() {
         return {
@@ -48,6 +49,7 @@ export class CoinStack extends Linkable {
                 { name: 'nbCoins', displayName: '# coins', type: 'number' },
                 { name: 'mean', displayName: 'mean', type: 'number' }
             ],
+            doubleTapStartTime: null
         };
     }
     mutabilities() {
@@ -173,10 +175,19 @@ export class CoinStack extends Linkable {
         return this.nbTails / this.nbCoins;
     }
     onTap(e) {
-        this.flip();
-    }
-    onLongPress(e) {
-        this.flip(100);
+        if (this.doubleTapStartTime) {
+            if (Date.now() - this.doubleTapStartTime < MERE_TAP_DELAY) {
+                this.flip(99);
+            }
+            this.doubleTapStartTime = null;
+        }
+        else {
+            this.doubleTapStartTime = Date.now();
+            window.setTimeout(function () {
+                this.doubleTapStartTime = null;
+            }.bind(this), MERE_TAP_DELAY);
+            this.flip();
+        }
     }
     flip(nbFlips = 1) {
         for (let i = 0; i < nbFlips; i++) {

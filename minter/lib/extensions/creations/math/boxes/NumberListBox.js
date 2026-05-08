@@ -18,7 +18,7 @@ export class NumberListBox extends Linkable {
             preventDefault: false,
             inputProperties: [
                 { name: 'value', displayName: 'list', type: 'Array<number>' },
-                { name: 'newestEntry', displayName: 'add entry', type: 'number' },
+                { name: 'newestEntry', displayName: 'add entry', type: 'number', kind: 'action' },
             ],
             outputProperties: [
                 { name: 'value', displayName: 'list', type: 'Array<number>' },
@@ -31,8 +31,12 @@ export class NumberListBox extends Linkable {
             })
         };
     }
-    get list() { return this.value; }
-    set list(newValue) { this.value = newValue; }
+    get list() {
+        return this.value;
+    }
+    set list(newValue) {
+        this.value = newValue;
+    }
     setup() {
         super.setup();
         this.background.update({
@@ -117,12 +121,11 @@ export class NumberListBox extends Linkable {
             }
             this.list.push(newValue);
         }
-        else {
+        else if (newValue instanceof Array) {
             this.list.push(...newValue);
         }
         this.scroll.view.div.scrollTop = this.scroll.view.div.scrollHeight;
         this.update();
-        this.updateDependents();
     }
     addedInputLink(link) {
         if (link.startHook.outlet.name == 'newestEntry' || link.endHook.outlet.name == 'newestEntry') {

@@ -431,7 +431,7 @@ export class Board extends Linkable {
                 this.creator.update({
                     anchor: (this.creationMode == 'draw') ? [0, 0] : this.creationStroke[0]
                 });
-                this.add(this.creator);
+                //this.add(this.creator)
                 this.helpTextLabel.update({
                     text: this.creator.helpText
                 });
@@ -815,7 +815,6 @@ export class Board extends Linkable {
             remove(this.links, link);
             this.remove(link);
             if (clickedHook.outlet.kind == 'output') {
-                clickedHook.outlet.removeHook();
                 this.createNewOpenLink(link.endHook, link.previousHook, link.dependency);
             }
             else {
@@ -955,25 +954,30 @@ export class Board extends Linkable {
         }
         this.showAllHooks();
         let h = this.freeCompatibleHookAtLocation(this.sensor.localEventVertex(e));
-        if (h === null) {
+        if (h === null || h === undefined) {
+            // TODO: remove the possibility of h being undefined
             if (this.openLink) {
                 this.remove(this.openLink);
                 if (this.openLink.startHook) {
                     this.openLink.startHook.update({ linked: false });
                     if (this.openLink.previousHook) {
+                        this.openLink.startHook.outlet.removeHook();
+                        if (this.openLink.dependency.kind == 'action') {
+                            this.openLink.previousHook.outlet.removeHook();
+                        }
                         this.openLink.startHook.outlet.ioList.mobject.removedOutputLink(this.openLink);
-                    }
-                }
-                if (this.openLink.endHook) {
-                    this.openLink.endHook.update({ linked: false });
-                    this.openLink.endHook.outlet.ioList.mobject.removedInputLink(this.openLink);
-                }
-                if (this.openLink.previousHook) {
-                    if (this.openLink.previousHook.outlet.kind == 'input') {
                         this.openLink.previousHook.outlet.ioList.mobject.removedInputLink(this.openLink);
                     }
-                    else {
+                }
+                else if (this.openLink.endHook) {
+                    this.openLink.endHook.update({ linked: false });
+                    if (this.openLink.previousHook) {
+                        this.openLink.previousHook.outlet.removeHook();
+                        if (this.openLink.dependency.kind == 'action') {
+                            this.openLink.endHook.outlet.removeHook();
+                        }
                         this.openLink.previousHook.outlet.ioList.mobject.removedOutputLink(this.openLink);
+                        this.openLink.endHook.outlet.ioList.mobject.removedInputLink(this.openLink);
                     }
                 }
             }
@@ -983,7 +987,7 @@ export class Board extends Linkable {
             this.compatibleHooks = [];
             return;
         }
-        let startHookWasNull = this.openLink.startHook == null;
+        let startHookWasNull = (this.openLink.startHook == null);
         if (startHookWasNull) {
             this.openLink.update({ startHook: h });
             this.openLink.previousHook = this.openLink.startHook;
@@ -1105,6 +1109,9 @@ export class Board extends Linkable {
         if (startHook == startHook.outlet.linkHooks[startHook.outlet.linkHooks.length - 1]) {
             startHook.outlet.addHook();
         }
+        if (endHook == endHook.outlet.linkHooks[endHook.outlet.linkHooks.length - 1] && this.openLink.dependency.kind == 'action') {
+            endHook.outlet.addHook();
+        }
         startHook.outlet.ioList.mobject.addedOutputLink(this.openLink);
         endHook.outlet.ioList.mobject.addedInputLink(this.openLink);
     }
@@ -1112,7 +1119,7 @@ export class Board extends Linkable {
         startHook.outlet.ioList.mobject.removeDependencyBetween(startHook.outlet.name, endHook.outlet.ioList.mobject, endHook.outlet.name);
         startHook.removeAllDependents();
         endHook.removeAllDependents();
-        startHook.outlet.removeHook();
+        //startHook.outlet.removeHook()
         if (this.openLink) {
             startHook.outlet.ioList.mobject.removedOutputLink(this.openLink);
             endHook.outlet.ioList.mobject.removedInputLink(this.openLink);
@@ -1170,7 +1177,9 @@ export class Board extends Linkable {
         return this.hookAtLocationFromList(p, this.compatibleHooks);
     }
     freeCompatibleHookAtLocation(p) {
-        return this.hookAtLocationFromList(p, this.freeCompatibleHooks());
+        let freeHooks = this.freeCompatibleHooks();
+        let hook = this.hookAtLocationFromList(p, freeHooks);
+        return hook;
     }
     //////////////////////////////////////////////////////////
     //                                                      //

@@ -22,7 +22,8 @@ export class NumberBox extends Linkable {
             frameHeight: 40,
             strokeWidth: 0.0,
             screenEventHandler: ScreenEventHandler.Self,
-            value: NaN
+            value: NaN,
+            returnHasBeenPressedBeforeBlur: false
         };
     }
     mutabilities() {
@@ -38,12 +39,20 @@ export class NumberBox extends Linkable {
         super.focus();
         this.inputElement.focus();
         document.addEventListener('keydown', this.boundKeyPressed);
+        this.update({
+            returnHasBeenPressedBeforeBlur: false
+        });
     }
     blur() {
         super.blur();
         this.inputElement.blur();
-        this.updateOnReturn();
+        if (!this.returnHasBeenPressedBeforeBlur) {
+            this.updateOnReturn();
+        }
         document.removeEventListener('keydown', this.boundKeyPressed);
+        this.update({
+            returnHasBeenPressedBeforeBlur: false
+        });
     }
     setup() {
         super.setup();
@@ -71,7 +80,6 @@ export class NumberBox extends Linkable {
             return;
         }
         this.inputElement.blur();
-        getPaper().activeKeyboard = true;
         if (!isTouchDevice) {
             for (let button of getSidebar().buttons) {
                 button.activeKeyboard = true;
@@ -83,9 +91,12 @@ export class NumberBox extends Linkable {
         this.update({ value: this.valueFromString(this.inputElement.value) });
         this.updateDependents();
         this.onReturn();
+        this.update({
+            returnHasBeenPressedBeforeBlur: true
+        });
     }
     valueFromString(valueString) {
-        return valueString;
+        return Number(valueString);
     }
     activateKeyboard() {
         document.removeEventListener('keyup', this.boundActivateKeyboard);

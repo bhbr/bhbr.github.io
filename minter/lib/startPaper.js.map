@@ -1,1 +1,1 @@
-{"version":3,"file":"startPaper.js","sourceRoot":"","sources":["../src/startPaper.ts"],"names":[],"mappings":"AAEA,8CAA8C;AAC9C,OAAO,EAAE,aAAa,EAAE,MAAM,6CAA6C,CAAA;AAS3E,MAAM,OAAO,UAAW,SAAQ,aAAa;CAAI;AAEjD,gBAAgB;AAEhB,MAAM,CAAC,MAAM,KAAK,GAAG,IAAI,UAAU,EAAE,CAAA"}
+{"version":3,"file":"startPaper.js","sourceRoot":"","sources":["../src/startPaper.ts"],"names":[],"mappings":"AAEA,8CAA8C;AAC9C,OAAO,EAAE,aAAa,EAAE,MAAM,6CAA6C,CAAA;AAW3E,MAAM,OAAO,UAAW,SAAQ,aAAa;CAAI;AAEjD,gBAAgB;AAEhB,MAAM,CAAC,MAAM,KAAK,GAAG,IAAI,UAAU,EAAE,CAAA"}

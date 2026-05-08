@@ -268,7 +268,7 @@ export class Mobject extends ExtendedObject {
     dependsOn(otherMobject) {
         return otherMobject.allDependents().includes(this);
     }
-    addDependency(outputName, target, inputName, refresh = true) {
+    addDependency(outputName, target, inputName, kind = 'value', refresh = true) {
         if (this.dependsOn(target)) {
             throw 'Circular dependency!';
         }
@@ -276,7 +276,8 @@ export class Mobject extends ExtendedObject {
             source: this,
             outputName: outputName,
             target: target,
-            inputName: inputName
+            inputName: inputName,
+            kind: kind
         });
         this.dependencies.push(dep);
         if (refresh) {
@@ -370,6 +371,7 @@ export class Mobject extends ExtendedObject {
             if (onlyValues && dep.kind == 'action') {
                 continue;
             }
+            //log('A')
             let dict = {};
             if (typeof this[dep.outputName] == 'function') {
                 dict[dep.inputName] = this[dep.outputName].bind(this);

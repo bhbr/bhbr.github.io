@@ -1,6 +1,7 @@
 import { Coin } from './Coin.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
 import { PlayButton } from '../../../extensions/ui/PlayButton/PlayButton.js';
+import { MERE_TAP_DELAY } from '../../../core/constants.js';
 export class PlayableCoin extends Linkable {
     defaults() {
         return {
@@ -21,7 +22,8 @@ export class PlayableCoin extends Linkable {
             ],
             frameWidth: 50,
             frameHeight: 50,
-            swipedSide: null
+            swipedSide: null,
+            doubleTapStartTime: null
         };
     }
     get tailsProbability() {
@@ -46,16 +48,23 @@ export class PlayableCoin extends Linkable {
         this.playButton.mobject = this;
     }
     onTap(e) {
-        this.flip();
-        this.coin.update({
-            opacity: 1
-        });
-    }
-    onLongPress(e) {
-        this.flip(true, 100);
-        this.coin.update({
-            opacity: 1
-        });
+        if (this.doubleTapStartTime) {
+            if (Date.now() - this.doubleTapStartTime < MERE_TAP_DELAY) {
+                this.flip(false, 98);
+                this.flip(); // animate the last flip
+            }
+            this.doubleTapStartTime = null;
+        }
+        else {
+            this.doubleTapStartTime = Date.now();
+            window.setTimeout(function () {
+                this.doubleTapStartTime = null;
+            }.bind(this), MERE_TAP_DELAY);
+            this.flip();
+            this.coin.update({
+                opacity: 1
+            });
+        }
     }
     onPointerDown(e) {
         this.sensor.eventStartLocation = this.sensor.localEventVertex(e);

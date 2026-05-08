@@ -33,7 +33,7 @@ export class ClassDeclaration {
         this.fullDefaults = function () {
             let parentDefaults = this.parent ? this.parent.fullDefaults() : {};
             return Object.assign(parentDefaults, this.defaults());
-        };
+        }.bind(this);
     }
     checkMutabilities() {
         // Are the mutabilities specified in the class's mutabilities() method compatible with the ones inherited from the parent class?

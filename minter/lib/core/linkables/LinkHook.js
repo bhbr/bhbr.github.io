@@ -6,11 +6,9 @@ export class LinkHook extends Circle {
     defaults() {
         return {
             name: '',
-            kind: 'input',
             radius: HOOK_RADIUS,
             fillOpacity: 0,
             strokeColor: Color.white(),
-            mobject: null,
             outlet: null,
             linked: false,
             linkedBulletIndicator: new LinkBullet({
@@ -24,7 +22,6 @@ export class LinkHook extends Circle {
             fillOpacity: 'never',
             strokeColor: 'never',
             name: 'always',
-            kind: 'on_init',
             outlet: 'on_init'
         };
     }

@@ -151,7 +151,7 @@ export class Linkable extends Mobject {
         if (!link.startHook) {
             return;
         }
-        link.startHook.outlet.removeUnlinkedHook();
+        //link.startHook.outlet.removeUnlinkedHook()
     }
     inputNames() {
         return this.inputProperties.map((prop) => prop.name);
@@ -228,6 +228,18 @@ export class Linkable extends Mobject {
         });
         this.positionIOLists();
         this.outputList.view.hide();
+    }
+    addDependency(outputName, target, inputName, kind = 'value', refresh = true) {
+        var newKind = 'value';
+        if (target instanceof Linkable) {
+            for (let prop of target.inputProperties) {
+                if (prop['name'] == inputName) {
+                    newKind = prop['kind'] ?? 'value';
+                    break;
+                }
+            }
+        }
+        super.addDependency(outputName, target, inputName, newKind, refresh);
     }
 }
 //# sourceMappingURL=Linkable.js.map

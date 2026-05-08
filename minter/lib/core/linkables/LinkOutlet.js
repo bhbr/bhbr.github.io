@@ -63,15 +63,20 @@ export class LinkOutlet extends MGroup {
     }
     addHook() {
         let index = this.linkHooks.length;
+        let li = this.ioList;
+        let mp = [
+            li.frameWidth / 2 + 15 + HOOK_HORIZONTAL_SPACING * index,
+            this.label.frameHeight / 2
+        ];
         let newHook = new LinkHook({
-            midpoint: [
-                this.ioList.frameWidth / 2 + 15 + HOOK_HORIZONTAL_SPACING * index,
-                this.label.frameHeight / 2
-            ],
+            midpoint: mp,
             outlet: this
         });
-        this.add(newHook);
-        this.linkHooks.push(newHook);
+        // delay to fight a concurrency bug
+        window.setTimeout(function () {
+            this.add(newHook);
+            this.linkHooks.push(newHook);
+        }.bind(this), 100);
     }
     get kind() {
         return this.ioList.kind;
