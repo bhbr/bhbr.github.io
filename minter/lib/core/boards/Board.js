@@ -3,6 +3,7 @@ import { DependencyLink } from '../../core/linkables/DependencyLink.js';
 import { LinkBullet } from '../../core/linkables/LinkBullet.js';
 import { RoundedRectangle } from '../../core/shapes/RoundedRectangle.js';
 import { vertexOrigin, vertexCopy, vertexAdd, vertexSubtract, vertexCloseTo } from '../../core/functions/vertex.js';
+import { log } from '../../core/functions/logging.js';
 import { remove } from '../../core/functions/arrays.js';
 import { Freehand } from '../../core/creators/Freehand.js';
 import { ExpandButton } from './ExpandButton.js';
@@ -18,7 +19,6 @@ import { HELP_TEXT_LABEL_WIDTH, HELP_TEXT_LABEL_HEIGHT } from './constants.js';
 import { IO_LIST_OFFSET, SNAPPING_DISTANCE } from '../../core/linkables/constants.js';
 import { SIDEBAR_WIDTH } from '../../core/constants.js';
 import { MGroup } from '../../core/mobjects/MGroup.js';
-import { IOList } from '../../core/linkables/IOList.js';
 import { TextLabel } from '../../core/ui/TextLabel.js';
 export class BoardContent extends MGroup {
     defaults() { return {}; }
@@ -325,11 +325,18 @@ export class Board extends Linkable {
         this.content.remove(mob);
     }
     setInternalDragging(value) {
+        log(`setInternalDragging to ${value}, and this.allowingDrag = ${this.allowingDrag}`);
         if (value == this.allowingDrag) {
             return;
         }
         this.allowingDrag = value;
+        log('still here');
         this.setPanning(value);
+        // if (this.isShowingLinks) {
+        // 	log('disable linking, but still show links')
+        // 	this.setLinking(false)
+        // 	this.showLinksOfContent()
+        // }
         for (let mob of this.contentChildren) {
             mob.setDragging(value);
         }
@@ -359,12 +366,6 @@ export class Board extends Linkable {
                     break;
                 }
                 this.setLinking(value);
-                if (value) {
-                    this.setControlsVisibility(false);
-                }
-                else {
-                    this.setControlsVisibility(this.isShowingControls);
-                }
                 this.helpTextLabel.update({
                     text: this.helpTexts['link']
                 });
@@ -384,18 +385,9 @@ export class Board extends Linkable {
                 });
                 if (value) {
                     this.helpTextLabel.view.show();
-                    //this.hideLinksOfContent()
                 }
                 else {
                     this.helpTextLabel.view.hide();
-                    if (this.isShowingLinks) {
-                        this.showLinksOfContent();
-                        this.disableContent();
-                    }
-                    else {
-                        this.hideLinksOfContent();
-                        this.enableContent();
-                    }
                 }
                 this.setControlsVisibility(value);
                 this.isShowingControls = value;
@@ -508,6 +500,37 @@ export class Board extends Linkable {
         }
         return null;
     }
+    ioListContaining(p) {
+        let mobs = [];
+        for (let child of this.contentChildren) {
+            if (!(child instanceof Linkable)) {
+                continue;
+            }
+            let q = vertexSubtract(p, child.anchor);
+            if (child.inputList.frame.contains(q)) {
+                mobs.push(child.inputList);
+            }
+            if (child.outputList.frame.contains(q)) {
+                mobs.push(child.outputList);
+            }
+        }
+        return mobs;
+    }
+    firstIOListContaining(p) {
+        for (let child of this.contentChildren) {
+            if (!(child instanceof Linkable)) {
+                continue;
+            }
+            let q = vertexSubtract(p, child.anchor);
+            if (child.inputList.frame.contains(q)) {
+                return child.inputList;
+            }
+            if (child.outputList.frame.contains(q)) {
+                return child.outputList;
+            }
+        }
+        return null;
+    }
     startErasing(e) {
         this.erasing(e);
     }
@@ -525,6 +548,9 @@ export class Board extends Linkable {
                     link.endHook.update({
                         linked: false
                     });
+                    if (link.dependency.kind == 'action') {
+                        link.endHook.outlet.removeHook();
+                    }
                     linksToBeRemoved.push(link);
                     this.remove(link);
                 }
@@ -622,6 +648,7 @@ export class Board extends Linkable {
         }
     }
     startCreating(e) {
+        log('startCreating');
         this.creationTool = screenEventDevice(e);
         if (this.creationTool == ScreenEventDevice.Finger && this.creationMode == 'draw') {
             return;
@@ -640,6 +667,9 @@ export class Board extends Linkable {
         this.creating(e);
     }
     creating(e) {
+        if (this.creator === null) {
+            return;
+        }
         if (this.creationTool == ScreenEventDevice.Finger && this.creationMode == 'draw') {
             return;
         }
@@ -664,6 +694,9 @@ export class Board extends Linkable {
         this.messageSidebar({ 'button': 'collapse' });
     }
     startPanning(e) {
+        log('startPanning');
+        let target = this.sensor.eventTarget;
+        log(target.constructor.name);
         // if (e instanceof TouchEvent) {
         // 	if (e.touches.length == 2) {
         // 		this.startZooming(e)
@@ -710,6 +743,7 @@ export class Board extends Linkable {
         }
     }
     setPanning(flag) {
+        log(`setPanning to ${flag}`);
         if (flag) {
             this.sensor.setTouchMethodsTo(this.startPanning.bind(this), this.panning.bind(this), this.endPanning.bind(this));
             this.sensor.setPenMethodsTo(this.startPanning.bind(this), this.panning.bind(this), this.endPanning.bind(this));
@@ -763,43 +797,79 @@ export class Board extends Linkable {
         expandedList.renameProperty(oldName, newName);
     }
     setLinking(flag) {
+        log(`setLinking to ${flag}`);
         if (flag === this.isShowingLinks) {
             return;
         }
         if (flag && !this.isShowingLinks) {
             this.showLinksOfContent();
-            this.disableContent();
+            //this.disableContent()
             this.ungreyAllHooks();
         }
         else if (!flag && this.isShowingLinks) { // if (!this.editingLinkName) {
             this.hideLinksOfContent();
-            this.enableContent();
+            //this.enableContent()
         }
         this.isShowingLinks = flag;
         if (flag) {
-            this.disableContent();
+            //this.disableContent()
             this.sensor.setTouchMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
             this.sensor.setPenMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
             this.sensor.setMouseMethodsTo(this.startLinking.bind(this), this.linking.bind(this), this.endLinking.bind(this));
         }
         else {
-            this.enableContent();
+            //this.enableContent()
             this.sensor.restoreTouchMethods();
             this.sensor.restorePenMethods();
             this.sensor.restoreMouseMethods();
         }
     }
     startLinking(e) {
+        log('startLinking');
+        let t = this.sensor.eventTarget;
+        log(`event target as seen by Board: ${t.constructor.name}`);
         var p = this.sensor.localEventVertex(e);
         let clickedHook = this.hookAtLocation(p);
         if (clickedHook == null) {
-            let l = this.sensor.eventTargetMobjectChain(e);
-            for (let mob of l) {
-                if (mob instanceof IOList) {
-                    return;
-                }
+            log('no hook');
+            // if (this.allowingDrag) {
+            // 	log('drag allowed')
+            // 	this.setLinking(false)
+            // 	this.showLinksOfContent()
+            // 	//this.setInternalDragging(true)
+            // 	let t = this.sensor.eventTargetMobject(e)
+            // 	log(`target: ${t.constructor.name}`)
+            // 	t.startDragging(e)
+            // 	return
+            // }
+            // let l = this.sensor.eventTargetMobjectChain(e).reverse()
+            // for (let mob of l) {
+            // 	if (mob instanceof IOList) {
+            // 		return
+            // 	}
+            // }
+            // let t1 = this.sensor.eventTargetMobject(e)
+            // let t2 = this.sensor.eventTarget
+            // log(t1)
+            // log(t2)
+            // if (this.sensor.eventTargetMobject(e) == this) {
+            // 	this.startCreating(e)
+            // }
+            let l = this.firstIOListContaining(p);
+            let mob = this.firstContentChildContaining(p);
+            log(p);
+            log(l);
+            log(mob);
+            if (l !== null) {
+                return;
             }
-            this.startCreating(e);
+            if (mob === null) {
+                this.sensor.eventTarget = this;
+                this.startCreating(e);
+                return;
+            }
+            this.sensor.eventTarget = mob;
+            mob.onPointerDown(e);
             return;
         }
         p = this.locationOfHook(clickedHook);
@@ -945,7 +1015,7 @@ export class Board extends Linkable {
         return ret;
     }
     endLinking(e) {
-        this.disableContent();
+        //this.disableContent()
         this.ungreyAllHooks();
         this.showLinksOfContent();
         if (!this.openLink) {
@@ -1125,10 +1195,43 @@ export class Board extends Linkable {
             endHook.outlet.ioList.mobject.removedInputLink(this.openLink);
         }
     }
+    removeDependencyOfLink(link) {
+        let startHook = link.startHook;
+        let endHook = link.endHook;
+        startHook.outlet.ioList.mobject.removeDependencyBetween(startHook.outlet.name, endHook.outlet.ioList.mobject, endHook.outlet.name);
+        startHook.removeAllDependents();
+        endHook.removeAllDependents();
+        //startHook.outlet.removeHook()
+        startHook.outlet.ioList.mobject.removedOutputLink(link);
+        endHook.outlet.ioList.mobject.removedInputLink(link);
+    }
     removeLink(link) {
-        this.removeDependencyBetweenHooks(link.startHook, link.endHook);
+        if (this.openLink) {
+            this.removeDependencyBetweenHooks(link.startHook, link.endHook);
+        }
+        else {
+            this.removeDependencyOfLink(link);
+        }
         remove(this.links, link);
         this.remove(link);
+    }
+    removeInputLinkForPropertyAtMobject(prop, mob, index = 0) {
+        let outlet = mob.inputList.outletNamed(prop);
+        if (!outlet) {
+            return;
+        }
+        let hook = outlet.linkHooks[index];
+        if (!hook) {
+            return;
+        }
+        let link = this.linkForHook(hook);
+        if (!link) {
+            return;
+        }
+        this.removeLink(link);
+        link.startHook.update({ linked: false });
+        link.endHook.update({ linked: false });
+        link.startHook.outlet.removeHook();
     }
     removeDependencyAtHook(hook) {
         for (let link of this.links) {

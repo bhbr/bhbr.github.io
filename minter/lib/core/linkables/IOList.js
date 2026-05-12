@@ -3,7 +3,9 @@ import { Color } from '../../core/classes/Color.js';
 import { RoundedRectangle } from '../../core/shapes/RoundedRectangle.js';
 import { LinkOutlet } from './LinkOutlet.js';
 import { IO_LIST_WIDTH, HOOK_INSET_X, HOOK_INSET_Y, HOOK_VERTICAL_SPACING } from './constants.js';
+import { log } from '../../core/functions/logging.js';
 import { remove } from '../../core/functions/arrays.js';
+import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
 export class IOList extends RoundedRectangle {
     defaults() {
         return {
@@ -17,7 +19,8 @@ export class IOList extends RoundedRectangle {
             fillOpacity: 1.0,
             strokeColor: Color.gray(0.4),
             strokeWidth: 0.75,
-            editable: false
+            editable: false,
+            screenEventHandler: ScreenEventHandler.Self
         };
     }
     mutabilities() {
@@ -186,6 +189,17 @@ export class IOList extends RoundedRectangle {
             ret = ret.concat(outlet.linkHooks);
         }
         return ret;
+    }
+    onPointerDown(e) {
+        let t = this.sensor.eventTargetMobject(e);
+        log(`event target as seen by IOList: ${t.constructor.name}`);
+        this.mobject.board.startLinking(e);
+    }
+    onPointerMove(e) {
+        this.mobject.board.linking(e);
+    }
+    onPointerUp(e) {
+        this.mobject.board.endLinking(e);
     }
 }
 //# sourceMappingURL=IOList.js.map

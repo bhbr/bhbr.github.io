@@ -1,7 +1,7 @@
 import { Coin } from './Coin.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
 import { PlayButton } from '../../../extensions/ui/PlayButton/PlayButton.js';
-import { MERE_TAP_DELAY } from '../../../core/constants.js';
+import { Checkbox } from '../../../core/ui/Checkbox.js';
 export class PlayableCoin extends Linkable {
     defaults() {
         return {
@@ -23,7 +23,13 @@ export class PlayableCoin extends Linkable {
             frameWidth: 50,
             frameHeight: 50,
             swipedSide: null,
-            doubleTapStartTime: null
+            fasterCheckbox: new Checkbox({
+                anchor: [65, 74],
+                text: 'x10',
+                state: false
+            }),
+            playFaster: false,
+            speedMultiplier: 10
         };
     }
     get tailsProbability() {
@@ -46,24 +52,24 @@ export class PlayableCoin extends Linkable {
         //this.add(this.playButton)
         this.controls.add(this.playButton);
         this.playButton.mobject = this;
+        this.controls.add(this.fasterCheckbox);
+        this.fasterCheckbox.onToggle = function () {
+            this.playFaster = !this.playFaster;
+            if (this.playState == 'play') {
+                this.pause();
+                this.play();
+            }
+        }.bind(this);
     }
     onTap(e) {
-        if (this.doubleTapStartTime) {
-            if (Date.now() - this.doubleTapStartTime < MERE_TAP_DELAY) {
-                this.flip(false, 98);
-                this.flip(); // animate the last flip
-            }
-            this.doubleTapStartTime = null;
+        if (this.swipedSide) {
+            return;
+        } // bc onPointerUp handles the flip
+        if (this.playFaster) {
+            this.flip(false, this.speedMultiplier);
         }
         else {
-            this.doubleTapStartTime = Date.now();
-            window.setTimeout(function () {
-                this.doubleTapStartTime = null;
-            }.bind(this), MERE_TAP_DELAY);
-            this.flip();
-            this.coin.update({
-                opacity: 1
-            });
+            this.flip(true);
         }
     }
     onPointerDown(e) {
@@ -89,9 +95,18 @@ export class PlayableCoin extends Linkable {
             opacity: 1
         });
         if (this.swipedSide) {
-            this.coin.flipToState(this.swipedSide, true);
-            this.update();
-            this.updateDependents();
+            if (this.playFaster) {
+                for (let i = 0; i < this.speedMultiplier; i++) {
+                    this.coin.flipToState(this.swipedSide, false);
+                    this.update();
+                    this.updateDependents();
+                }
+            }
+            else {
+                this.coin.flipToState(this.swipedSide, true);
+                this.update();
+                this.updateDependents();
+            }
             this.swipedSide = null;
         }
     }
@@ -104,9 +119,16 @@ export class PlayableCoin extends Linkable {
         }
     }
     play() {
-        this.playIntervalID = window.setInterval(function () {
-            this.flip(true);
-        }.bind(this), 250);
+        if (!this.playFaster) {
+            this.playIntervalID = window.setInterval(function () {
+                this.flip(true);
+            }.bind(this), 250);
+        }
+        else {
+            this.playIntervalID = window.setInterval(function () {
+                this.flip(false, this.speedMultiplier);
+            }.bind(this), 250);
+        }
         this.playState = 'play';
     }
     pause() {

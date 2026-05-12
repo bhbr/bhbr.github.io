@@ -10,7 +10,9 @@ import { VariableNameBox } from './VariableNameBox.js';
 export class Slider extends Linkable {
     defaults() {
         return {
-            inputProperties: [],
+            inputProperties: [
+                { name: 'max', type: 'number' }
+            ],
             outputProperties: [
                 { name: 'value', type: 'number' }
             ],
@@ -120,6 +122,7 @@ export class Slider extends Linkable {
         let maxValue = Number(this.maxValueInputBox.value);
         if (maxValue <= this.min) {
             this.maxValueInputBox.value = this.max;
+            this.maxValueInputBox.inputElement.value = this.max.toString();
         }
         else {
             this.update({
@@ -144,6 +147,12 @@ export class Slider extends Linkable {
             this.minValueInputBox.update({
                 anchor: [-70, this.height - 10]
             });
+        }
+        let newMax = args['max'];
+        if (newMax !== undefined && newMax != this.max) {
+            this.maxValueInputBox.inputElement.value = `${newMax}`;
+            this.maxValueInputBox.value = newMax;
+            this.updateMaxValue();
         }
         //// updating submobs
         let a = this.normalizedValue();
@@ -181,6 +190,19 @@ export class Slider extends Linkable {
         newValue = Math.max(Math.min(newValue, this.max), this.min);
         newValue = Math.round(newValue * 10 ** this.precision) / 10 ** this.precision;
         this.update({ value: newValue });
+    }
+    addedInputLink(link) {
+        super.addedInputLink(link);
+        if (link.endHook.outlet.name == 'max') {
+            this.maxValueInputBox.value = this.max;
+            this.maxValueInputBox.inputElement.disabled = true;
+        }
+    }
+    removedInputLink(link) {
+        super.removedInputLink(link);
+        if (link.endHook.outlet.name == 'max') {
+            this.maxValueInputBox.inputElement.disabled = false;
+        }
     }
 }
 //# sourceMappingURL=Slider.js.map

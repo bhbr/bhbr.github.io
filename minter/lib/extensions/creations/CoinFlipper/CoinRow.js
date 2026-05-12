@@ -6,7 +6,7 @@ import { ScreenEventHandler } from '../../../core/mobjects/screen_events.js';
 import { HEADS_COLOR, TAILS_COLOR } from './constants.js';
 import { NumberInputBox } from '../../../extensions/ui/InputBox/NumberInputBox.js';
 import { getPaper } from '../../../core/functions/getters.js';
-import { MERE_TAP_DELAY } from '../../../core/constants.js';
+import { Checkbox } from '../../../core/ui/Checkbox.js';
 export class CoinRow extends Linkable {
     defaults() {
         return {
@@ -40,7 +40,6 @@ export class CoinRow extends Linkable {
                 { name: 'nbHeads', displayName: '# heads', type: 'number' },
                 { name: 'nbTails', displayName: '# tails', type: 'number' },
                 { name: 'nbCoins', displayName: '# coins', type: 'number' },
-                { name: 'mean', displayName: 'mean', type: 'number' }
             ],
             frameWidth: 300,
             frameHeight: 50,
@@ -48,7 +47,13 @@ export class CoinRow extends Linkable {
                 labelText: '# coins:',
                 value: 1
             }),
-            doubleTapStartTime: null
+            fasterCheckbox: new Checkbox({
+                anchor: [60, 70],
+                text: 'x10',
+                state: false
+            }),
+            playFaster: false,
+            speedMultiplier: 10
         };
     }
     setup() {
@@ -57,6 +62,7 @@ export class CoinRow extends Linkable {
         this.setupLabels();
         this.setupButton();
         this.setupInputBox();
+        this.setupCheckbox();
     }
     createCoins() {
         for (var i = 0; i < this.nbCoins; i++) {
@@ -96,6 +102,19 @@ export class CoinRow extends Linkable {
             anchor: [this.frameWidth / 2 - this.nbCoinsInputBox.frameWidth / 2, 0]
         });
     }
+    setupCheckbox() {
+        this.controls.add(this.fasterCheckbox);
+        this.fasterCheckbox.label.update({
+            frameWidth: 50
+        });
+        this.fasterCheckbox.onToggle = function () {
+            this.playFaster = !this.playFaster;
+            if (this.playState == 'play') {
+                this.pause();
+                this.play();
+            }
+        }.bind(this);
+    }
     endNbCoinsEditing() {
         getPaper().blurFocusedChild();
         this.nbCoinsInputBox.inputElement.blur();
@@ -123,6 +142,7 @@ export class CoinRow extends Linkable {
         this.adjustFrameWidth();
         this.positionTailsLabel();
         this.positionButton();
+        this.positionCheckbox();
         this.positionNbCoinsInputBox();
         this.positionIOLists();
         this.updateDependents();
@@ -133,6 +153,7 @@ export class CoinRow extends Linkable {
         this.adjustFrameWidth();
         this.positionTailsLabel();
         this.positionButton();
+        this.positionCheckbox();
         this.positionNbCoinsInputBox();
         this.positionIOLists();
         this.updateDependents();
@@ -158,6 +179,14 @@ export class CoinRow extends Linkable {
             ]
         });
     }
+    positionCheckbox() {
+        this.fasterCheckbox.update({
+            anchor: [
+                this.playButton.anchor[0] + 65,
+                this.playButton.anchor[1] + 4
+            ]
+        });
+    }
     positionNbCoinsInputBox() {
         this.nbCoinsInputBox.update({
             anchor: [
@@ -177,24 +206,24 @@ export class CoinRow extends Linkable {
         this.update();
     }
     onTap(e) {
-        if (this.doubleTapStartTime) {
-            if (Date.now() - this.doubleTapStartTime < MERE_TAP_DELAY) {
-                this.flipCoins(99);
-            }
-            this.doubleTapStartTime = null;
+        if (this.playFaster) {
+            this.flipCoins(this.speedMultiplier);
         }
         else {
-            this.doubleTapStartTime = Date.now();
-            window.setTimeout(function () {
-                this.doubleTapStartTime = null;
-            }.bind(this), MERE_TAP_DELAY);
             this.flipCoins();
         }
     }
     play() {
-        this.playIntervalID = window.setInterval(function () {
-            this.flipCoins();
-        }.bind(this), 100);
+        if (!this.playFaster) {
+            this.playIntervalID = window.setInterval(function () {
+                this.flipCoins();
+            }.bind(this), 250);
+        }
+        else {
+            this.playIntervalID = window.setInterval(function () {
+                this.flipCoins(this.speedMultiplier);
+            }.bind(this), 250);
+        }
         this.playState = 'play';
     }
     pause() {
@@ -224,9 +253,6 @@ export class CoinRow extends Linkable {
         return this.nbCoins - this.nbTails();
     }
     nbHeadsAsString() { return this.nbHeads().toString(); }
-    mean() {
-        return this.nbTails() / this.nbCoins;
-    }
     update(args = {}, redraw = false) {
         let newNbCoins = args['nbCoins'];
         if (newNbCoins !== undefined && newNbCoins != this.nbCoins) {
