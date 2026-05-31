@@ -42,6 +42,9 @@ export class ToggleButton extends SidebarButton {
         });
     }
     commonMereButtonUp() {
+        if (this.sidebar.activeButton !== this) {
+            return;
+        }
         this.messagePaper(this.deselectMessages[0]);
         this.touchStartTime = null;
         this.sidebar.setActiveButton(null);
@@ -51,7 +54,7 @@ export class ToggleButton extends SidebarButton {
         this.label.view.hide();
     }
     commonButtonTap() {
-        if (this.sidebar.activeButton != this) {
+        if (this.sidebar.activeButton !== this) {
             return;
         }
         if (this.locked) {
@@ -61,6 +64,7 @@ export class ToggleButton extends SidebarButton {
             this.messagePaper(this.selectMessages[0]);
         }
         this.messagePaper({ 'show help': false });
+        this.sidebar.setActiveButton(null);
         this.touchStartTime = null;
         this.locked = !this.locked;
         this.innerCircle.update({

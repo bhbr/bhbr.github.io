@@ -13,7 +13,7 @@ import { LinkHook } from 'core/linkables/LinkHook'
 //import { EditableLinkHook } from './EditableLinkHook'
 import { Color } from 'core/classes/Color'
 import { Creator } from 'core/creators/Creator'
-import { ScreenEventDevice, screenEventDevice, screenEventDeviceAsString, ScreenEventHandler, ScreenEvent, eventVertex, isTouchDevice } from 'core/mobjects/screen_events'
+import { ScreenEventDevice, screenEventDevice, screenEventDeviceAsString, ScreenEventHandler, ScreenEvent, eventVertex, isTouchDevice, separateSidebar } from 'core/mobjects/screen_events'
 import { Mobject } from 'core/mobjects/Mobject'
 import { convertArrayToString } from 'core/functions/arrays'
 import { getPaper } from 'core/functions/getters'
@@ -59,8 +59,8 @@ The content children can also be dragged and panned.
 				anchor: vertexOrigin(),
 				cornerRadius: 25,
 				screenEventHandler: ScreenEventHandler.Parent,
-				fillColor: isTouchDevice ? Color.clear() : Color.black(),
-				fillOpacity: isTouchDevice ? 0.0 : 1.0,
+				fillColor: (isTouchDevice && separateSidebar) ? Color.clear() : Color.black(),
+				fillOpacity: (isTouchDevice && separateSidebar) ? 0.0 : 1.0,
 				strokeColor: Color.gray(0.2),
 				strokeWidth: 1.0,
 				drawShadow: true
@@ -423,10 +423,8 @@ The content children can also be dragged and panned.
 	}
 
 	setInternalDragging(value: boolean) {
-		log(`setInternalDragging to ${value}, and this.allowingDrag = ${this.allowingDrag}`)
 		if (value == this.allowingDrag) { return }
 		this.allowingDrag = value
-		log('still here')
 		this.setPanning(value)
 		// if (this.isShowingLinks) {
 		// 	log('disable linking, but still show links')
@@ -712,6 +710,7 @@ The content children can also be dragged and panned.
 	}
 
 	onPointerDown(e: ScreenEvent) {
+		log('pointer down')
 		if (this.focusedChild) {
 			this.focusedChild.blur()
 		}
@@ -750,7 +749,6 @@ The content children can also be dragged and panned.
 	}
 
 	startCreating(e: ScreenEvent) {
-		log('startCreating')
 		this.creationTool = screenEventDevice(e)
 		if (this.creationTool == ScreenEventDevice.Finger && this.creationMode == 'draw') {
 			return
@@ -761,18 +759,24 @@ The content children can also be dragged and panned.
 	}
 
 	onPointerMove(e: ScreenEvent) {
+		log('pointer move')
 		if (this.contracted) { return }
+		log('A')
 		if (this.creationStroke.length == 0) { return }
+		log('B')
 		this.creating(e)
 	}
 
 	creating(e: ScreenEvent) {
+		log('C')
 		if (this.creator === null) {
 			return
 		}
+		log('D')
 		if (this.creationTool == ScreenEventDevice.Finger && this.creationMode == 'draw') {
 			return
 		}
+		log('E')
 		let v: vertex = this.sensor.localEventVertex(e)
 		this.creationStroke.push(v)
 		this.creator.updateFromTip(v)
@@ -805,9 +809,7 @@ The content children can also be dragged and panned.
 	panPointStart?: vertex
 
 	startPanning(e: ScreenEvent) {
-		log('startPanning')
 		let target = this.sensor.eventTarget
-		log(target.constructor.name)
 		// if (e instanceof TouchEvent) {
 		// 	if (e.touches.length == 2) {
 		// 		this.startZooming(e)
@@ -822,7 +824,6 @@ The content children can also be dragged and panned.
 	}
 
 	panning(e: ScreenEvent) {
-		// log(e.constructor.name)
 		// if (e instanceof TouchEvent) {
 		// 	log(e.touches.length)
 		// 	if (e.touches.length == 2) {
@@ -856,7 +857,6 @@ The content children can also be dragged and panned.
 	}
 
 	setPanning(flag: boolean) {
-		log(`setPanning to ${flag}`)
 		if (flag) {
 			this.sensor.setTouchMethodsTo(this.startPanning.bind(this), this.panning.bind(this), this.endPanning.bind(this))
 			this.sensor.setPenMethodsTo(this.startPanning.bind(this), this.panning.bind(this), this.endPanning.bind(this))
@@ -958,7 +958,6 @@ The content children can also be dragged and panned.
 	}
 
 	setLinking(flag: boolean) {
-		log(`setLinking to ${flag}`)
 		if (flag === this.isShowingLinks) {
 			return
 		}
@@ -985,13 +984,10 @@ The content children can also be dragged and panned.
 	}
 
 	startLinking(e: ScreenEvent) {
-		log('startLinking')
 		let t = this.sensor.eventTarget
-		log(`event target as seen by Board: ${t.constructor.name}`)
 		var p = this.sensor.localEventVertex(e)
 		let clickedHook = this.hookAtLocation(p)
 		if (clickedHook == null) {
-			log('no hook')
 			// if (this.allowingDrag) {
 			// 	log('drag allowed')
 			// 	this.setLinking(false)
@@ -1018,9 +1014,6 @@ The content children can also be dragged and panned.
 			// }
 			let l = this.firstIOListContaining(p)
 			let mob = this.firstContentChildContaining(p)
-			log(p)
-			log(l)
-			log(mob)
 			if (l !== null) {
 				return
 			}

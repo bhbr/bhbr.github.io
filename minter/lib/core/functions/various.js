@@ -33,7 +33,7 @@ export function gaussianRandom(mean = 0, stdev = 1) {
     return z * stdev + mean;
 }
 export function randomBinomial(n = 1, p = 0.5) {
-    if (n < 1e7) {
+    if (n < 5e3) {
         var X = 0;
         for (var i = 0; i < n; i++) {
             let v = (Math.random() < p) ? 1 : 0;

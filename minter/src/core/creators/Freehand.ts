@@ -49,11 +49,14 @@ export class Freehand extends Creator {
 	}
 
 	updateFromTip(q: vertex, redraw: boolean = true) {
+		log('Freehand.updateFromTip')
 		super.updateFromTip(q, false)
 		if (redraw) {
 			this.line.view.redraw()
 			this.view.redraw()
 		}
+		log('F')
+		log(this.line)
 	}
 
 	dissolve() {

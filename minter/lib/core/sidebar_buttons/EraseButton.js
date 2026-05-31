@@ -3,7 +3,7 @@ import { Color } from '../../core/classes/Color.js';
 export class EraseButton extends SidebarButton {
     defaults() {
         return {
-            baseColor: Color.red().brighten(0.7),
+            baseColor: Color.red().darken(0.7),
             messageKey: 'erase',
             selectMessages: [
                 { 'erase': true },
@@ -19,7 +19,7 @@ export class EraseButton extends SidebarButton {
     setup() {
         super.setup();
         this.innerCircle.update({
-            fillColor: Color.red().brighten(0.5)
+            fillColor: Color.red().darken(0.5)
         });
         this.label.update({
             backgroundColor: this.innerCircle.fillColor

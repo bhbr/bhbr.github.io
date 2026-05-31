@@ -26,7 +26,7 @@ export class BinaryOperatorBox extends Linkable {
                 { name: 'operand2', displayName: null, type: 'number|Array<number>' }
             ],
             outputProperties: [
-                { name: 'result', displayName: null, type: 'number|Array<number>' }
+                { name: 'value', displayName: null, type: 'number|Array<number>' }
             ],
             operand2InputBox: new NumberInputBox({
                 label: new TextLabel({
@@ -75,8 +75,6 @@ export class BinaryOperatorBox extends Linkable {
         else if (this.valueBox instanceof NumberListBox) {
             this.valueBox.scroll.update({ list: [] });
         }
-        this.moveToTop(this.inputList);
-        this.moveToTop(this.outputList);
         this.operand2InputBox.onReturn = function () {
             this.update({
                 operand2: this.operand2InputBox.value
@@ -93,10 +91,20 @@ export class BinaryOperatorBox extends Linkable {
                 value: this.result()
             });
             this.valueBox.controls.remove(this.valueBox.clearButton);
+            this.createOutputVariable('length');
+            this.createOutputVariable('sum');
+            this.createOutputVariable('mean');
+            this.outputProperties[0]['displayName'] == 'list';
+            this.outputList.linkOutlets[0].label.update({ text: 'list' });
             this.valueBox.sensor.screenEventHandler = ScreenEventHandler.Parent;
         }
         else if (this.valueType == 'Array<number>' && newType == 'number') {
             this.remove(this.valueBox);
+            this.removeOutputVariable('length');
+            this.removeOutputVariable('sum');
+            this.removeOutputVariable('mean');
+            this.outputProperties[0]['displayName'] == 'value';
+            this.outputList.linkOutlets[0].label.update({ text: 'value' });
             this.valueBox = new NumberBox({
                 value: this.result()
             });
@@ -117,6 +125,25 @@ export class BinaryOperatorBox extends Linkable {
         let a = this.operand1;
         let b = this.operand2;
         return this.compute(a, b, this.operator);
+    }
+    length() {
+        if (this.valueType === 'number') {
+            throw `Result is not a list`;
+        }
+        else {
+            return this.valueBox.length();
+        }
+    }
+    sum() {
+        if (this.valueType === 'number') {
+            throw `Result is not a list`;
+        }
+        else {
+            return this.valueBox.sum();
+        }
+    }
+    mean() {
+        return this.sum() / this.length();
     }
     compute(a, b, op) {
         if (typeof a == 'number' && typeof b == 'number') {
@@ -214,9 +241,6 @@ export class AddBox extends BinaryOperatorBox {
             inputProperties: [
                 { name: 'operand1', displayName: 'term', type: 'number|Array<number>' },
                 { name: 'operand2', displayName: 'term', type: 'number|Array<number>' }
-            ],
-            outputProperties: [
-                { name: 'result', displayName: 'sum', type: 'number|Array<number>' }
             ]
         };
     }
@@ -233,9 +257,6 @@ export class SubtractBox extends BinaryOperatorBox {
             inputProperties: [
                 { name: 'operand1', displayName: 'minuend', type: 'number|Array<number>' },
                 { name: 'operand2', displayName: 'subtrahend', type: 'number|Array<number>' }
-            ],
-            outputProperties: [
-                { name: 'result', displayName: 'difference', type: 'number|Array<number>' }
             ]
         };
     }
@@ -252,9 +273,6 @@ export class MultiplyBox extends BinaryOperatorBox {
             inputProperties: [
                 { name: 'operand1', displayName: 'factor', type: 'number|Array<number>' },
                 { name: 'operand2', displayName: 'factor', type: 'number|Array<number>' }
-            ],
-            outputProperties: [
-                { name: 'result', displayName: 'product', type: 'number|Array<number>' }
             ]
         };
     }
@@ -271,9 +289,6 @@ export class DivideBox extends BinaryOperatorBox {
             inputProperties: [
                 { name: 'operand1', displayName: 'dividend', type: 'number|Array<number>' },
                 { name: 'operand2', displayName: 'divisor', type: 'number|Array<number>' }
-            ],
-            outputProperties: [
-                { name: 'result', displayName: 'quotient', type: 'number|Array<number>' }
             ]
         };
     }

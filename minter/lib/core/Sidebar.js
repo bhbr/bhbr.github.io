@@ -8,7 +8,6 @@ import { buttonAnchor } from '../core/sidebar_buttons/button_geometry.js';
 import { Mobject } from '../core/mobjects/Mobject.js';
 import { DragButton } from '../core/sidebar_buttons/DragButton.js';
 import { SidebarView } from './SidebarView.js';
-import { isTouchDevice, separateSidebar } from '../core/mobjects/screen_events.js';
 export class Sidebar extends Mobject {
     defaults() {
         return {
@@ -16,7 +15,7 @@ export class Sidebar extends Mobject {
             activeButton: null,
             background: new Rectangle({
                 fillColor: Color.black(),
-                fillOpacity: isTouchDevice ? 0.0 : 1.0,
+                fillOpacity: 1.0,
                 strokeWidth: 0,
                 screenEventHandler: ScreenEventHandler.Parent,
                 width: SIDEBAR_WIDTH,
@@ -59,18 +58,17 @@ export class Sidebar extends Mobject {
         this.requestInit(); // bc only it knows the initial buttons
         this.addDependency('frameWidth', this.background, 'width');
         this.addDependency('frameHeight', this.background, 'height');
-        if (isTouchDevice) {
-            if (separateSidebar) {
-                this.view.div.style.background = 'clear';
-                this.view.div.style.backgroundColor = 'clear';
-                this.background.update({
-                    fillColor: Color.clear()
-                });
-            }
-            else {
-                document.body.style.backgroundColor = 'black';
-            }
-        }
+        // if (isTouchDevice) {
+        // 	if (separateSidebar) {
+        // 		this.view.div.style.background = 'clear'
+        // 		this.view.div.style.backgroundColor = 'clear'
+        // 		this.background.update({
+        // 			fillColor: Color.clear()
+        // 		})
+        // 	} else {
+        // 		document.body.style.backgroundColor = 'black'
+        // 	}
+        // }
     }
     addButton(button) {
         let i = this.buttons.length;

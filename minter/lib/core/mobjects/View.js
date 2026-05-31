@@ -69,6 +69,7 @@ export class View extends ExtendedObject {
             this.div.style.border = '1px dashed green';
         }
         this.div['view'] = this;
+        this.div['mobject'] = this.mobject;
         this.frame.view = this;
         this.redraw();
         if (this.drawShadow) {

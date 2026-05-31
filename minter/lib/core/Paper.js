@@ -58,14 +58,15 @@ export class Paper extends Board {
         this.background.view.hideShadow();
         if (isTouchDevice) {
             if (separateSidebar) {
-                this.view.div.style.background = 'clear';
-                this.view.div.style.backgroundColor = 'clear';
+                this.view.div.style.background = 'transparent';
+                this.view.div.style.backgroundColor = 'transparent';
                 this.background.update({
-                    fillColor: Color.clear()
+                    fillColor: Color.black()
                 });
+                this.background.view.div.style.backgroundColor = 'rgba(0, 0, 0, 1)';
             }
             else {
-                document.body.style.backgroundColor = 'black';
+                document.body.style.backgroundColor = 'rgba(0, 0, 0, 0)';
             }
         }
         let width = window.innerWidth - (separateSidebar ? 0 : SIDEBAR_WIDTH);

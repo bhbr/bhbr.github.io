@@ -1,5 +1,4 @@
 import { remove, clear } from '../../core/functions/arrays.js';
-import { log } from '../../core/functions/logging.js';
 import { copy } from '../../core/functions/copying.js';
 import { ScreenEventHandler, eventVertex, addPointerDown, addPointerMove, addPointerUp, addPointerOut } from './screen_events.js';
 import { vertexAdd, vertexSubtract } from '../../core/functions/vertex.js';
@@ -372,7 +371,6 @@ export class Mobject extends ExtendedObject {
             if (onlyValues && dep.kind == 'action') {
                 continue;
             }
-            //log('A')
             let dict = {};
             if (typeof this[dep.outputName] == 'function') {
                 dict[dep.inputName] = this[dep.outputName].bind(this);
@@ -428,15 +426,10 @@ export class Mobject extends ExtendedObject {
     onLongMouseDown(e) { this.onLongPress(e); }
     onPointerOut(e) { }
     setDragging(flag) {
-        log('setDragging on');
-        log(this.constructor.name);
-        log(flag);
-        log(this.draggingEnabled);
         if (flag) {
             if (this.draggingEnabled) {
                 return;
             }
-            log('here');
             this.sensor.setTouchMethodsTo(this.startDragging.bind(this), this.dragging.bind(this), this.endDragging.bind(this));
             this.sensor.setPenMethodsTo(this.startDragging.bind(this), this.dragging.bind(this), this.endDragging.bind(this));
             this.sensor.setMouseMethodsTo(this.startDragging.bind(this), this.dragging.bind(this), this.endDragging.bind(this));
@@ -452,7 +445,6 @@ export class Mobject extends ExtendedObject {
         this.draggingEnabled = flag;
     }
     startDragging(e) {
-        log(`startDragging on ${this.constructor.name}`);
         this.dragAnchorStart = vertexSubtract(this.view.frame.anchor, eventVertex(e));
         this.hideShadow();
         this.parent.update();

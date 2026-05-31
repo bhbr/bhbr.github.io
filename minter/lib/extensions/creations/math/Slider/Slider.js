@@ -138,6 +138,23 @@ export class Slider extends Linkable {
         if (args['name'] !== undefined) {
             this.renameLinkableProperty('output', this.name ?? 'value', args['name']);
         }
+        let newValue = args['value'] ?? this.value;
+        let newMax = args['max'] ?? this.max;
+        let newMin = args['min'] ?? this.min;
+        if (newMin > newMax) {
+            if (args['max']) {
+                args['max'] = newMin;
+            }
+            if (args['min']) {
+                args['min'] = newMax;
+            }
+        }
+        if (newValue > newMax) {
+            args['value'] = newMax;
+        }
+        if (newValue < newMin) {
+            args['value'] = newMin;
+        }
         super.update(args, false);
         if (args['width'] !== undefined) {
             this.view.frame.width = this.width;
@@ -148,7 +165,6 @@ export class Slider extends Linkable {
                 anchor: [-70, this.height - 10]
             });
         }
-        let newMax = args['max'];
         if (newMax !== undefined && newMax != this.max) {
             this.maxValueInputBox.inputElement.value = `${newMax}`;
             this.maxValueInputBox.value = newMax;

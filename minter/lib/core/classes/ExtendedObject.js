@@ -95,6 +95,9 @@ export class ExtendedObject {
         // for debugging
         return this.prototypes().map((obj) => obj.constructor.name);
     }
+    isInstanceOf(cls) {
+        return this.ancestry().includes(cls);
+    }
     checkConstructorArgs(args) {
         // Only properties with mutability 'always', 'on_update' or 'on_init' can be set in the constructor call
         for (let [prop, value] of Object.entries(args)) {

@@ -10,7 +10,7 @@ import { ExpandButton } from './ExpandButton.js';
 //import { EditableLinkHook } from './EditableLinkHook'
 import { Color } from '../../core/classes/Color.js';
 import { Creator } from '../../core/creators/Creator.js';
-import { ScreenEventDevice, screenEventDevice, ScreenEventHandler, isTouchDevice } from '../../core/mobjects/screen_events.js';
+import { ScreenEventDevice, screenEventDevice, ScreenEventHandler, isTouchDevice, separateSidebar } from '../../core/mobjects/screen_events.js';
 import { convertArrayToString } from '../../core/functions/arrays.js';
 import { getPaper } from '../../core/functions/getters.js';
 import { ExpandedBoardInputList } from './ExpandedBoardInputList.js';
@@ -46,8 +46,8 @@ export class Board extends Linkable {
                 anchor: vertexOrigin(),
                 cornerRadius: 25,
                 screenEventHandler: ScreenEventHandler.Parent,
-                fillColor: isTouchDevice ? Color.clear() : Color.black(),
-                fillOpacity: isTouchDevice ? 0.0 : 1.0,
+                fillColor: (isTouchDevice && separateSidebar) ? Color.clear() : Color.black(),
+                fillOpacity: (isTouchDevice && separateSidebar) ? 0.0 : 1.0,
                 strokeColor: Color.gray(0.2),
                 strokeWidth: 1.0,
                 drawShadow: true
@@ -325,12 +325,10 @@ export class Board extends Linkable {
         this.content.remove(mob);
     }
     setInternalDragging(value) {
-        log(`setInternalDragging to ${value}, and this.allowingDrag = ${this.allowingDrag}`);
         if (value == this.allowingDrag) {
             return;
         }
         this.allowingDrag = value;
-        log('still here');
         this.setPanning(value);
         // if (this.isShowingLinks) {
         // 	log('disable linking, but still show links')
@@ -610,6 +608,7 @@ export class Board extends Linkable {
         }
     }
     onPointerDown(e) {
+        log('pointer down');
         if (this.focusedChild) {
             this.focusedChild.blur();
         }
@@ -648,7 +647,6 @@ export class Board extends Linkable {
         }
     }
     startCreating(e) {
-        log('startCreating');
         this.creationTool = screenEventDevice(e);
         if (this.creationTool == ScreenEventDevice.Finger && this.creationMode == 'draw') {
             return;
@@ -658,21 +656,27 @@ export class Board extends Linkable {
         this.add(this.creator);
     }
     onPointerMove(e) {
+        log('pointer move');
         if (this.contracted) {
             return;
         }
+        log('A');
         if (this.creationStroke.length == 0) {
             return;
         }
+        log('B');
         this.creating(e);
     }
     creating(e) {
+        log('C');
         if (this.creator === null) {
             return;
         }
+        log('D');
         if (this.creationTool == ScreenEventDevice.Finger && this.creationMode == 'draw') {
             return;
         }
+        log('E');
         let v = this.sensor.localEventVertex(e);
         this.creationStroke.push(v);
         this.creator.updateFromTip(v);
@@ -694,9 +698,7 @@ export class Board extends Linkable {
         this.messageSidebar({ 'button': 'collapse' });
     }
     startPanning(e) {
-        log('startPanning');
         let target = this.sensor.eventTarget;
-        log(target.constructor.name);
         // if (e instanceof TouchEvent) {
         // 	if (e.touches.length == 2) {
         // 		this.startZooming(e)
@@ -710,7 +712,6 @@ export class Board extends Linkable {
         }
     }
     panning(e) {
-        // log(e.constructor.name)
         // if (e instanceof TouchEvent) {
         // 	log(e.touches.length)
         // 	if (e.touches.length == 2) {
@@ -743,7 +744,6 @@ export class Board extends Linkable {
         }
     }
     setPanning(flag) {
-        log(`setPanning to ${flag}`);
         if (flag) {
             this.sensor.setTouchMethodsTo(this.startPanning.bind(this), this.panning.bind(this), this.endPanning.bind(this));
             this.sensor.setPenMethodsTo(this.startPanning.bind(this), this.panning.bind(this), this.endPanning.bind(this));
@@ -797,7 +797,6 @@ export class Board extends Linkable {
         expandedList.renameProperty(oldName, newName);
     }
     setLinking(flag) {
-        log(`setLinking to ${flag}`);
         if (flag === this.isShowingLinks) {
             return;
         }
@@ -825,13 +824,10 @@ export class Board extends Linkable {
         }
     }
     startLinking(e) {
-        log('startLinking');
         let t = this.sensor.eventTarget;
-        log(`event target as seen by Board: ${t.constructor.name}`);
         var p = this.sensor.localEventVertex(e);
         let clickedHook = this.hookAtLocation(p);
         if (clickedHook == null) {
-            log('no hook');
             // if (this.allowingDrag) {
             // 	log('drag allowed')
             // 	this.setLinking(false)
@@ -857,9 +853,6 @@ export class Board extends Linkable {
             // }
             let l = this.firstIOListContaining(p);
             let mob = this.firstContentChildContaining(p);
-            log(p);
-            log(l);
-            log(mob);
             if (l !== null) {
                 return;
             }

@@ -6,8 +6,11 @@ export class Color {
         this.blue = b;
         this.alpha = a;
     }
-    brighten(factor) {
+    darken(factor) {
         return new Color(factor * this.red, factor * this.green, factor * this.blue, this.alpha);
+    }
+    brighten(factor) {
+        return new Color(1 - factor * (1 - this.red), 1 - factor * (1 - this.green), 1 - factor * (1 - this.blue), this.alpha);
     }
     // Conversion methods
     toHex() {

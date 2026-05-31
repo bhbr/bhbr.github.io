@@ -2,6 +2,7 @@ import { Creator } from '../../core/creators/Creator.js';
 import { PolygonalLine } from '../../core/vmobjects/PolygonalLine.js';
 import { Color } from '../../core/classes/Color.js';
 import { ScreenEventHandler } from '../../core/mobjects/screen_events.js';
+import { log } from '../../core/functions/logging.js';
 export class Freehand extends Creator {
     defaults() {
         return {
@@ -33,11 +34,14 @@ export class Freehand extends Creator {
         this.add(this.line);
     }
     updateFromTip(q, redraw = true) {
+        log('Freehand.updateFromTip');
         super.updateFromTip(q, false);
         if (redraw) {
             this.line.view.redraw();
             this.view.redraw();
         }
+        log('F');
+        log(this.line);
     }
     dissolve() {
         this.update({

@@ -211,12 +211,14 @@ export class Linkable extends Mobject {
         if (name == null) {
             return;
         }
-        this.createProperty(name, 0);
-        this.outputProperties = [{
-                name: name,
-                type: 'number',
-                displayName: name
-            }];
+        if (this[name] === undefined) {
+            this.createProperty(name, 0);
+        }
+        this.outputProperties.push({
+            name: name,
+            type: 'number',
+            displayName: name
+        });
         this.outputList.update({
             outletProperties: this.outputProperties // should not be necessary
         });
@@ -227,7 +229,7 @@ export class Linkable extends Mobject {
         if (name == null) {
             return;
         }
-        this.removeProperty(name);
+        //this.removeProperty(name)
         for (let prop of this.outputProperties) {
             if (prop['name'] == name) {
                 remove(this.outputProperties, prop);
