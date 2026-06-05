@@ -1,55 +1,40 @@
-//import { AllTests } from './_tests/allTests'
 import { CoinFlipPaper } from './extensions/boards/coin-flip/CoinFlipPaper.js';
-import { isTouchDevice, separateSidebar } from './core/mobjects/screen_events.js';
+import { Partition } from './extensions/animation_sequences/PascalsBrickWall/Partition.js';
 export class StartPaper extends CoinFlipPaper {
     defaults() { return {}; }
     mutabilities() { return {}; }
 }
-//AllTests.run()
+export const TESTING = true;
+//if (TESTING) { AllTests.run() }
 export const paper = new StartPaper();
-if (isTouchDevice && separateSidebar) {
-    paper.background.view.div.style.backgroundColor = 'rgba(0, 0, 0, 1)';
-}
-window.setTimeout(function () {
-    let startTouch = new Touch({
-        identifier: Date.now(),
-        target: paper.view.div,
-        clientX: 100,
-        clientY: 100,
-        radiusX: 2.5,
-        radiusY: 2.5,
-        rotationAngle: 10,
-        force: 0.5,
-        touchType: 'stylus'
-    });
-    let startTouchEvent = new TouchEvent('touchstart', {
-        cancelable: true,
-        bubbles: true,
-        touches: [startTouch],
-        targetTouches: [],
-        changedTouches: [startTouch],
-        shiftKey: true,
-    });
-    paper.view.div.dispatchEvent(startTouchEvent);
-    let touch = new Touch({
-        identifier: Date.now(),
-        target: paper.view.div,
-        clientX: 200,
-        clientY: 200,
-        radiusX: 2.5,
-        radiusY: 2.5,
-        rotationAngle: 10,
-        force: 0.5,
-        touchType: 'stylus'
-    });
-    let touchEvent = new TouchEvent('touchmove', {
-        cancelable: true,
-        bubbles: true,
-        touches: [touch],
-        targetTouches: [],
-        changedTouches: [touch],
-        shiftKey: true,
-    });
-    paper.view.div.dispatchEvent(touchEvent);
-}, 2000);
+// let wall = new PascalsBrickWall({
+// 	anchor: [300, 700],
+// 	nbFlips: 1
+// })
+// paper.addToContent(wall)
+let p = new Partition({
+    presentationForm: 'histogram',
+    tailsProbability: 0.5,
+    anchor: [300, 400],
+    nbFlips: 1
+});
+paper.addToContent(p);
+// let b = new Brick({
+// 	anchor: [100, 100],
+// 	nbFlips: 1,
+// 	nbTails: 0,
+// 	height: BASE_BRICK_HEIGHT
+// })
+// paper.add(b)
+// let l = new DetailedBrickLabel({
+// 	anchor: [100, 100],
+// 	nbHeads: 0,
+// 	nbTails: 0
+// })
+// paper.add(l)
+// l.update({
+// 	nbHeads: 1
+// })
+// l.addTailsCoins(2)
+// l.removeHeadsCoin()
 //# sourceMappingURL=startPaper.js.map

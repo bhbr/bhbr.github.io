@@ -189,10 +189,10 @@ export class CoinStack extends Linkable {
         this.update({ nbCoins: this.nbCoinsInputBox.value });
     }
     headsBarHeight() {
-        return Math.round(this.nbHeads / this.nbCoins * this.height);
+        return Math.round(this.nbHeads / this.nbCoins * this.maxBarHeight);
     }
     tailsBarHeight() {
-        return this.height - this.headsBarHeight();
+        return this.maxBarHeight - this.headsBarHeight();
     }
     get height() {
         return this.maxBarHeight + 2 * (this.labelHeight + this.labelSpacing);
@@ -246,13 +246,13 @@ export class CoinStack extends Linkable {
     addedInputLink(link) {
         super.addedInputLink(link);
         if (link.endHook.outlet.name == 'nbCoins') {
-            this.nbCoinsInputBox.inputElement.disabled = true;
+            this.nbCoinsInputBox.disable();
         }
     }
     removedInputLink(link) {
         super.removedInputLink(link);
         if (link.endHook.outlet.name == 'nbCoins') {
-            this.nbCoinsInputBox.inputElement.disabled = false;
+            this.nbCoinsInputBox.enable();
         }
     }
     update(args = {}, redraw = true) {

@@ -1,6 +1,12 @@
 import { InputBox } from './InputBox.js';
 export class NumberInputBox extends InputBox {
+    defaults() {
+        return {
+            value: 0
+        };
+    }
     get value() {
+        //if (this.inputElement.value == '') { return NaN }
         return Number(this.inputElement.value);
     }
     set value(newValue) {
@@ -12,7 +18,6 @@ export class NumberInputBox extends InputBox {
         //this.inputElement.setAttribute('type', 'number')
         // needs adjustment for iPad
     }
-    defaults() { return {}; }
     mutabilities() { return {}; }
 }
 //# sourceMappingURL=NumberInputBox.js.map

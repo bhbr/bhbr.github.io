@@ -22,11 +22,11 @@ export class Frame extends ExtendedObject {
     get parent() {
         return this.view?.mobject.parent?.frame ?? null;
     }
-    contains(p) {
-        let flag1 = (p[0] > this.anchor[0]);
-        let flag2 = (p[0] < this.anchor[0] + this.width);
-        let flag3 = (p[1] > this.anchor[1]);
-        let flag4 = (p[1] < this.anchor[1] + this.height);
+    contains(p, margin = 0) {
+        let flag1 = (p[0] > this.anchor[0] - margin);
+        let flag2 = (p[0] < this.anchor[0] + this.width + margin);
+        let flag3 = (p[1] > this.anchor[1] - margin);
+        let flag4 = (p[1] < this.anchor[1] + this.height + margin);
         return (flag1 && flag2 && flag3 && flag4);
     }
     relativeTransform(frame) {

@@ -54,6 +54,7 @@ export class Mobject extends ExtendedObject {
             motor: new Motor(),
             sensor: new Sensor(),
             preventDefault: true,
+            divComment: null,
             draggingEnabled: false,
             // dependencies
             dependencies: []
@@ -91,6 +92,13 @@ export class Mobject extends ExtendedObject {
         }
         this.view.transform = newValue;
     }
+    get transformAngle() { return this.view?.transform.angle ?? 0; }
+    set transformAngle(newValue) {
+        if (!this.view) {
+            return;
+        }
+        this.view.transform.angle = newValue;
+    }
     get frame() { return this.view.frame; }
     set frame(newValue) { this.view.frame = newValue; }
     get frameWidth() { return this.frame.width; }
@@ -127,8 +135,8 @@ export class Mobject extends ExtendedObject {
             depmob.view.hide();
         }
     }
-    animate(args = {}, seconds) {
-        this.motor.animate(args, seconds);
+    animate(args = {}, seconds, showShadow = false, completionHandler = () => { }) {
+        this.motor.animate(args, seconds, showShadow, completionHandler);
     }
     /*
     Actually we want to hide some more housekeeping code
@@ -341,6 +349,9 @@ export class Mobject extends ExtendedObject {
             else {
                 this.view.div.style['pointer-events'] = 'auto';
             }
+        }
+        if (this.divComment !== null) {
+            this.view.div.setAttribute('comment', this.divComment);
         }
         if (redraw) {
             this.view.redraw();
