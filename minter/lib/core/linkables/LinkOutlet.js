@@ -38,7 +38,7 @@ export class LinkOutlet extends MGroup {
             text: this.displayName
         });
         this.label.view.update({
-            horizontalAlignment: 'right'
+            horizontalAlign: 'right'
         });
         this.add(this.label);
         if (this.editable) {

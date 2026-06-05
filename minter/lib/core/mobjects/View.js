@@ -2,7 +2,6 @@ import { ExtendedObject } from '../../core/classes/ExtendedObject.js';
 import { Frame } from './Frame.js';
 import { Color } from '../../core/classes/Color.js';
 import { DRAW_BORDERS } from '../../core/constants.js';
-import { VIEW_DEBUGGING_OFFSET } from '../../core/constants.js';
 export class View extends ExtendedObject {
     defaults() {
         return {
@@ -91,8 +90,8 @@ export class View extends ExtendedObject {
     }
     redraw() {
         this.div.style.transform = this.transform.withoutAnchor().toCSSString();
-        this.div.style.left = `${(this.anchor[0] + VIEW_DEBUGGING_OFFSET[0]).toString()}px`;
-        this.div.style.top = `${(this.anchor[1] + VIEW_DEBUGGING_OFFSET[1]).toString()}px`;
+        this.div.style.left = `${this.anchor[0].toString()}px`;
+        this.div.style.top = `${this.anchor[1].toString()}px`;
         this.div.style.width = `${this.frame.width.toString()}px`;
         this.div.style.height = `${this.frame.height.toString()}px`;
         this.div.style.backgroundColor = this.backgroundColor.toCSS();

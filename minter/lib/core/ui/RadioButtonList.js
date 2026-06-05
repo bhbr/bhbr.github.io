@@ -31,8 +31,7 @@ export class RadioButtonList extends MGroup {
             switch (this.orientation) {
                 case 'horizontal':
                     button.update({
-                        anchor: [this.optionSpacing * i, 0],
-                        frameWidth: this.optionSpacing - 2 * button.radius - 10
+                        anchor: [this.optionSpacing * i, 0]
                     });
                     break;
                 case 'vertical':
@@ -59,13 +58,6 @@ export class RadioButtonList extends MGroup {
             }
         }
         this.action(button.label.text);
-    }
-    update(args = {}, redraw = true) {
-        super.update(args, redraw);
-        let b = args['selectedButton'];
-        if (b) {
-            b.select();
-        }
     }
 }
 //# sourceMappingURL=RadioButtonList.js.map
