@@ -14,7 +14,9 @@ import { ScatterPlotCreator } from '../../../extensions/creations/DesmosCalculat
 import { HistogramCreator } from '../../../extensions/creations/DesmosCalculator/HistogramCreator.js';
 import { RGBAColorSampleCreator } from '../../../extensions/creations/ColorSample/RGBAColorSampleCreator.js';
 import { WheelColorSampleCreator } from '../../../extensions/creations/ColorSample/WheelColorSampleCreator.js';
-import { MathExpressionFieldCreator } from '../../../extensions/creations/MathExpressionField/MathExpressionFieldCreator.js';
+import { DesmosLoader } from '../../../extensions/apis/DesmosLoader.js';
+import { PartitionCreator } from '../../../extensions/animation_sequences/PascalsBrickWall/PartitionCreator.js';
+import { BrickWallCreator } from '../../../extensions/animation_sequences/PascalsBrickWall/BrickWallCreator.js';
 export class CoinFlipPaper extends Paper {
     defaults() {
         return {
@@ -36,13 +38,14 @@ export class CoinFlipPaper extends Paper {
                 'greater or equal': GreaterThanOrEqualBoxCreator,
                 'equal': EqualsBoxCreator,
                 'not equal': NotEqualsBoxCreator,
-                'expression': MathExpressionFieldCreator,
                 'sum': SumBoxCreator,
                 'mean': AverageBoxCreator,
                 'plot': ScatterPlotCreator,
                 'histogram': HistogramCreator,
                 'rgb color': RGBAColorSampleCreator,
                 'color wheel': WheelColorSampleCreator,
+                'partition': PartitionCreator,
+                'wall': BrickWallCreator
             },
             buttonNames: [
                 'DragButton',
@@ -55,11 +58,18 @@ export class CoinFlipPaper extends Paper {
                 //'AlgebraButton',
                 'ListFunctionsButton',
                 'PlotButton',
+                'PartitionButton',
                 //'ColorSampleButton',
                 'EraseButton'
+            ],
+            apiLoaders: [
+                new DesmosLoader()
             ]
         };
     }
+    loadContent() {
+    }
     mutabilities() { return {}; }
 }
+let p = new CoinFlipPaper();
 //# sourceMappingURL=CoinFlipPaper.js.map

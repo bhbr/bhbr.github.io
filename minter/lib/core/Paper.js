@@ -17,7 +17,10 @@ export class Paper extends Board {
             activeKeyboard: true,
             currentColor: Color.white(),
             drawShadow: false,
+            apiLoaders: [],
+            loadingAPIs: [],
             loadedAPIs: [],
+            loadPromise: null,
             buttonNames: [
                 'DragButton',
                 'LinkButton',
@@ -42,6 +45,9 @@ export class Paper extends Board {
         };
     }
     setup() {
+        for (let loader of this.apiLoaders) {
+            loader.load();
+        }
         super.setup();
         this.expandedMobject = this;
         this.expandButton.view.hide();
@@ -58,15 +64,14 @@ export class Paper extends Board {
         this.background.view.hideShadow();
         if (isTouchDevice) {
             if (separateSidebar) {
-                this.view.div.style.background = 'transparent';
-                this.view.div.style.backgroundColor = 'transparent';
+                this.view.div.style.background = 'clear';
+                this.view.div.style.backgroundColor = 'clear';
                 this.background.update({
-                    fillColor: Color.black()
+                    fillColor: Color.clear()
                 });
-                this.background.view.div.style.backgroundColor = 'rgba(0, 0, 0, 1)';
             }
             else {
-                document.body.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+                document.body.style.backgroundColor = 'black';
             }
         }
         let width = window.innerWidth - (separateSidebar ? 0 : SIDEBAR_WIDTH);
@@ -85,6 +90,9 @@ export class Paper extends Board {
         }
         //window.addEventListener('resize', this.resize.bind(this))
         this.resize();
+        if (this.apiLoaders.length == 0) {
+            this.loadContent();
+        }
     }
     resize() {
         let size = Math.max(window.screen.width, window.screen.height);
@@ -184,6 +192,19 @@ export class Paper extends Board {
         for (let submob of this.linkableChildren()) {
             submob.showLinks();
         }
+    }
+    allAPIsLoaded() {
+        return this.apiLoaders.every(loader => (loader.status == 'loaded'));
+    }
+    loadedAPI(loader) {
+        loader.update({
+            status: 'loaded'
+        });
+        if (this.allAPIsLoaded()) {
+            this.loadContent();
+        }
+    }
+    loadContent() {
     }
 }
 //# sourceMappingURL=Paper.js.map

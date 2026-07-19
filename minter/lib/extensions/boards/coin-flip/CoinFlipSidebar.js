@@ -10,6 +10,7 @@ import { ListFunctionsButton } from '../../../extensions/sidebar_buttons/ListFun
 import { PlotButton } from '../../../extensions/sidebar_buttons/PlotButton.js';
 import { NumberButton } from '../../../extensions/sidebar_buttons/NumberButton.js';
 import { EraseButton } from '../../../core/sidebar_buttons/EraseButton.js';
+import { PartitionButton } from '../../../extensions/sidebar_buttons/PartitionButton.js';
 export class CoinFlipSidebar extends Sidebar {
     defaults() {
         return {
@@ -24,6 +25,7 @@ export class CoinFlipSidebar extends Sidebar {
                 AlgebraButton,
                 ListFunctionsButton,
                 PlotButton,
+                PartitionButton,
                 //ColorSampleButton,
                 EraseButton
             ],
@@ -38,6 +40,7 @@ export class CoinFlipSidebar extends Sidebar {
                 //new AlgebraButton(),
                 new ListFunctionsButton(),
                 new PlotButton(),
+                new PartitionButton(),
                 //new ColorSampleButton(),
                 new EraseButton()
             ],
@@ -49,4 +52,5 @@ export class CoinFlipSidebar extends Sidebar {
         };
     }
 }
+let s = new CoinFlipSidebar();
 //# sourceMappingURL=CoinFlipSidebar.js.map

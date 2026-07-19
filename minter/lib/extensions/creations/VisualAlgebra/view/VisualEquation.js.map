@@ -1,0 +1,1 @@
+{"version":3,"file":"VisualEquation.js","sourceRoot":"","sources":["../../../../../src/extensions/creations/VisualAlgebra/view/VisualEquation.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,cAAc,EAAE,MAAM,kBAAkB,CAAA;AAEjD,MAAM,OAAO,cAAe,SAAQ,cAAc;IAEjD,QAAQ;QACP,OAAO;YACN,QAAQ,EAAE,GAAG;SACb,CAAA;IACF,CAAC;IAED,QAAQ;QACP,OAAO,GAAG,CAAA;IACX,CAAC;CAED"}

@@ -2,7 +2,7 @@ import { CreativeButton } from '../../core/sidebar_buttons/CreativeButton.js';
 export class AlgebraButton extends CreativeButton {
     defaults() {
         return {
-            creations: ['expression'],
+            creations: ['expression', 'equation'],
             iconSize: 35
         };
     }

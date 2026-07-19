@@ -1,6 +1,9 @@
+import { equalArrays } from '../core/functions/arrays.js';
+import { equalObjects } from '../core/functions/copying.js';
 class Test {
     constructor(args) {
         this.functionToTest = args['function'];
+        this.functionResult = undefined;
         this.silent = args['silent'] ?? false;
         this.catchErrors = args['catchErrors'] ?? false;
         this.indentationLevel = args['indentationLevel'] ?? 0;
@@ -13,40 +16,43 @@ class Test {
         silent = (silent ?? this.silent) || this.silent;
         if (silent)
             return this.mereRun();
-        let indentation = ' '.repeat(4 * this.indentationLevel);
-        console.log(indentation + `Running ${this.name}...`);
-        let result = this.mereRun();
-        if (result) {
-            console.log(indentation + `%c PASSED: ${this.name} `, 'background-color: #070');
+        this.testLog(`Running ${this.name}...`);
+        let passed = this.mereRun();
+        if (passed) {
+            this.testLog(`PASSED: ${this.name} `, '#070');
         }
         else {
-            console.log(indentation + `%c FAILED: ${this.name} `, 'background-color: #700');
+            this.testLog(`FAILED: ${this.name} `, '#700');
+            this.onTestFailed();
         }
-        return result;
+        return true;
+    }
+    testLog(str, color = 'rgba(0, 0, 0, 0)') {
+        let indentation = ' '.repeat(4 * this.indentationLevel);
+        console.log(indentation + '%c ' + str, `background-color: ${color}`);
     }
     mereRun() {
         if (this.catchErrors) {
             try {
-                let result = this.unsafeRun();
-                return result;
+                return this.unsafeRun();
             }
             catch {
                 return false;
             }
         }
         else {
-            let result = this.unsafeRun();
-            return result;
+            return this.unsafeRun();
         }
     }
     unsafeRun() {
         console.error('Please subclass Test');
         return false;
     }
+    onTestFailed() { }
 }
 export class ExecutionTest extends Test {
     unsafeRun() {
-        this.functionToTest();
+        this.functionResult = this.functionToTest();
         return true;
     }
     defaults() { return {}; }
@@ -58,8 +64,8 @@ export class ConditionTest extends Test {
         this.condition = args['condition'];
     }
     unsafeRun() {
-        let result = this.functionToTest();
-        return this.condition(result);
+        this.functionResult = this.functionToTest();
+        return this.condition(this.functionResult);
     }
     defaults() { return {}; }
     mutabilities() { return {}; }
@@ -67,8 +73,36 @@ export class ConditionTest extends Test {
 export class ValueTest extends ConditionTest {
     constructor(args) {
         super(args);
-        this.value = args['value'];
-        this.condition = (x) => (x === this.value);
+        this.expectedResult = args['value'];
+        this.condition = (x) => {
+            if (x instanceof Array && this.expectedResult instanceof Array) {
+                return equalArrays(x, this.expectedResult);
+            }
+            else if (typeof x == 'object' && typeof this.expectedResult == 'object') {
+                return equalObjects(x, this.expectedResult);
+            }
+            else {
+                return x === this.expectedResult;
+            }
+        };
+    }
+    onTestFailed() {
+        this.testLog(`got result`);
+        console.log(this.functionResult);
+        this.testLog(`expected`);
+        console.log(this.expectedResult);
+    }
+    defaults() { return {}; }
+    mutabilities() { return {}; }
+}
+export class NumberValueTest extends ValueTest {
+    constructor(args) {
+        super(args);
+        this.expectedResult = args['value'];
+        this.precision = args['precision'] ?? 1e-12;
+        this.condition = (x) => {
+            return Math.abs(x - this.expectedResult) < this.precision;
+        };
     }
     defaults() { return {}; }
     mutabilities() { return {}; }
@@ -76,7 +110,7 @@ export class ValueTest extends ConditionTest {
 export class AssertionTest extends ValueTest {
     constructor(args) {
         super(args);
-        this.value = true;
+        this.expectedResult = true;
         this.condition = (x) => x;
     }
     defaults() { return {}; }
@@ -89,7 +123,7 @@ export class ErrorTest extends Test {
     }
     mereRun() {
         try {
-            this.functionToTest();
+            this.functionResult = this.functionToTest();
         }
         catch (error) {
             if (this.errorName === null) {

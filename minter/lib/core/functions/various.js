@@ -59,4 +59,14 @@ export function prettyPrint(value, precision = 4) {
         return `${value}`;
     }
 }
+export function conditionTrigger(condition, handler, period = 0.1) {
+    let id = `timeoutID_${Date.now()}`;
+    window[id] = window.setInterval(function () {
+        if (condition()) {
+            window.clearInterval(window[id]);
+            delete window[id];
+            handler();
+        }
+    }, period * 1000);
+}
 //# sourceMappingURL=various.js.map

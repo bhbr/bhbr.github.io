@@ -1,3 +1,4 @@
+import { equalArrays } from './arrays.js';
 export function copy(obj) {
     // shallow copy
     // numbers, string, booleans
@@ -122,6 +123,12 @@ export function isInstance(obj, className) {
     return false;
 }
 export function equalObjects(obj1, obj2) {
+    if (obj1 === null && obj2 === null) {
+        return true;
+    }
+    if (obj1 instanceof Array && obj2 instanceof Array) {
+        return equalArrays(obj1, obj2);
+    }
     let a = Object.keys(obj1);
     let b = Object.keys(obj2);
     for (let key of a) {
@@ -138,6 +145,11 @@ export function equalObjects(obj1, obj2) {
         let value1 = obj1[prop];
         let value2 = obj2[prop];
         if (typeof value1 == 'object' && typeof value2 == 'object') {
+            if (value1 instanceof Array && value2 instanceof Array) {
+                if (!equalArrays(value1, value2)) {
+                    return false;
+                }
+            }
             if (!equalObjects(value1, value2)) {
                 return false;
             }

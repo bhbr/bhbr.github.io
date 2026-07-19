@@ -1,3 +1,4 @@
+import { equalObjects } from './copying.js';
 export function removeOne(arr, value) {
     // remove the first encountered matching entry of an object or value from an Array
     for (let i = 0; i < arr.length; i++) {
@@ -84,10 +85,35 @@ export function equalArrays(arr1, arr2) {
         return false;
     }
     for (var i = 0; i < arr1.length; i++) {
-        if (arr1[i] !== arr2[i]) {
+        if (arr1[i].constructor.name == 'Array'
+            && arr2[i].constructor.name == 'Array') {
+            if (!equalArrays(arr1[i], arr2[i])) {
+                return false;
+            }
+        }
+        else if (typeof arr1[i] == 'object' && typeof arr2[i] == 'object') {
+            if (!equalObjects(arr1[i], arr2[i])) {
+                return false;
+            }
+        }
+        else if (arr1[i] !== arr2[i]) {
             return false;
         }
     }
     return true;
+}
+export function replaceAll(arr, oldValue, newValue) {
+    for (let i = 0; i < arr.length; i++) {
+        let entry = arr[i];
+        if (entry === oldValue) {
+            arr[i] = newValue;
+            continue;
+        }
+        if (entry instanceof Array && oldValue instanceof Array) {
+            if (equalArrays(entry, oldValue)) {
+                arr[i] = newValue;
+            }
+        }
+    }
 }
 //# sourceMappingURL=arrays.js.map

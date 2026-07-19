@@ -11,7 +11,9 @@ export class Motor extends ExtendedObject {
             animationInterval: null,
             animationStartArgs: {},
             animationStopArgs: {},
-            showShadow: null
+            animating: false,
+            showShadow: null,
+            completionHandler: () => { }
         };
     }
     static isAnimatable(args) {
@@ -30,17 +32,19 @@ export class Motor extends ExtendedObject {
         }
         return true;
     }
-    animate(args = {}, seconds, showShadow = false) {
+    animate(args = {}, seconds, showShadow = false, completionHandler = () => { }) {
         // Calling this method launches an animation
         if (!Motor.isAnimatable(args)) {
             return;
         }
+        this.animating = true;
         for (let key of Object.keys(args)) {
             let a = this.mobject[key];
             let b = copy(a);
             this.animationStartArgs[key] = b;
         }
         this.animationStopArgs = args;
+        this.completionHandler = completionHandler;
         // all times in ms bc that is what setInterval and setTimeout expect
         let dt = 10;
         this.animationTimeStart = Date.now();
@@ -102,7 +106,9 @@ export class Motor extends ExtendedObject {
         this.animationInterval = null;
         this.animationStartArgs = {};
         this.animationStopArgs = {};
+        this.animating = false;
         this.showShadow = null;
+        this.completionHandler();
     }
     mutabilities() { return {}; }
 }

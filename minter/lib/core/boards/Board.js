@@ -117,7 +117,7 @@ export class Board extends Linkable {
         this.add(this.content);
         this.moveToTop(this.inputList);
         this.moveToTop(this.outputList);
-        //this.add(this.expandButton)
+        this.add(this.expandButton);
         // this.expandedInputList.update({
         // 	height: EXPANDED_IO_LIST_HEIGHT,
         // 	width: this.expandedWidth() - this.expandButton.view.frame.width - 2 * EXPANDED_IO_LIST_INSET,

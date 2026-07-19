@@ -3,7 +3,6 @@ import { Mobject } from '../../../core/mobjects/Mobject.js';
 import { Linkable } from '../../../core/linkables/Linkable.js';
 import { PlayButton } from '../../../extensions/ui/PlayButton/PlayButton.js';
 import { Rectangle } from '../../../core/shapes/Rectangle.js';
-import { getPaper } from '../../../core/functions/getters.js';
 export class CindyCanvas extends Linkable {
     defaults() {
         return {
@@ -15,9 +14,9 @@ export class CindyCanvas extends Linkable {
             innerCanvas: new Mobject(),
             outerFrame: new Rectangle(),
             playButton: new PlayButton({
-                anchor: [5, 5]
+                anchor: [5, -50]
             }),
-            id: undefined,
+            id: `Cindy-${Date.now()}`,
             screenEventHandler: ScreenEventHandler.Self,
             playedOnce: false,
             playState: 'stop',
@@ -41,9 +40,6 @@ export class CindyCanvas extends Linkable {
     }
     setup() {
         super.setup();
-        if (!getPaper().loadedAPIs.includes('cindy')) {
-            this.loadCindyAPI();
-        }
         this.innerCanvas.view.frame.update({
             width: this.view.frame.width,
             height: this.view.frame.height
@@ -66,26 +62,12 @@ export class CindyCanvas extends Linkable {
             height: this.view.frame.height,
             started: false
         });
-        this.add(this.playButton);
         this.controls.add(this.playButton);
         this.playButton.update({
             mobject: this
         });
         this.createScripts();
-        window.setTimeout(this.startCore.bind(this), 2000);
-        // todo: async/await
-    }
-    loadCindyAPI() {
-        let paper = getPaper();
-        let scriptTag1 = document.createElement('script');
-        scriptTag1.type = 'text/javascript';
-        scriptTag1.src = '../../../CindyJS/build/js/Cindy.js';
-        let scriptTag2 = document.createElement('script');
-        scriptTag2.type = 'text/javascript';
-        scriptTag2.src = '../../../CindyJS/build/js/CindyGL.js';
-        document.head.append(scriptTag1);
-        document.head.append(scriptTag2);
-        paper.loadedAPIs.push('cindy');
+        this.startCore();
     }
     createScripts() {
         this.createInitScript();

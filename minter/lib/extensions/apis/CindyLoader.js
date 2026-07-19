@@ -1,0 +1,25 @@
+import { APILoader } from '../../core/apis/APILoader.js';
+import { getPaper } from '../../core/functions/getters.js';
+export class CindyLoader extends APILoader {
+    load() {
+        this.update({
+            status: 'loading'
+        });
+        let scriptTag1 = document.createElement('script');
+        scriptTag1.type = 'text/javascript';
+        scriptTag1.src = '../../../CindyJS/build/js/Cindy.js';
+        let scriptTag2 = document.createElement('script');
+        scriptTag2.type = 'text/javascript';
+        scriptTag2.src = '../../../CindyJS/build/js/CindyGL.js';
+        scriptTag2.onload = function () {
+            getPaper().loadedAPI(this);
+        }.bind(this);
+        scriptTag1.onload = function () {
+            document.head.append(scriptTag2);
+        }.bind(this);
+        document.head.append(scriptTag1);
+    }
+    defaults() { return {}; }
+    mutabilities() { return {}; }
+}
+//# sourceMappingURL=CindyLoader.js.map
