@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hypercube of n-bit Messages</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #11151f;
+    --grid: #1c2230;
+    --text: #e8e6df;
+    --dim: #7b8494;
+    --edge: #35415a;
+    --edge-bright: #5b7099;
+    --hover-strong: #f1f2f5;
+    --hover-soft: #838b9c;
+    --vertex: #8b7fd9;
+    --vertex-bright: #b7aeef;
+    --vertex-hot: #f5a623;
+    --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+  }
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--grid);
+    padding-bottom: 14px;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+  h1 span { color: var(--dim); font-weight: 400; }
+  .n-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--vertex-hot);
+    background: var(--panel);
+    border: 1px solid var(--grid);
+    padding: 4px 8px 4px 12px;
+    border-radius: 4px;
+  }
+  .n-control label { user-select: none; }
+  .n-control input {
+    width: 48px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--grid);
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 3px 4px;
+    text-align: center;
+  }
+  .n-control input:focus {
+    outline: none;
+    border-color: var(--vertex-hot);
+  }
+  /* Native spinner arrows are small enough that an ordinary click on the
+     input often lands on the down-arrow instead of placing the cursor,
+     silently decrementing the value. Removing them avoids that entirely —
+     typing and the up/down arrow keys still work fine without them. */
+  .n-control input::-webkit-outer-spin-button,
+  .n-control input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .n-control input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  .stage {
+    background: var(--panel);
+    border: 1px solid var(--grid);
+    border-radius: 10px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  .blocks-panel {
+    background: var(--panel);
+    border: 1px solid var(--grid);
+    border-radius: 10px;
+    margin-top: 14px;
+    padding: 14px 18px;
+  }
+  .blocks-stats {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: var(--dim);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--grid);
+  }
+  .blocks-stats b { color: var(--text); font-weight: 600; }
+  .blocks-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    min-height: 20px;
+  }
+  .blocks-columns:empty::before {
+    content: "No code blocks selected yet — click a vertex to start one.";
+    color: var(--dim);
+    font-size: 13px;
+  }
+  .block-column {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-left: 10px;
+    border-left: 3px solid var(--block-color);
+  }
+  .block-column-header {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--block-color);
+    margin-bottom: 2px;
+  }
+  .block-line {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--block-color);
+    opacity: 0.72;
+    white-space: nowrap;
+  }
+  .block-line-center {
+    opacity: 1;
+    font-weight: 700;
+  }
+  svg { display: block; cursor: grab; touch-action: none; }
+  svg.panning { cursor: grabbing; }
+  .vertex circle {
+    fill: var(--vertex);
+    stroke: var(--bg);
+    stroke-width: 2px;
+    transition: fill 120ms ease, r 120ms ease;
+    cursor: pointer;
+  }
+  .vertex text {
+    font-family: var(--mono);
+    font-size: 11px;
+    fill: var(--dim);
+    text-anchor: middle;
+    pointer-events: none;
+    transition: fill 120ms ease;
+  }
+  .vertex.active circle { fill: var(--hover-strong); r: 9; }
+  .vertex.active text { fill: var(--text); }
+  .vertex.neighbor circle { fill: var(--hover-soft); }
+  .vertex.neighbor text { fill: var(--hover-soft); }
+  .vertex.weight1 circle {
+    fill: var(--vertex-bright);
+    stroke: var(--bg);
+    cursor: grab;
+  }
+  .vertex.weight1 text { fill: var(--vertex-bright); }
+  .vertex.weight1.dragging circle { cursor: grabbing; r: 8; }
+  .vertex.zero circle {
+    fill: var(--vertex-bright);
+    stroke: var(--bg);
+    stroke-width: 2px;
+    r: 8;
+    cursor: grab;
+  }
+  .vertex.zero text { fill: var(--vertex-bright); font-weight: 600; }
+  .vertex.zero.dragging circle { cursor: grabbing; r: 9; }
+  .vertex.block-member circle { r: 8; stroke: var(--bg); }
+  .vertex.block-member text { font-weight: 600; }
+  line.edge {
+    stroke: var(--edge);
+    stroke-width: 1.4px;
+    transition: stroke 120ms ease, stroke-width 120ms ease;
+  }
+  line.edge.zero-edge {
+    stroke: var(--edge-bright);
+    stroke-width: 1.8px;
+  }
+  line.edge.hot {
+    stroke: var(--hover-soft);
+    stroke-width: 2.2px;
+  }
+  footer {
+    margin-top: 18px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--dim);
+  }
+  footer b { color: var(--text); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Hypercube of <span>n</span>-bit messages</h1>
+    <div class="n-control">
+      <label for="nInput">n =</label>
+      <input type="number" id="nInput" min="1" max="6" value="4">
+    </div>
+  </header>
+
+  <div class="stage">
+    <svg id="hypercube"></svg>
+  </div>
+
+  <div class="blocks-panel">
+    <div class="blocks-stats">
+      <span>Code blocks: <b id="blockCount">0</b></span>
+      <span>Unassigned vertices: <b id="freeCount">0</b></span>
+    </div>
+    <div class="blocks-columns" id="blocksColumns"></div>
+  </div>
+
+  <footer>
+    Every vertex is one of the <b id="countLabel"></b> possible bitstrings.
+    An edge joins two vertices whose bitstrings differ in exactly <b>one</b> bit
+    — a Hamming distance of 1. Hover a vertex to see its neighbors.
+    The <b>all-zero message</b> and the <b>single-1 vertices</b>, along with
+    the edges between them, are highlighted. Drag a single-1 vertex to shear
+    the cube along that bit, or drag the zero vertex to translate the whole
+    cube at once.
+    <b>Click any vertex</b> to group it with its neighbors into a code block,
+    shown in its own color — click any vertex in that block again to remove it.
+    Blocks can't overlap, since that's the packing challenge. Each block's
+    codeword and its one-error variations appear as a labeled column below
+    the graph.
+    <b>Scroll to zoom</b> in or out around the pointer (vertices and labels
+    stay the same size); <b>drag the background</b> to pan; double-click to
+    reset the view.
+  </footer>
+</div>
+
+<script>
+// ---- geometry: place each of the 2^n bitstrings as a vertex --------
+// Each bit position i contributes a fixed 2D offset vector. A vertex's
+// position is the sum of the offset vectors for the bits that are 1.
+// Directions are grouped into 3s: each group's first two directions are a
+// clean horizontal/vertical pair (a proper right angle, so the front face
+// of each nested cube reads unambiguously), and the third is a diagonal
+// that produces the cube's depth edge. Each group is also longer and
+// rotated relative to the last, so every 3 dimensions reads as its own
+// cube nested inside the next-larger one — see buildLayout for details.
+function buildLayout(n, size) {
+  const cx = size / 2, cy = size / 2;
+
+  // Within a group: slot 0 is horizontal, slot 1 is a right angle from
+  // slot 0 (vertical), slot 2 is a diagonal partway between them, which is
+  // what makes the group read as a cube corner rather than a flat corner.
+  // A two-perpendicular-plus-one-diagonal group can never sum to zero
+  // (unlike three vectors at exactly 120° apart, which always do) — for
+  // slot angles 0°, 90°, X°, the sum's components are (1+cosX, 1+sinX),
+  // which is zero only if cosX = sinX = -1 simultaneously, impossible for
+  // any real X. So the "all three bits set" vertex of a group can never
+  // collapse onto its own zero vertex, whatever X is.
+  //
+  // Each successive group is rotated by `groupRotationStep` (so higher
+  // groups aren't just bigger copies pointing the same way) and scaled up
+  // by `growth` (so e.g. dimension 4 is 5x as long as dimension 1). A
+  // group's own 3 angles (0°, -90°, -45°) split its 90° span into two 45°
+  // gaps; rotating the next group by half that (22.5°) drops its 3 angles
+  // right into the middle of those gaps, evenly interleaving both groups'
+  // directions instead of letting any of them sit close together.
+  const slotOffsets = [0, -Math.PI / 2, -Math.PI / 4]; // 0°, 90°, 45° (screen "up" is -y)
+  const groupRotationStep = (22.5 * Math.PI) / 180; // 22.5° per group
+  const growth = 5;
+
+  const dirs = [];
+  for (let i = 0; i < n; i++) {
+    const group = Math.floor(i / 3);
+    const slot = i % 3;
+    const angle = group * groupRotationStep + slotOffsets[slot];
+    const len = Math.pow(growth, group);
+    dirs.push([Math.cos(angle) * len, Math.sin(angle) * len]);
+  }
+
+  const count = 1 << n;
+  const raw = [];
+  for (let v = 0; v < count; v++) {
+    let x = 0, y = 0;
+    for (let i = 0; i < n; i++) {
+      if ((v >> i) & 1) { x += dirs[i][0]; y += dirs[i][1]; }
+    }
+    raw.push([x, y]);
+  }
+
+  // Re-center on the bounding box and scale it to fit comfortably inside
+  // the canvas with some margin — the raw directions above are in
+  // arbitrary relative units, not canvas pixels.
+  const xs = raw.map(p => p[0]), ys = raw.map(p => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
+  const margin = 40;
+  const fitScale = Math.min(
+    (size - 2 * margin) / (maxX - minX || 1),
+    (size - 2 * margin) / (maxY - minY || 1)
+  );
+
+  return raw.map(([x, y]) => [
+    cx + (x - midX) * fitScale,
+    cy + (y - midY) * fitScale
+  ]);
+}
+
+function toBitstring(v, n) {
+  return v.toString(2).padStart(n, "0");
+}
+
+// ---- build the SVG ---------------------------------------------------
+const SIZE = 640;
+const svgNS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("hypercube");
+svg.setAttribute("viewBox", `0 0 ${SIZE} ${SIZE}`);
+svg.setAttribute("width", SIZE);
+svg.setAttribute("height", SIZE);
+
+const nInput = document.getElementById("nInput");
+
+// Holds the current render's camera/redraw/etc, so the wheel/dblclick
+// listeners (attached once, below) always act on whatever was drawn most
+// recently — render() reassigns this at the end of each call, instead of
+// each call adding its own new listeners on top of the last one's.
+let activeScene = null;
+
+// Tracks an in-progress background pan (dragging empty space, not a vertex).
+let panState = null;
+
+function render(n) {
+  // wipe whatever was drawn for the previous n
+  svg.innerHTML = "";
+  panState = null;
+
+  document.getElementById("countLabel").textContent = `2^${n} = ${1 << n}`;
+
+  const basePositions = buildLayout(n, SIZE);
+  const count = basePositions.length;
+
+  // The hypercube is a zonotope: every vertex's position is the origin
+  // (the all-zero message) plus the sum of one "edge vector" per bit that's
+  // set. Keeping that structure explicit — rather than baking it into fixed
+  // per-vertex coordinates — is what lets dragging one weight-1 vertex (which
+  // redefines the edge vector for its bit) move every other vertex that
+  // shares that bit, so the shape stays a consistent parallelepiped.
+  const origin = basePositions[0].slice();
+  const edgeVectors = [];
+  for (let i = 0; i < n; i++) {
+    const p = basePositions[1 << i];
+    edgeVectors.push([p[0] - origin[0], p[1] - origin[1]]);
+  }
+
+  function computePositions() {
+    const pos = new Array(count);
+    for (let v = 0; v < count; v++) {
+      let x = origin[0], y = origin[1];
+      for (let i = 0; i < n; i++) {
+        if ((v >> i) & 1) { x += edgeVectors[i][0]; y += edgeVectors[i][1]; }
+      }
+      pos[v] = [x, y];
+    }
+    return pos;
+  }
+
+  let positions = computePositions();
+
+  // ---- camera: lets the user zoom in/out around the pointer -----------
+  // Vertex/edge coordinates live in "model space" (the positions array
+  // above). What actually gets written into cx/cy/x1/y1/... is model space
+  // run through this simple pan+zoom transform. Because circle radius and
+  // font-size are never touched by it, zooming spreads vertices apart (or
+  // pulls them together) without changing how big any vertex or label
+  // looks on screen — only the layout's scale changes, not the glyphs.
+  const camera = { k: 1, x: 0, y: 0 };
+
+  function toScreen([mx, my]) {
+    return [mx * camera.k + camera.x, my * camera.k + camera.y];
+  }
+
+  // adjacency: neighbors of v are vertices differing by exactly one bit
+  function neighbors(v) {
+    const list = [];
+    for (let b = 0; b < n; b++) list.push(v ^ (1 << b));
+    return list;
+  }
+
+  // ---- code blocks: click a vertex to select it and its neighbors -----
+  // A "block" is the Hamming ball of radius 1 around a chosen vertex — the
+  // vertex itself plus every neighbor one bit away. Each block gets a
+  // letter label (A, B, C, ...) and a color from a small fixed palette
+  // indexed by that letter — not by creation order — so block "i" is
+  // always the same color, even after being deselected and reselected.
+  const blocks = [];
+  const usedLabels = new Set();
+  const BLOCK_PALETTE = [
+    "#f97316", // orange
+    "#22c55e", // green
+    "#3b82f6", // blue
+    "#eab308", // yellow
+    "#ec4899", // pink
+    "#a855f7", // violet
+    "#06b6d4", // cyan
+    "#ef4444", // red
+    "#84cc16", // lime
+    "#14b8a6", // teal
+  ];
+
+  function colorForLabel(label) {
+    const idx = label.charCodeAt(0) - 65; // A -> 0, B -> 1, ...
+    return BLOCK_PALETTE[idx % BLOCK_PALETTE.length];
+  }
+
+  // Always hands out the lowest unused letter, so if a middle block gets
+  // removed, the next new block reuses its letter (and therefore its
+  // color) rather than the labels drifting ever further through the
+  // alphabet.
+  function nextLabel() {
+    for (let i = 0; i < 26; i++) {
+      const letter = String.fromCharCode(65 + i);
+      if (!usedLabels.has(letter)) { usedLabels.add(letter); return letter; }
+    }
+    return "?";
+  }
+
+  function findBlock(v) {
+    return blocks.find(b => b.members.has(v));
+  }
+
+  function toggleBlock(v) {
+    const existing = findBlock(v);
+    if (existing) {
+      blocks.splice(blocks.indexOf(existing), 1);
+      usedLabels.delete(existing.label);
+      styleBlock(existing, false);
+      updateBlocksPanel();
+      return;
+    }
+
+    const candidateMembers = [v, ...neighbors(v)];
+    const conflict = candidateMembers.some(m => findBlock(m));
+    if (conflict) return; // would overlap an existing block — refuse
+
+    const label = nextLabel();
+    const block = {
+      center: v,
+      members: new Set(candidateMembers),
+      color: colorForLabel(label),
+      label,
+    };
+    blocks.push(block);
+    styleBlock(block, true);
+    updateBlocksPanel();
+  }
+
+  function styleBlock(block, on) {
+    for (const m of block.members) {
+      const g = vertexEls[m];
+      const circle = g.querySelector("circle");
+      const label = g.querySelector("text");
+      circle.style.fill = on ? block.color : "";
+      label.style.fill = on ? block.color : "";
+      g.classList.toggle("block-member", on);
+    }
+    for (const m of block.members) {
+      if (m === block.center) continue;
+      const line = edgeEls[`${block.center}-${m}`];
+      line.style.stroke = on ? block.color : "";
+      line.style.strokeWidth = on ? "2.4px" : "";
+    }
+  }
+
+  // Redraws the stats bar and the per-block columns of bitstrings beneath
+  // the graph. Columns are ordered left-to-right by label (A, B, C, ...).
+  function updateBlocksPanel() {
+    document.getElementById("blockCount").textContent = blocks.length;
+
+    const assigned = new Set();
+    for (const b of blocks) for (const m of b.members) assigned.add(m);
+    document.getElementById("freeCount").textContent = count - assigned.size;
+
+    const columnsEl = document.getElementById("blocksColumns");
+    columnsEl.innerHTML = "";
+
+    const ordered = [...blocks].sort((a, b) => a.label.localeCompare(b.label));
+    for (const block of ordered) {
+      const col = document.createElement("div");
+      col.className = "block-column";
+      col.style.setProperty("--block-color", block.color);
+
+      const header = document.createElement("div");
+      header.className = "block-column-header";
+      header.textContent = block.label;
+      col.appendChild(header);
+
+      const centerLine = document.createElement("div");
+      centerLine.className = "block-line block-line-center";
+      centerLine.textContent = toBitstring(block.center, n);
+      col.appendChild(centerLine);
+
+      const others = [...block.members].filter(m => m !== block.center).sort((a, b) => a - b);
+      for (const m of others) {
+        const line = document.createElement("div");
+        line.className = "block-line";
+        line.textContent = toBitstring(m, n);
+        col.appendChild(line);
+      }
+
+      columnsEl.appendChild(col);
+    }
+  }
+
+  updateBlocksPanel(); // reset the panel for this n before any blocks exist
+
+  // edges (each pair drawn once)
+  const edgesGroup = document.createElementNS(svgNS, "g");
+  svg.appendChild(edgesGroup);
+  const edgeEls = {}; // key "a-b" -> <line>, both directions point to the same line
+  const edgeList = []; // [line, a, b] for bulk geometry updates
+
+  for (let v = 0; v < count; v++) {
+    for (let b = 0; b < n; b++) {
+      const u = v ^ (1 << b);
+      if (u < v) continue; // draw each edge once
+      const [x1, y1] = toScreen(positions[v]);
+      const [x2, y2] = toScreen(positions[u]);
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+      line.setAttribute("class", v === 0 ? "edge zero-edge" : "edge");
+      edgesGroup.appendChild(line);
+      edgeEls[`${v}-${u}`] = line;
+      edgeEls[`${u}-${v}`] = line;
+      edgeList.push([line, v, u]);
+    }
+  }
+
+  // vertices (drawn after edges so they sit on top)
+  const verticesGroup = document.createElementNS(svgNS, "g");
+  svg.appendChild(verticesGroup);
+  const vertexEls = [];
+
+  for (let v = 0; v < count; v++) {
+    const [x, y] = toScreen(positions[v]);
+    const g = document.createElementNS(svgNS, "g");
+    const isWeight1 = v !== 0 && (v & (v - 1)) === 0; // exactly one bit set
+    const isZero = v === 0;
+    g.setAttribute("class", isWeight1 ? "vertex weight1" : isZero ? "vertex zero" : "vertex");
+    g.setAttribute("data-v", v);
+
+    const circle = document.createElementNS(svgNS, "circle");
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", 6);
+    g.appendChild(circle);
+
+    const label = document.createElementNS(svgNS, "text");
+    label.setAttribute("x", x);
+    label.setAttribute("y", y - 12);
+    label.textContent = toBitstring(v, n);
+    g.appendChild(label);
+
+    g.addEventListener("mouseenter", () => setActive(v));
+    g.addEventListener("mouseleave", () => clearActive());
+
+    if (isWeight1) {
+      // Dragging a weight-1 vertex redefines the edge vector for its bit,
+      // shearing every vertex that shares that bit along with it.
+      const i = Math.log2(v);
+      attachInteraction(g, v, (x, y) => { edgeVectors[i] = [x - origin[0], y - origin[1]]; });
+    } else if (isZero) {
+      // Dragging the zero vertex just moves the origin — since every other
+      // vertex is origin + a sum of edge vectors, this translates the whole
+      // cube rigidly without changing its shape.
+      attachInteraction(g, v, (x, y) => { origin[0] = x; origin[1] = y; });
+    } else {
+      // Not draggable, but still clickable to toggle a code block.
+      attachInteraction(g, v, null);
+    }
+
+    verticesGroup.appendChild(g);
+    vertexEls.push(g);
+  }
+
+  // Pushes the current `positions` (after recomputing from edgeVectors),
+  // run through the camera transform, out to every vertex and edge element.
+  function redraw() {
+    positions = computePositions();
+    for (let v = 0; v < count; v++) {
+      const [x, y] = toScreen(positions[v]);
+      const g = vertexEls[v];
+      g.querySelector("circle").setAttribute("cx", x);
+      g.querySelector("circle").setAttribute("cy", y);
+      const label = g.querySelector("text");
+      label.setAttribute("x", x);
+      label.setAttribute("y", y - 12);
+    }
+    for (const [line, a, b] of edgeList) {
+      const [x1, y1] = toScreen(positions[a]);
+      const [x2, y2] = toScreen(positions[b]);
+      line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+    }
+  }
+
+  // Converts a pointer event's screen coordinates into the SVG's own
+  // viewBox coordinate space, accounting for how the element is scaled
+  // on the page (but not yet undoing our own camera pan/zoom).
+  function toViewBoxPoint(evt) {
+    const pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  // Converts a pointer event all the way into model space, undoing the
+  // camera transform too — this is what drag handlers need, since
+  // origin/edgeVectors are defined in model space.
+  function toModelPoint(evt) {
+    const p = toViewBoxPoint(evt);
+    return { x: (p.x - camera.x) / camera.k, y: (p.y - camera.y) / camera.k };
+  }
+
+  // Publish this render's camera/redraw/toViewBoxPoint for the top-level
+  // wheel/dblclick listeners (attached once, outside render()) to use.
+  activeScene = { camera, redraw, toViewBoxPoint };
+
+  // Wires up pointer interaction on a vertex group. If the pointer moves
+  // more than a few pixels between down and up, it's treated as a drag and
+  // onMove(x, y) is called on every move (only weight-1 and zero vertices
+  // pass an onMove — everything else is undraggable). If it doesn't move,
+  // it's treated as a click and toggles that vertex's code-block membership.
+  function attachInteraction(g, v, onMove) {
+    let down = false, moved = false, startX = 0, startY = 0;
+
+    g.addEventListener("pointerdown", (e) => {
+      down = true;
+      moved = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      if (onMove) {
+        g.classList.add("dragging");
+        g.setPointerCapture(e.pointerId);
+      }
+      e.preventDefault();
+    });
+
+    g.addEventListener("pointermove", (e) => {
+      if (!down) return;
+      if (Math.hypot(e.clientX - startX, e.clientY - startY) > 3) moved = true;
+      if (onMove && moved) {
+        const { x, y } = toModelPoint(e);
+        onMove(x, y);
+        redraw();
+      }
+    });
+
+    g.addEventListener("pointerup", (e) => {
+      if (!down) return;
+      down = false;
+      if (onMove) {
+        g.classList.remove("dragging");
+        g.releasePointerCapture(e.pointerId);
+      }
+      if (!moved) toggleBlock(v);
+    });
+  }
+
+  function setActive(v) {
+    vertexEls[v].classList.add("active");
+    for (const u of neighbors(v)) {
+      vertexEls[u].classList.add("neighbor");
+      edgeEls[`${v}-${u}`].classList.add("hot");
+    }
+  }
+
+  function clearActive() {
+    vertexEls.forEach(el => el.classList.remove("active", "neighbor"));
+    Object.values(edgeEls).forEach(el => el.classList.remove("hot"));
+  }
+}
+
+function readN() {
+  const min = Number(nInput.min), max = Number(nInput.max);
+  let n = Math.round(Number(nInput.value));
+  if (Number.isNaN(n)) n = min;
+  n = Math.max(min, Math.min(max, n));
+  nInput.value = n;
+  return n;
+}
+
+// While typing, an empty box (or a value still being typed, like the "1" of
+// "13") shouldn't be clamped or redrawn — that's what was fighting the user.
+// Only redraw once there's a real number to draw.
+nInput.addEventListener("input", () => {
+  if (nInput.value.trim() === "") return;
+  const n = Number(nInput.value);
+  if (Number.isNaN(n)) return;
+  const min = Number(nInput.min), max = Number(nInput.max);
+  if (n < min || n > max) return; // don't clamp/overwrite mid-typing
+  render(n);
+});
+
+// On blur/change, normalize whatever is left (including an empty or
+// out-of-range value) back to a valid n and redraw.
+nInput.addEventListener("change", () => render(readN()));
+
+const MIN_ZOOM = 0.25, MAX_ZOOM = 8;
+
+svg.addEventListener("wheel", (e) => {
+  if (!activeScene) return;
+  e.preventDefault();
+  const { camera, redraw, toViewBoxPoint } = activeScene;
+  const pivot = toViewBoxPoint(e);
+  const zoomFactor = Math.exp(-e.deltaY * 0.0015);
+  const newK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, camera.k * zoomFactor));
+  const actualFactor = newK / camera.k;
+  camera.x = pivot.x - (pivot.x - camera.x) * actualFactor;
+  camera.y = pivot.y - (pivot.y - camera.y) * actualFactor;
+  camera.k = newK;
+  redraw();
+}, { passive: false });
+
+// Double-click resets the view if the user zooms/pans themselves into a
+// confusing spot.
+svg.addEventListener("dblclick", () => {
+  if (!activeScene) return;
+  const { camera, redraw } = activeScene;
+  camera.k = 1; camera.x = 0; camera.y = 0;
+  redraw();
+});
+
+// Click-and-drag on empty background (i.e. not on a vertex, which has its
+// own drag/click handling) pans the whole camera. Panning happens in
+// view-box coordinates directly — camera.x/y are already in that space, so
+// no extra scaling by camera.k is needed for the offset itself.
+svg.addEventListener("pointerdown", (e) => {
+  if (!activeScene) return;
+  if (e.target.closest(".vertex")) return; // let the vertex handle its own drag/click
+  const { camera, toViewBoxPoint } = activeScene;
+  const p = toViewBoxPoint(e);
+  panState = { startX: p.x, startY: p.y, camX: camera.x, camY: camera.y, pointerId: e.pointerId };
+  svg.setPointerCapture(e.pointerId);
+  svg.classList.add("panning");
+  e.preventDefault();
+});
+
+svg.addEventListener("pointermove", (e) => {
+  if (!panState || !activeScene) return;
+  const { camera, redraw, toViewBoxPoint } = activeScene;
+  const p = toViewBoxPoint(e);
+  camera.x = panState.camX + (p.x - panState.startX);
+  camera.y = panState.camY + (p.y - panState.startY);
+  redraw();
+});
+
+function endPan(e) {
+  if (!panState) return;
+  svg.releasePointerCapture(panState.pointerId);
+  svg.classList.remove("panning");
+  panState = null;
+}
+svg.addEventListener("pointerup", endPan);
+svg.addEventListener("pointercancel", endPan);
+
+render(readN());
+</script>
+</body>
+</html>
