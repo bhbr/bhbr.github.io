@@ -2,6 +2,7 @@ import { isTouchDevice } from '@bhbr/minter';
 export const LANGUAGE = new URLSearchParams(window.location.search).get('language') ?? 'en';
 export const GRID_SIDELENGTH = isTouchDevice ? 50 : 70;
 export const FROG_SIZE = isTouchDevice ? 40 : 50;
+export const GHOST_FROG_OPACITY = 0.35;
 export const GOAL_SIZE = isTouchDevice ? 60 : 80;
 export const GOAL_ICON_SIZE = 40;
 export const LABEL_FONT = 'Times';
