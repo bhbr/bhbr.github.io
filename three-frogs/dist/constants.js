@@ -1,0 +1,18 @@
+import { isTouchDevice } from '@bhbr/minter';
+export const LANGUAGE = new URLSearchParams(window.location.search).get('language') ?? 'en';
+export const GRID_SIDELENGTH = isTouchDevice ? 50 : 70;
+export const FROG_SIZE = isTouchDevice ? 40 : 50;
+export const GOAL_SIZE = isTouchDevice ? 60 : 80;
+export const GOAL_ICON_SIZE = 40;
+export const LABEL_FONT = 'Times';
+export const LABEL_FONT_SIZE = 24;
+export const INPUT_FONT_SIZE = 20;
+export const UNDO_BUTTON_FONT_SIZE = 32;
+export const UNDO_BUTTON_LABEL_OFFSET = -3;
+export const CONTROLS_X_OFFSET = 10;
+export const CONTROLS_Y_OFFSET = 10;
+export const BUTTON_HEIGHT = 30;
+export const BUTTON_WIDTH = 60;
+export const BUTTON_SPACING = 10;
+export const GOAL_ICON_OFFSET = [-35, 5];
+//# sourceMappingURL=constants.js.map

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+
+        <title></title>
+
+        <link rel="stylesheet" href="./minter.css">
+
+        
+        <!--
+        HTML IMPORT MAP
+        Since the browser does not know about Node, it needs its own map to resolve the import paths in the TS (and JS) code. This map needs to cover all used node modules and their dependencies. Extend this import map as needed with your own node modules and local projects.
+        -->
+        <script type="importmap">
+            {
+                "imports": {
+                    "@bhbr/minter": "../node_modules/@bhbr/minter/dist/index.js",
+                    "@bhbr/minter-arithmetic": "../node_modules/@bhbr/minter-arithmetic/dist/index.js",
+                    "@bhbr/tsts": "../node_modules/@bhbr/tsts/dist/index.js",
+                    "@bhbr/egalite": "../node_modules/@bhbr/egalite/dist/index.js",
+                    "@bhbr/copycat": "../node_modules/@bhbr/copycat/dist/index.js",
+                    "@bhbr/betray": "../node_modules/@bhbr/betray/dist/index.js",
+                    "@bhbr/upper-class": "../node_modules/@bhbr/upper-class/dist/index.js",
+                    "@bhbr/better-things": "../node_modules/@bhbr/better-things/dist/index.js",
+                    "@bhbr/affr2": "../node_modules/@bhbr/affr2/dist/index.js"
+                }
+            }
+        </script>
+    </head>
+
+    <body style="overflow: hidden;">
+
+        <!-- The main surface for drawing and creating -->
+        <div id='paper_id' style="float: left; display: inline; width: 100%; height: 100%;"></div>
+
+        <!-- Initialization -->
+        <script type="module" src='../dist/_tests/test_papers/initTestPaper.js'></script>
+            
+    </body>
+</html>
