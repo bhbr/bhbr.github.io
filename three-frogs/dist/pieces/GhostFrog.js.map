@@ -1,1 +1,0 @@
-{"version":3,"file":"GhostFrog.js","sourceRoot":"","sources":["../../src/pieces/GhostFrog.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,IAAI,EAAE,MAAM,WAAW,CAAA;AAChC,OAAO,EAAE,kBAAkB,EAAE,MAAM,cAAc,CAAA;AAEjD,MAAM,OAAO,SAAU,SAAQ,IAAI;IAElC,QAAQ;QACP,OAAO;YACN,OAAO,EAAE,GAAG;YACZ,kBAAkB,EAAE,kBAAkB,CAAC,MAAM;SAC7C,CAAA;IACF,CAAC;CACD"}
