@@ -605,15 +605,15 @@ export class FrogPaper extends Paper {
         do {
             m = Math.round(8 * Math.random() - 4);
             n = Math.round(8 * Math.random() - 4);
-        } while (this.frogAt([m, n]));
+        } while (this.frogStartsAt([m, n]));
         this.reset();
         this.goal.positionAt([m, n]);
         this.goalXField.update({ value: m });
         this.goalYField.update({ value: n });
     }
-    frogAt(position) {
+    frogStartsAt(position) {
         for (let frog of this.frogs) {
-            if (equal(position, frog.position)) {
+            if (equal(position, frog.startPosition)) {
                 return true;
             }
         }
