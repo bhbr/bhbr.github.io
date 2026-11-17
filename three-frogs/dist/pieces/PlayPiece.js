@@ -23,6 +23,9 @@ export class PlayPiece extends Mobject {
         });
     }
     positionAt(pos) {
+        if (this.paper === null) {
+            return;
+        }
         this.update({
             anchor: vertexSubtract(this.paper.coordinatesForPosition(pos), [0.5 * this.frameWidth, 0.5 * this.frameHeight]),
             position: pos

@@ -39,6 +39,7 @@ export declare class FrogPaper extends Paper {
     defaults(): object;
     setup(): void;
     onResize(e: Event): void;
+    scrollUp(): void;
     resize(): void;
     setupAxes(): void;
     resizeAxes(): void;

@@ -1,7 +1,9 @@
-body {
+html, body {
     width: 100%;
+    height: 100%;
     margin: 0 auto;
     position: absolute;
+    overflow: hidden;
 }
 
 button {
@@ -46,4 +48,10 @@ button {
 * {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
+}
+
+#paper-id {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
 }

@@ -161,6 +161,7 @@ export class FrogPaper extends Paper {
             labelFontSize: LABEL_FONT_SIZE
         });
         this.add(this.goalXField);
+        this.goalXField.onTap = this.scrollUp.bind(this);
         this.goalXField.onReturn = this.positionGoal.bind(this);
         this.goalYField.update({
             value: this.goal.position[1],
@@ -168,14 +169,32 @@ export class FrogPaper extends Paper {
             labelFontSize: LABEL_FONT_SIZE
         });
         this.add(this.goalYField);
+        this.goalYField.onTap = this.scrollUp.bind(this);
         this.goalYField.onReturn = this.positionGoal.bind(this);
         this.repositionControls();
+        window.visualViewport.addEventListener('resize', () => {
+            requestAnimationFrame(() => {
+                if (Math.abs(window.visualViewport.height - window.innerHeight) < 2) {
+                    let paperDiv = document.getElementById('paper_id');
+                    paperDiv.style.top = '0px';
+                    paperDiv.style.left = '0px';
+                }
+            });
+        });
         window.setTimeout(function () {
             window.alert(this.welcomeMessage[LANGUAGE]);
         }.bind(this), 1000);
     }
     onResize(e) {
         this.resize();
+    }
+    scrollUp() {
+        window.setTimeout(function () {
+            let paperDiv = document.getElementById('paper_id');
+            let shift = window.visualViewport.height - window.innerHeight;
+            paperDiv.style.top = `${shift}px`;
+            paperDiv.style.left = '0px';
+        }.bind(this), 1000);
     }
     resize() {
         let width = window.innerWidth;
@@ -285,7 +304,7 @@ export class FrogPaper extends Paper {
         for (let frog of this.ghostFrogs) {
             this.placePiece(frog, frog.position);
         }
-        this.placePiece(this.goal, this.goal.position);
+        this.positionGoal();
     }
     repositionSpots() {
         for (let spot of this.visitedSpots.children) {
