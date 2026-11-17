@@ -1,6 +1,6 @@
 import { Frog } from './Frog.js';
-import { GHOST_FROG_OPACITY } from '../constants.js';
 import { ScreenEventHandler } from '@bhbr/minter';
+import { GHOST_FROG_OPACITY } from '../constants.js';
 export class GhostFrog extends Frog {
     defaults() {
         return {

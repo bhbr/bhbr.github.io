@@ -19,4 +19,3 @@ export class VisitedSpot extends Circle {
         });
     }
 }
-//# sourceMappingURL=VisitedSpot.js.map

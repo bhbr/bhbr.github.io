@@ -54,9 +54,9 @@ export class FrogPaper extends Paper {
                 new Frog({ color: 'blue', startPosition: [0, 1] })
             ],
             ghostFrogs: [
-                new GhostFrog({ color: 'green', startPosition: [0, 0] }),
-                new GhostFrog({ color: 'red', startPosition: [1, 0] }),
-                new GhostFrog({ color: 'blue', startPosition: [0, 1] })
+                new GhostFrog({ color: 'green' }),
+                new GhostFrog({ color: 'red' }),
+                new GhostFrog({ color: 'blue' })
             ],
             goal: new Goal({ position: [3, 4] }),
             jumpLines: new MGroup(),
@@ -114,7 +114,8 @@ export class FrogPaper extends Paper {
             finishMessage: {
                 'en': 'Good Game!',
                 'de': 'Good Game!'
-            }
+            },
+            playEnabled: false
         };
     }
     setup() {
@@ -183,6 +184,7 @@ export class FrogPaper extends Paper {
         });
         window.setTimeout(function () {
             window.alert(this.welcomeMessage[LANGUAGE]);
+            this.playEnabled = true;
         }.bind(this), 1000);
     }
     onResize(e) {
@@ -390,12 +392,18 @@ export class FrogPaper extends Paper {
         return this.ghostFrogs[frog.color];
     }
     startPanning(e) {
+        if (!this.playEnabled) {
+            return;
+        }
         super.startPanning(e);
         this.update({
             previousLLPosition: this.llPosition
         });
     }
     panning(e) {
+        if (!this.playEnabled) {
+            return;
+        }
         this.update({
             panShift: vertexSubtract(this.sensor.localEventVertex(e), this.panPointStart),
             llPosition: vertexAdd(this.previousLLPosition, [
@@ -453,6 +461,9 @@ export class FrogPaper extends Paper {
         });
     }
     endPanning(e) {
+        if (!this.playEnabled) {
+            return;
+        }
         this.update({
             panShift: vertexOrigin()
         });
@@ -589,10 +600,23 @@ export class FrogPaper extends Paper {
         this.goal.positionAt([newM, newN]);
     }
     randomizeGoal() {
-        let m = Math.round(8 * Math.random() - 4);
-        let n = Math.round(8 * Math.random() - 4);
+        var m = 0;
+        var n = 0;
+        do {
+            m = Math.round(8 * Math.random() - 4);
+            n = Math.round(8 * Math.random() - 4);
+        } while (this.frogAt([m, n]));
         this.reset();
         this.goal.positionAt([m, n]);
+        this.goalXField.update({ value: m });
+        this.goalYField.update({ value: n });
+    }
+    frogAt(position) {
+        for (let frog of this.frogs) {
+            if (equal(position, frog.position)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
-//# sourceMappingURL=FrogPaper.js.map

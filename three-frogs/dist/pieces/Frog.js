@@ -29,6 +29,9 @@ export class Frog extends PlayPiece {
         super.update(args, redraw);
     }
     startDragging(e) {
+        if (!this.paper.playEnabled) {
+            return;
+        }
         this.update({
             dragStartPoint: vertexAdd(this.sensor.localEventVertex(e), this.anchor),
             previousAnchor: this.anchor
@@ -36,6 +39,9 @@ export class Frog extends PlayPiece {
         this.paper.startDraggingFrog(this);
     }
     dragging(e) {
+        if (!this.paper.playEnabled) {
+            return;
+        }
         if (!this.dragStartPoint) {
             return;
         }
@@ -62,6 +68,9 @@ export class Frog extends PlayPiece {
         }
     }
     endDragging(e) {
+        if (!this.paper.playEnabled) {
+            return;
+        }
         if (!this.dragStartPoint) {
             return;
         }
@@ -87,4 +96,3 @@ export class Frog extends PlayPiece {
         this.paper.removeGhostFrogs();
     }
 }
-//# sourceMappingURL=Frog.js.map

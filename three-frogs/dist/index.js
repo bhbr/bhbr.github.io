@@ -8,4 +8,3 @@ export * from './pieces/Goal.js';
 export * from './pieces/PlayPiece.js';
 export * from './pieces/VisitedSpot.js';
 export * from './sidebar/FrogSidebar.js';
-//# sourceMappingURL=index.js.map

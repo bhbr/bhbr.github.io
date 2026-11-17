@@ -16,4 +16,3 @@ export const BUTTON_HEIGHT = 30;
 export const BUTTON_WIDTH = 60;
 export const BUTTON_SPACING = 10;
 export const GOAL_ICON_OFFSET = [-35, 5];
-//# sourceMappingURL=constants.js.map
