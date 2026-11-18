@@ -359,10 +359,10 @@ export class FrogPaper extends Paper {
         }
         this.movesHistory = [];
         this.movesHistoryPosition = 0;
-        for (let spot of this.visitedSpots) {
+        while (this.visitedSpots.length > 0) {
+            let spot = this.visitedSpots.pop();
             this.removeFromContent(spot);
         }
-        clear(this.visitedSpots);
     }
     placePiece(piece, position) {
         let p = this.coordinatesForPosition(position);
@@ -511,6 +511,8 @@ export class FrogPaper extends Paper {
         for (let frog of this.frogs) {
             if (equal(frog.position, pos1)) {
                 frog.positionAt(pos2);
+                this.remove(frog);
+                this.add(frog);
                 return true;
             }
         }
@@ -553,6 +555,18 @@ export class FrogPaper extends Paper {
             this.randomizeGoal();
         }
     }
+    printMove(move) {
+        return `([${move[0][0]}, ${move[0][1]}] -> [${move[1][0]}, ${move[1][1]}])`;
+    }
+    printMovesHistory() {
+        return '[' + this.movesHistory.map((move) => this.printMove(move)).join(', ') + ']';
+    }
+    printSpot(spot) {
+        return `[${spot.position[0]}, ${spot.position[1]}]`;
+    }
+    printVisitedSpots() {
+        return '[' + this.visitedSpots.map((spot) => this.printSpot(spot)).join(', ') + ']';
+    }
     positionIsVisited(pos) {
         for (let spot of this.visitedSpots) {
             if (equal(pos, spot.position)) {
@@ -575,7 +589,7 @@ export class FrogPaper extends Paper {
         }
     }
     hideLastVisitedSpot() {
-        this.visitedSpots[this.visitedSpots.length - 1].hide();
+        this.visitedSpots[this.movesHistoryPosition].hide();
     }
     redoMove() {
         if (this.movesHistoryPosition == this.movesHistory.length) {

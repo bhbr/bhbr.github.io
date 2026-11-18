@@ -1,0 +1,1 @@
+{"version":3,"file":"FrogSidebar.js","sourceRoot":"","sources":["../../src/sidebar/FrogSidebar.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,OAAO,EAAE,MAAM,cAAc,CAAA;AAGtC,MAAM,OAAO,WAAY,SAAQ,OAAO;IAEvC,QAAQ;QACP,OAAO;YACN,gSAAgS;YAChS,sBAAsB,EAAE,EACvB;YACD,mCAAmC;YACnC,OAAO,EAAE,EACR;SACD,CAAA;IACF,CAAC;CACD"}
