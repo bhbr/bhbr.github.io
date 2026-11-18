@@ -1,12 +1,11 @@
 import { Paper, StraightArrow, MGroup, Circle, Color, Line, SimpleButton, TextLabel } from '@bhbr/minter';
-import { GRID_SIDELENGTH, LABEL_FONT, LABEL_FONT_SIZE, INPUT_FONT_SIZE, UNDO_BUTTON_FONT_SIZE, UNDO_BUTTON_LABEL_OFFSET, GOAL_SIZE, CONTROLS_X_OFFSET, CONTROLS_Y_OFFSET, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_SPACING, GOAL_ICON_SIZE, GOAL_ICON_OFFSET, LANGUAGE } from '../constants.js';
+import { GRID_SIDELENGTH, LABEL_FONT, LABEL_FONT_SIZE, INPUT_FONT_SIZE, UNDO_BUTTON_FONT_SIZE, UNDO_BUTTON_LABEL_OFFSET, GOAL_SIZE, CONTROLS_X_OFFSET, CONTROLS_Y_OFFSET, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_SPACING, GOAL_ICON_SIZE, GOAL_ICON_OFFSET, VISITED_SPOT_OPACITY, LANGUAGE } from '../constants.js';
 import { vertexOrigin, vertexAdd, vertexSubtract } from '@bhbr/affr2';
 import { Frog } from '../pieces/Frog.js';
 import { GhostFrog } from '../pieces/GhostFrog.js';
 import { Goal } from '../pieces/Goal.js';
 import { equal } from '@bhbr/egalite';
 import { VisitedSpot } from '../pieces/VisitedSpot.js';
-import { isInstanceOf } from '@bhbr/upper-class';
 import { NumberInputBox } from '@bhbr/minter-arithmetic';
 import { clear } from '@bhbr/betray';
 export class Grid extends MGroup {
@@ -80,7 +79,7 @@ export class FrogPaper extends Paper {
                 width: BUTTON_WIDTH,
                 height: BUTTON_HEIGHT
             }),
-            visitedSpots: new MGroup(),
+            visitedSpots: [],
             goalXIcon: new Goal({
                 anchor: [10, 100],
                 frameWidth: GOAL_ICON_SIZE,
@@ -124,7 +123,6 @@ export class FrogPaper extends Paper {
         this.resize();
         this.setupAxes();
         this.setupGrid();
-        this.addToContent(this.visitedSpots);
         this.add(this.jumpLines);
         this.setupPieces();
         this.moveToBack(this.xAxis);
@@ -305,23 +303,15 @@ export class FrogPaper extends Paper {
         for (let frog of this.ghostFrogs) {
             this.placePiece(frog, frog.position);
         }
-        for (let spot of this.visitedSpots.children) {
-            if (!isInstanceOf(spot, 'VisitedSpot')) {
-                continue;
-            }
-            let spot2 = spot;
-            spot2.update({ midpoint: this.coordinatesForPosition(spot2.position) });
+        for (let spot of this.visitedSpots) {
+            spot.update({ midpoint: this.coordinatesForPosition(spot.position) });
         }
         this.placePiece(this.goal, this.goal.position);
     }
     repositionSpots() {
-        for (let spot of this.visitedSpots.children) {
-            if (!isInstanceOf(spot, 'VisitedSpot')) {
-                continue;
-            }
-            let spot2 = spot;
-            spot2.update({
-                midpoint: this.coordinatesForPosition(spot2.position)
+        for (let spot of this.visitedSpots) {
+            spot.update({
+                midpoint: this.coordinatesForPosition(spot.position)
             });
         }
     }
@@ -369,7 +359,10 @@ export class FrogPaper extends Paper {
         }
         this.movesHistory = [];
         this.movesHistoryPosition = 0;
-        this.visitedSpots.removeAllChildren();
+        for (let spot of this.visitedSpots) {
+            this.removeFromContent(spot);
+        }
+        clear(this.visitedSpots);
     }
     placePiece(piece, position) {
         let p = this.coordinatesForPosition(position);
@@ -452,9 +445,8 @@ export class FrogPaper extends Paper {
             this.panPiece(frog);
         }
         this.panPiece(this.goal);
-        for (let spot of this.visitedSpots.children) {
-            if (isInstanceOf(spot, 'VisitedSpot'))
-                this.panSpot(spot);
+        for (let spot of this.visitedSpots) {
+            this.panSpot(spot);
         }
     }
     panPiece(piece) {
@@ -540,33 +532,30 @@ export class FrogPaper extends Paper {
         }
         while (this.movesHistory.length > this.movesHistoryPosition) {
             this.movesHistory.pop();
-            this.visitedSpots.remove(this.visitedSpots.children[this.visitedSpots.children.length - 1]);
+            let spot = this.visitedSpots.pop();
+            this.removeFromContent(spot);
         }
         this.movesHistory.push(move);
         this.movesHistoryPosition += 1;
         this.undoButton.enable();
         this.redoButton.disable();
         let visited = this.positionIsVisited(move[0]);
-        if (!visited) {
-            let spot = new VisitedSpot({
-                position: move[0],
-                midpoint: this.coordinatesForPosition(move[0])
-            });
-            spot.setColor(movedFrog.color);
-            this.visitedSpots.add(spot);
-        }
+        let spot = new VisitedSpot({
+            position: move[0],
+            midpoint: this.coordinatesForPosition(move[0]),
+            fillOpacity: visited ? 0 : VISITED_SPOT_OPACITY
+        });
+        spot.setColor(movedFrog.color);
+        this.addToContent(spot);
+        this.visitedSpots.push(spot);
         if (equal(move[1], this.goal.position)) {
             window.alert(this.finishMessage[LANGUAGE]);
             this.randomizeGoal();
         }
     }
     positionIsVisited(pos) {
-        for (let spot of this.visitedSpots.children) {
-            if (!isInstanceOf(spot, 'VisitedSpot')) {
-                continue;
-            }
-            let spot2 = spot;
-            if (equal(pos, spot2.position)) {
+        for (let spot of this.visitedSpots) {
+            if (equal(pos, spot.position)) {
                 return true;
             }
         }
@@ -579,15 +568,14 @@ export class FrogPaper extends Paper {
         let move = this.movesHistory[this.movesHistoryPosition - 1];
         this.movesHistoryPosition -= 1;
         this.moveFrogs([move[1], move[0]]);
-        this.visitedSpots.children[this.visitedSpots.children.length - 1].hide();
+        this.hideLastVisitedSpot();
         this.redoButton.enable();
         if (this.movesHistoryPosition == 0) {
             this.undoButton.disable();
         }
     }
-    removeLastVisitedSpot() {
-        let lastSpot = this.visitedSpots.children[this.visitedSpots.children.length - 1];
-        this.visitedSpots.remove(lastSpot);
+    hideLastVisitedSpot() {
+        this.visitedSpots[this.visitedSpots.length - 1].hide();
     }
     redoMove() {
         if (this.movesHistoryPosition == this.movesHistory.length) {
@@ -601,7 +589,7 @@ export class FrogPaper extends Paper {
             color: movedFrog.color,
             position: move[0]
         });
-        this.visitedSpots.children[this.visitedSpots.children.length - 1].show();
+        this.visitedSpots[this.movesHistoryPosition - 1].show();
         this.undoButton.enable();
         if (this.movesHistoryPosition == this.movesHistory.length) {
             this.redoButton.disable();

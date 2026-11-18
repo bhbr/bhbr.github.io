@@ -3,7 +3,6 @@ export class VisitedSpot extends Circle {
     defaults() {
         return {
             position: [0, 0],
-            fillOpacity: 0.5,
             strokeWidth: 0,
             radius: 10,
             colors: {
