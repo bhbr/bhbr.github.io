@@ -9,3 +9,4 @@ export class GhostFrog extends Frog {
         };
     }
 }
+//# sourceMappingURL=GhostFrog.js.map

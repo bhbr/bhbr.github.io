@@ -96,3 +96,4 @@ export class Frog extends PlayPiece {
         this.paper.removeGhostFrogs();
     }
 }
+//# sourceMappingURL=Frog.js.map

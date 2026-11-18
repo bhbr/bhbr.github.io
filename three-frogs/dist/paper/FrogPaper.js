@@ -14,12 +14,13 @@ export class Grid extends MGroup {
 export class FrogPaper extends Paper {
     defaults() {
         return {
-            // List all the sidebar button class names here. The paper might ask the Sidebar to reinitialize with a new set of buttons, e. g. when maximising or minimising a board with its own custom set of tools.
             buttonNames: [],
-            // Provide help texts for each option in each sidebar button.
             helpTexts: {},
-            llPosition: [0, 0],
-            previousLLPosiion: null,
+            grid: new Grid(),
+            gridPoints: [],
+            gridSize: [0, 0],
+            gridAnchor: [0, 0],
+            previousGridAnchor: null,
             xAxis: new StraightArrow({
                 strokeColor: Color.gray(0.5),
                 tipStyle: 'dart'
@@ -45,9 +46,6 @@ export class FrogPaper extends Paper {
                 frameHeight: 30
             }),
             panShift: vertexOrigin(),
-            grid: new Grid(),
-            gridPoints: [],
-            gridSize: [0, 0],
             frogs: [
                 new Frog({ color: 'green', startPosition: [0, 0] }),
                 new Frog({ color: 'red', startPosition: [1, 0] }),
@@ -243,18 +241,16 @@ export class FrogPaper extends Paper {
     }
     setupGrid() {
         this.remove(this.grid);
-        let grid = this.makeGrid();
-        this.add(grid);
-        this.grid = grid;
+        this.grid = this.makeGrid();
+        this.add(this.grid);
     }
     makeGrid() {
         let grid = new Grid();
-        this.llPosition = [-0.5 * this.frameWidth / GRID_SIDELENGTH, -0.5 * this.frameHeight / GRID_SIDELENGTH];
+        this.gridAnchor = [-0.5 * this.frameWidth / GRID_SIDELENGTH, -0.5 * this.frameHeight / GRID_SIDELENGTH];
         let minIntegerM = Math.floor(this.mMin());
         let maxIntegerM = Math.ceil(this.mMax());
         let minIntegerN = Math.floor(this.nMin());
         let maxIntegerN = Math.ceil(this.nMax());
-        this.gridSize = [Math.ceil(maxIntegerM) - Math.floor(minIntegerM) + 1, Math.ceil(maxIntegerN) - Math.floor(minIntegerN) + 1];
         clear(this.gridPoints);
         for (let m = minIntegerM; m <= maxIntegerM; m++) {
             let gridLine = [];
@@ -266,20 +262,23 @@ export class FrogPaper extends Paper {
                     strokeWidth: 0
                 });
                 grid.add(gridPoint);
-                gridLine.push(gridPoint);
+                this.gridPoints.push(gridPoint);
             }
-            this.gridPoints.push(gridLine);
         }
         return grid;
     }
     resizeGrid() {
-        this.llPosition = [-0.5 * this.frameWidth / GRID_SIDELENGTH, -0.5 * this.frameHeight / GRID_SIDELENGTH];
+        this.gridAnchor = [-0.5 * this.frameWidth / GRID_SIDELENGTH, -0.5 * this.frameHeight / GRID_SIDELENGTH];
         let newMinIntegerM = Math.floor(this.mMin());
         let newMaxIntegerM = Math.ceil(this.mMax());
         let newMinIntegerN = Math.floor(this.nMin());
         let newMaxIntegerN = Math.ceil(this.nMax());
         let newGridSize = [Math.ceil(newMaxIntegerM) - Math.floor(newMinIntegerM) + 1, Math.ceil(newMaxIntegerN) - Math.floor(newMinIntegerN) + 1];
-        if (!equal(newGridSize, this.gridSize)) {
+        if (equal(newGridSize, this.gridSize)) {
+            this.panGrid();
+        }
+        else {
+            this.gridSize = newGridSize;
             this.setupGrid();
         }
     }
@@ -306,7 +305,14 @@ export class FrogPaper extends Paper {
         for (let frog of this.ghostFrogs) {
             this.placePiece(frog, frog.position);
         }
-        this.positionGoal();
+        for (let spot of this.visitedSpots.children) {
+            if (!isInstanceOf(spot, 'VisitedSpot')) {
+                continue;
+            }
+            let spot2 = spot;
+            spot2.update({ midpoint: this.coordinatesForPosition(spot2.position) });
+        }
+        this.placePiece(this.goal, this.goal.position);
     }
     repositionSpots() {
         for (let spot of this.visitedSpots.children) {
@@ -372,20 +378,20 @@ export class FrogPaper extends Paper {
             anchor: [p[0] - piece.frameWidth / 2, p[1] - piece.frameHeight / 2]
         });
     }
-    mMin() { return this.llPosition[0]; }
+    mMin() { return this.gridAnchor[0]; }
     mMax() { return this.mMin() + this.frameWidth / GRID_SIDELENGTH; }
-    nMin() { return this.llPosition[1]; }
+    nMin() { return this.gridAnchor[1]; }
     nMax() { return this.nMin() + this.frameHeight / GRID_SIDELENGTH; }
     coordinatesForPosition(position) {
         return [
-            GRID_SIDELENGTH * (position[0] - this.llPosition[0]),
-            this.frameHeight - GRID_SIDELENGTH * (position[1] - this.llPosition[1])
+            GRID_SIDELENGTH * (position[0] - this.gridAnchor[0]),
+            this.frameHeight - GRID_SIDELENGTH * (position[1] - this.gridAnchor[1])
         ];
     }
     positionForCoordinates(coordinates) {
         return [
-            Math.round(this.llPosition[0] + coordinates[0] / GRID_SIDELENGTH),
-            Math.round(this.llPosition[1] + (this.frameHeight - coordinates[1]) / GRID_SIDELENGTH)
+            Math.round(this.gridAnchor[0] + coordinates[0] / GRID_SIDELENGTH),
+            Math.round(this.gridAnchor[1] + (this.frameHeight - coordinates[1]) / GRID_SIDELENGTH)
         ];
     }
     ghostForFrog(frog) {
@@ -397,16 +403,16 @@ export class FrogPaper extends Paper {
         }
         super.startPanning(e);
         this.update({
-            previousLLPosition: this.llPosition
+            previousGridAnchor: this.gridAnchor
         });
     }
     panning(e) {
-        if (!this.playEnabled) {
+        if (!this.playEnabled || !this.panPointStart) {
             return;
         }
         this.update({
             panShift: vertexSubtract(this.sensor.localEventVertex(e), this.panPointStart),
-            llPosition: vertexAdd(this.previousLLPosition, [
+            gridAnchor: vertexAdd(this.previousGridAnchor, [
                 -this.panShift[0] / GRID_SIDELENGTH,
                 this.panShift[1] / GRID_SIDELENGTH
             ])
@@ -428,13 +434,12 @@ export class FrogPaper extends Paper {
     }
     panGrid() {
         let minIntegerM = Math.floor(this.mMin());
-        let maxIntegerM = minIntegerM + this.gridPoints.length - 1;
+        let maxIntegerM = minIntegerM + this.gridSize[0] - 1;
         let minIntegerN = Math.floor(this.nMin());
-        let maxIntegerN = minIntegerN + this.gridPoints[0].length - 1;
+        let maxIntegerN = minIntegerN + this.gridSize[1] - 1;
         for (let m = minIntegerM; m <= maxIntegerM; m++) {
-            let gridLine = this.gridPoints[m - minIntegerM];
             for (let n = minIntegerN; n <= maxIntegerN; n++) {
-                let gridPoint = gridLine[n - minIntegerN];
+                let gridPoint = this.gridPoints[(m - minIntegerM) * (maxIntegerN - minIntegerN + 1) + (n - minIntegerN)];
                 let newMidpoint = this.coordinatesForPosition([m, n]);
                 gridPoint.update({
                     midpoint: newMidpoint
@@ -461,7 +466,7 @@ export class FrogPaper extends Paper {
         });
     }
     endPanning(e) {
-        if (!this.playEnabled) {
+        if (!this.playEnabled || !this.panPointStart) {
             return;
         }
         this.update({
@@ -541,16 +546,31 @@ export class FrogPaper extends Paper {
         this.movesHistoryPosition += 1;
         this.undoButton.enable();
         this.redoButton.disable();
-        let spot = new VisitedSpot({
-            position: move[0],
-            midpoint: this.coordinatesForPosition(move[0])
-        });
-        spot.setColor(movedFrog.color);
-        this.visitedSpots.add(spot);
+        let visited = this.positionIsVisited(move[0]);
+        if (!visited) {
+            let spot = new VisitedSpot({
+                position: move[0],
+                midpoint: this.coordinatesForPosition(move[0])
+            });
+            spot.setColor(movedFrog.color);
+            this.visitedSpots.add(spot);
+        }
         if (equal(move[1], this.goal.position)) {
             window.alert(this.finishMessage[LANGUAGE]);
             this.randomizeGoal();
         }
+    }
+    positionIsVisited(pos) {
+        for (let spot of this.visitedSpots.children) {
+            if (!isInstanceOf(spot, 'VisitedSpot')) {
+                continue;
+            }
+            let spot2 = spot;
+            if (equal(pos, spot2.position)) {
+                return true;
+            }
+        }
+        return false;
     }
     undoMove() {
         if (this.movesHistoryPosition == 0) {
@@ -620,3 +640,4 @@ export class FrogPaper extends Paper {
         return false;
     }
 }
+//# sourceMappingURL=FrogPaper.js.map

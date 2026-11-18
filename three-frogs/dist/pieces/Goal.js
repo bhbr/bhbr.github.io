@@ -17,3 +17,4 @@ export class GoalIcon extends Goal {
         };
     }
 }
+//# sourceMappingURL=Goal.js.map

@@ -9,3 +9,4 @@ export class FrogSidebar extends Sidebar {
         };
     }
 }
+//# sourceMappingURL=FrogSidebar.js.map
