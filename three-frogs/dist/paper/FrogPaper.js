@@ -541,16 +541,29 @@ export class FrogPaper extends Paper {
         this.movesHistoryPosition += 1;
         this.undoButton.enable();
         this.redoButton.disable();
-        let spot = new VisitedSpot({
-            position: move[0],
-            midpoint: this.coordinatesForPosition(move[0])
-        });
-        spot.setColor(movedFrog.color);
-        this.visitedSpots.add(spot);
+        let visited = this.positionIsVisited(move[0]);
+        if (!visited) {
+            let spot = new VisitedSpot({
+                position: move[0],
+                midpoint: this.coordinatesForPosition(move[0])
+            });
+            spot.setColor(movedFrog.color);
+            this.visitedSpots.add(spot);
+        }
         if (equal(move[1], this.goal.position)) {
             window.alert(this.finishMessage[LANGUAGE]);
             this.randomizeGoal();
         }
+    }
+    positionIsVisited(pos) {
+        for (let spot of this.visitedSpots.children) {
+            if (!isInstanceOf(spot, 'VisitedSpot')) { continue }
+            let spot2 = spot;
+            if (equal(pos, spot2.position)) {
+                return true
+            }
+        }
+        return false
     }
     undoMove() {
         if (this.movesHistoryPosition == 0) {
