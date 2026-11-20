@@ -394,6 +394,9 @@ export class FrogPaper extends Paper {
         if (!this.playEnabled) {
             return;
         }
+        if (this.panPointStart) {
+            return;
+        }
         super.startPanning(e);
         this.update({
             previousGridAnchor: this.gridAnchor
@@ -444,6 +447,10 @@ export class FrogPaper extends Paper {
         for (let frog of this.frogs) {
             this.panPiece(frog);
         }
+        for (let frog of this.ghostFrogs) {
+            frog.hide();
+        }
+        this.removeJumpLines();
         this.panPiece(this.goal);
         for (let spot of this.visitedSpots) {
             this.panSpot(spot);
@@ -466,6 +473,7 @@ export class FrogPaper extends Paper {
         });
     }
     startDraggingFrog(frog) {
+        this.jumpLines.show();
         let snapPoints = [];
         for (let i = 0; i < this.frogs.length; i++) { // including the dragged frog itself (reflect it around itself)
             let otherFrog = this.frogs[i];

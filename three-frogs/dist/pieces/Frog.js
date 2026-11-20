@@ -84,7 +84,6 @@ export class Frog extends PlayPiece {
             this.update({
                 anchor: this.previousAnchor
             });
-            //this.paper.removeLastVisitedSpot()
         }
         this.update({
             dragStartPoint: null,
